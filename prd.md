@@ -260,11 +260,19 @@ Character 3  →  Voice C
 **Rule:**
 - User Approve না করা পর্যন্ত Final Video Production শুরু হবে না।
 - Reject করলে পরিবর্তনের সুযোগ দেওয়া হবে।
+- **Delta Re-Rendering (ক্যাশ অপটিমাইজেশন):** রিজেক্ট বা এডিটের সময় সম্পূর্ণ অডিও পুনরায় রেন্ডার হবে না; **শুধু পরিবর্তিত নির্দিষ্ট ডায়ালগ ও টাইমস্ট্যাম্পের ক্যাশ রি-রেন্ডার** হবে। বাকি অপরিবর্তিত অংশ ক্যাশ থেকে জোড়া লাগবে।
 - Script Approval প্রয়োজন নেই — শুধু Voice Approval বাধ্যতামূলক।
 
-### 5.9 Adaptive Visual Synchronization
+### 5.9 Adaptive Visual Synchronization & Multi-Language Timing Adjustment
 
 **Rule:** Video Type অনুযায়ী আলাদা Sync Method ব্যবহার করতে হবে। সব ভিডিওতে একই Lip-Sync Method নয়।
+
+**Audio Stem Separation (পরিবেশের শব্দ সংরক্ষণ):**
+- অরিজিনাল অডিও থেকে **AI Stem Separation (যেমন: Demucs / Spleeter)** প্রযুক্তি ব্যবহার করে ভোকাল এবং ব্যাকগ্রাউন্ড অ্যাম্বিয়েন্ট সাউন্ড আলাদা করা হবে। অরিজিনাল মানুষের কণ্ঠ বাদ দিয়ে শুধুমাত্র নতুন AI ভয়েস ট্র্যাক যুক্ত হবে, এবং মূল ব্যাকগ্রাউন্ড সাউন্ড অক্ষুণ্ণ রাখা হবে।
+
+**Timing & Speech Speed Stretch Rule:**
+- ফাইনাল ভিডিওর ভয়েস টাইমিং হুবহু অরিজিনাল ভিডিওর ভয়েস টাইমিংয়ের সাথে মিল থাকতে হবে।
+- ভাষাভেদে (বাংলা, হিন্দি, ইংরেজি) শব্দ সংখ্যার তারতম্যের কারণে সময় বেড়ে বা কমে গেলে, দৃশ্য স্লো বা ফাস্ট না করে **ডায়ালগের কথা বলার গতি (Audio Speed Stretch / Pacing Control)** স্বয়ংক্রিয়ভাবে বাড়িয়ে বা কমিয়ে অরিজিনাল টাইম-স্লটের সাথে নিখুঁতভাবে ফিট করা হবে।
 
 | Video Type | Synchronization Method |
 |---|---|
@@ -356,8 +364,11 @@ User একটি Real Video Upload করবে। AI সেই ভিডিও
 | 🖌️ Watercolor | Soft, Artistic Look |
 | 🕹️ Pixel Art | Retro Pixel Style |
 
-### 6.6 Character System Requirements
+### 6.6 Character System Requirements & Visual Consistency
 - Original Character-এর Visual থেকে Cartoon Character Design
+- **Character Consistency Anchor (Face Embedding & Reference Sheet):**
+  - প্রথম ফ্রেম থেকে তৈরি প্রতিটি কার্টুন ক্যারেক্টারের একটি ডেডিকেটেড Character Reference Sheet ও Face Embedding তৈরি করা হবে।
+  - পুরো ভিডিওর প্রতিটি দৃশ্য ও ফ্রেমে সেই একই ফেস লক (Identity Anchor) থাকবে, যাতে সিন পরিবর্তনের সাথে সাথে কার্টুনের চেহারা বা আউটফিট বদলে না যায়।
 - Character Color Scheme, Expression, Costume নির্ধারণ
 - Character-specific Cartoon Mouth Shapes (Lip-Sync এর জন্য)
 - Character Library-তে Save করার সুবিধা
@@ -664,26 +675,34 @@ User কোনো Video বা Content Upload করবে না। শুধ�
 
 ---
 
-## 20. TECHNICAL REQUIREMENTS (HIGH-LEVEL)
+## 20. TECHNICAL REQUIREMENTS & AI PROVIDER INTEGRATION
 
-| Category | Requirement |
-|---|---|
-| AI Video Understanding | Scene & Character Detection |
-| Speech-to-Text | Multi-language Transcript Extraction |
-| LLM | Script & Content Generation |
-| Image / Animation AI | Cartoon Character & Frame Generation |
-| Multilingual TTS | Bangla, Hindi, English, Arabic + others |
-| Multi-speaker Voice | Character-wise Voice Generation |
-| Audio Processing | Mixing, BGM, SFX, Noise Removal |
-| Lip-Sync AI | Human + Cartoon Lip-Sync |
-| Adaptive Sync | Video Type-based Sync Engine |
-| Video Rendering | Final Composition & Export |
-| Subtitle Engine | Auto Generation + Sync |
-| Backend | REST API, Job Queue, Database |
-| File Storage | Local + Cloud (S3 or equivalent) |
-| Copyright Check | Audio & Visual Similarity Detection |
+### 20.1 High-Level Component Mapping
 
-> **Rule:** External API বা Paid Model প্রয়োজন হলে clearly চিহ্নিত করতে হবে। API Key নিরাপদে সংরক্ষণ করতে হবে।
+| Category | Recommended Model / Technology | Deployment Option |
+|---|---|---|
+| AI Video Understanding | Gemini 1.5 Pro / Flash (Multimodal Video Analysis) | Cloud API |
+| Speech-to-Text | OpenAI Whisper / Gemini Multimodal Audio | Cloud API / Local |
+| LLM (Script / Translation) | Claude 3.5 Sonnet / Gemini 1.5 Pro | Cloud API |
+| Audio Stem Separation | Demucs v4 / Spleeter (Vocal vs Ambient Sound) | Local GPU / Cloud Worker |
+| Image / Cartoon Generation | Stable Diffusion XL (ControlNet / LoRA) / Midjourney API | Local / Cloud API |
+| Multilingual TTS | ElevenLabs Multilingual v2 / Azure Cognitive Speech | Cloud API |
+| Lip-Sync Engine | Wav2Lip / LivePortrait / SadTalker | Local GPU / Cloud Worker |
+| Video Editing & Inpainting | FFmpeg + ProPainter / LaMa (Video Inpainting) | Local / Cloud Engine |
+| Subtitle Engine | Whisper timestamping + FFmpeg SRT Burn-in | Local Engine |
+
+### 20.2 AI Subscription & API Key Architecture (BYOK - Bring Your Own Key)
+
+> **Rule:** ব্যবহারকারী নিজের পেইড সাবস্ক্রিপশন (Gemini Advanced, Google Cloud, Anthropic Claude, OpenAI ইত্যাদি) কীভাবে প্ল্যাটফর্মে সহজে যুক্ত করতে পারবেন:
+
+1. **Settings > AI Providers Management:**
+   - ড্যাশবোর্ডে ডেডিকেটেড **"AI API Configuration"** প্যানেল থাকবে।
+   - ব্যবহারকারী সরাসরি তার **Gemini API Key**, **Claude API Key**, **OpenAI API Key**, বা **ElevenLabs API Key** ইনপুট দিতে পারবেন।
+2. **Key Security (নিরাপত্তা):**
+   - সব API Key লোকাল মেশিনে এনক্রিপ্টেড আকারে (`.env` বা OS Credential Vault) সংরক্ষিত থাকবে।
+3. **Smart Fallback & Provider Switching:**
+   - স্ক্রিপ্ট রাইটিং বা ভিডিও অ্যানালাইসিসে ইউজার ড্রপডাউন থেকে সিলেক্ট করতে পারবেন: "Use Gemini 1.5 Pro" অথবা "Use Claude 3.5 Sonnet"।
+   - একটি প্রোভাইডার লিমিট রিচ করলে স্বয়ংক্রিয়ভাবে অল্টারনেটিভ প্রোভাইডারে সুইচ করার অপশন থাকবে।
 
 ---
 
