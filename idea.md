@@ -154,51 +154,52 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 
 ## 🎨 MODE 02 — Cartoon Video Re-Creation Studio
 
-### মূল উদ্দেশ্য
+### মূল উদ্দেশ্য ও কনসেপ্ট স্পষ্টীকরণ
 
 > [!IMPORTANT]
-> User একটি Real Video Upload করবে। AI সেই ভিডিওর **একই Content, Story ও Scene Structure** বজায় রেখে সম্পূর্ণ নতুন Cartoon/Animation Video তৈরি করবে।
->
-> **Copyright Protection সর্বোচ্চ অগ্রাধিকার।** Original Voice, Music, Footage — কোনোটিই Final Output-এ থাকবে না।
+> **ব্যবহারকারীর মূল চাওয়া:**
+> অরিজিনাল ভিডিওটিই হুবহু Re-create হয়ে **কার্টুন ভিডিও** হবে—অর্থাৎ দৃশ্য, অ্যাকশন, ক্যারেক্টার এবং **ডায়ালগের কথা/কন্টেন্ট (Dialogue Transcript) একদম সেম থাকবে**।
+> 
+> **কিন্তু কপিরাইট সুরক্ষার কৌশল (বিশেষ করে ভয়েস):**
+> অরিজিনাল ভিডিওর নিজস্ব অডিও/ভয়েস ট্র্যাক ফাইনালে কখনোই বাজবে না (যাতে অডিও কপিরাইট স্ট্রাইক না আসে)।
+> AI অরিজিনাল ভিডিও শুনে তার প্রতিটি সংলাপ/কথোপকথন (Exact Speech/Content) তুলে নেবে। এরপর সেই একই ডায়ালগ হুবহু রেখে **সম্পূর্ণ নতুন AI Character Voice** দিয়ে পুনরায় ডাবিং/জেনারেট করবে।
+> 
+> ফলে:
+> - **ভিজুয়াল:** অরিজিনাল ভিডিওর দৃশ্য ও অ্যাকশন হুবহু কার্টুন স্টাইলে রূপান্তর হবে।
+> - **কন্টেন্ট/কথা:** অরিজিনাল ভিডিওর মূল ডায়ালগ ও সময়সূচি (Timing) ঠিক সেম থাকবে।
+> - **ভয়েস:** অরিজিনাল মানুষের ভয়েসের সাথে কোনো মিল থাকবে না (নতুন AI Voice Actor), যাতে কোনো প্রকার Audio Copyright বা Voice-Match Claim না আসে!
 
-### Copyright-Safe Re-Creation নীতি
+### Copyright-Safe Re-Creation পদ্ধতি
 
-| কী পরিবর্তন হবে | কীভাবে |
-|---|---|
-| 🎙️ Voice | সম্পূর্ণ নতুন AI-generated Voice — Original Voice-এর কোনো অংশ ব্যবহার নয় |
-| 🎬 Visual | Original Footage সরাসরি ব্যবহার নয় — Scene-by-Scene Cartoon Re-Creation |
-| 🎵 Music | Original Soundtrack নয় — AI-generated বা Royalty-free Music |
-| 📝 Script | Original Dialogue-এর Concept নিয়ে নতুনভাবে লেখা — Word-for-word copy নয় |
-
-> [!CAUTION]
-> **Voice সবচেয়ে গুরুত্বপূর্ণ Copyright ক্ষেত্র।** Original ভিডিওর কোনো Voice Clip কোনো অবস্থায় Final Output-এ ব্যবহার করা যাবে না। সম্পূর্ণ নতুন AI Voice Generate করতে হবে।
+| বিষয় | অরিজিনাল ভিডিও | ফাইনাল কার্টুন ভিডিওতে কী হবে | কপিরাইট সুরক্ষার কৌশল |
+|---|---|---|---|
+| 🎬 ভিজুয়াল ও দৃশ্য | আসল ক্যামেরা ফুটেজ / মানুষ | কার্টুন / অ্যানিমেশন ক্যারেক্টার ও সিন | সম্পূর্ণ নতুন AI Generated কার্টুন ফ্রেম (Visual Copyright মুক্ত) |
+| 🗣️ সংলাপের বিষয়বস্তু (Content) | যা যা কথা বা গল্প ছিল | **একদম একই ডায়ালগ ও কথা থাকবে** | কন্টেন্ট ও গল্পের নির্যাস অক্ষুণ্ণ রাখা হবে |
+| 🎙️ ভয়েস (Voice Audio) | অরিজিনাল শিল্পীর ভয়েস ট্র্যাক | **সম্পূর্ণ নতুন AI Generated Voice** | অরিজিনাল শিল্পীর গলার স্বর বাদ দিয়ে নতুন কণ্ঠ প্রয়োগ (Audio Copyright মুক্ত) |
+| 🎵 ব্যাকগ্রাউন্ড মিউজিক / SFX | মূল ভিডিওর গান/মিউজিক | নতুন AI Generated Royalty-Free মিউজিক | মিউজিক কপিরাইট প্রটেকশন |
 
 ### Re-Creation Workflow
 
 ```
 Original Video Upload
         ↓
-Video Analysis (Scene, Character, Story, Dialogue)
+Speech-to-Text & Transcript Extraction (অরিজিনাল ভিডিওর সঠিক কথা ও ডায়ালগ তুলে আনা)
         ↓
-Content Map তৈরি (Scene-by-Scene Story Structure)
+Scene & Action Analysis (অরিজিনাল দৃশ্যের অ্যাকশন ও টাইমিং ম্যাপিং)
         ↓
-Character Design Generation (Cartoon Style)
+Cartoon Character Generation (অরিজিনাল চরিত্রের কার্টুন রূপ)
         ↓
-Animation Style নির্বাচন
+Animation Style নির্বাচন (2D, 3D, Anime ইত্যাদি)
         ↓
-Scene-by-Scene Cartoon Re-Creation
+Scene-by-Scene Cartoon Re-Creation (আসল অ্যাকশন বজায় রেখে কার্টুন ফ্রেম তৈরি)
         ↓
-New Script তৈরি (Original Concept — নতুন ভাষায়)
+Voice Re-generation using AI (একই সংলাপ, কিন্তু একদম নতুন AI Voice ও আলাদা Tone/Pitch)
         ↓
-Language নির্বাচন (Bangla / Hindi / English / Other)
+Cartoon Lip-Sync & Timing Sync (অরিজিনাল টাইমিংয়ে কার্টুন মুখের নড়াচড়া মেলানো)
         ↓
-AI Voice Generation (Character-wise — সম্পূর্ণ নতুন)
+Royalty-Free BGM ও Sound Effects যোগ করা
         ↓
-Cartoon Lip-Sync
-        ↓
-AI-generated Background Music & Sound Effects
-        ↓
-Final Cartoon Video Export
+✅ Final Copyright-Safe Cartoon Video Export
 ```
 
 ### Features
