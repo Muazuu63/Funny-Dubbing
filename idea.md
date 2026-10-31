@@ -118,6 +118,29 @@ Visual Style           →  Subtitle Style, Synchronization Method
 > [!NOTE]
 > Reference Video-এর Original Dialogue কখনো Copy করা যাবে না — শুধু **Style ও Creative Direction** নেওয়া হবে।
 
+### 🧹 Video Pre-Processing — Auto Copyright Element Removal
+
+> [!IMPORTANT]
+> Working Video Upload হওয়ার পর Analysis শুরু করার **আগেই** AI স্বয়ংক্রিয়ভাবে ভিডিও থেকে সম্ভাব্য Copyright-sensitive উপাদানগুলো সনাক্ত করে Remove করবে।
+
+**AI যা স্বয়ংক্রিয়ভাবে সনাক্ত ও Remove করবে:**
+
+| উপাদান | উদাহরণ |
+|---|---|
+| 🏷️ Logo | Channel Logo, Brand Logo, Watermark |
+| 📝 Text / Overlay | Channel Name, Caption Overlay, Lower Third |
+| ©️ Watermark | Copyright Sign, Website URL |
+| 📺 Channel Branding | Subscribe Button, Outro Element |
+| 🔲 On-screen Graphic | Promo Banner, Pop-up Text |
+
+**Remove পদ্ধতি:**
+- AI Background Inpainting — Remove করা জায়গা স্বাভাবিকভাবে পূরণ হবে
+- Frame-by-Frame Processing — প্রতিটি Frame-এ Detection ও Removal
+- Moving Watermark Detection — স্থান পরিবর্তনশীল Watermark-ও Remove করতে পারবে
+
+> [!NOTE]
+> Remove করার পর ভিডিও Natural দেখাবে — কোনো কালো দাগ বা খালি জায়গা থাকবে না। এই Pre-processing সম্পূর্ণ Automatic।
+
 ### Working Video Analysis
 
 ```
@@ -211,6 +234,7 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 |---|---|---|---|
 | 🎬 ভিজুয়াল ও দৃশ্য | আসল ক্যামেরা ফুটেজ / মানুষ | কার্টুন / অ্যানিমেশন ক্যারেক্টার ও সিন | সম্পূর্ণ নতুন AI Generated কার্টুন ফ্রেম (Visual Copyright মুক্ত) |
 | 🗣️ সংলাপের বিষয়বস্তু (Content) | যা যা কথা বা গল্প ছিল | **একদম একই ডায়ালগ ও কথা থাকবে** | কন্টেন্ট ও গল্পের নির্যাস অক্ষুণ্ণ রাখা হবে |
+| 🏷️ Logo / Watermark / Text | অরিজিনাল ভিডিওর Logo ও Copyright Element | **AI স্বয়ংক্রিয়ভাবে Remove করবে** | Visual Copyright উপাদান মুক্ত ক্লিন ফুটেজ |
 | 🎙️ ভয়েস (Voice Audio) | অরিজিনাল শিল্পীর ভয়েস ট্র্যাক | **সম্পূর্ণ নতুন AI Generated Voice** | অরিজিনাল শিল্পীর গলার স্বর বাদ দিয়ে নতুন কণ্ঠ প্রয়োগ (Audio Copyright মুক্ত) |
 | 🎵 ব্যাকগ্রাউন্ড মিউজিক / SFX | মূল ভিডিওর গান/মিউজিক | নতুন AI Generated Royalty-Free মিউজিক | মিউজিক কপিরাইট প্রটেকশন |
 
@@ -218,6 +242,8 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 
 ```
 Original Video Upload
+        ↓
+🧹 Auto Copyright Element Removal (Logo, Watermark, Text, Overlay — AI স্বয়ংক্রিয়ভাবে Remove করবে)
         ↓
 Speech-to-Text & Transcript Extraction (অরিজিনাল ভিডিওর সঠিক কথা ও ডায়ালগ তুলে আনা)
         ↓

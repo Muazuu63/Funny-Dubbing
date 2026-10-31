@@ -162,6 +162,26 @@ Profile নতুন Reference Video যোগ করলে Update হবে এ
 **Input:** Original Working Video (MP4, MOV, MKV)
 **Video Upload Support:** Duration Detection, Resolution Detection, Audio Detection, Upload Progress, File Validation
 
+### 5.4.0 Pre-Processing — Auto Copyright Element Removal (নতুন)
+
+> **Rule:** Working Video Upload হওয়ার পর Analysis শুরু হওয়ার **আগেই** AI স্বয়ংক্রিয়ভাবে সম্ভাব্য Copyright-sensitive উপাদান সনাক্ত করে Remove করবে।
+
+| Element Type | Examples | Removal Method |
+|---|---|---|
+| 🏷️ Logo | Channel Logo, Brand Logo, Network Logo | AI Inpainting |
+| ©️ Watermark | Copyright Sign, Semi-transparent Overlay | Frame-by-frame Detection |
+| 📝 On-screen Text | Channel Name, Caption Overlay, Lower Third | Text Detection + Inpainting |
+| 📺 Channel Branding | Subscribe Button, Outro Element | Object Detection + Removal |
+| 🔲 Promo Graphic | Banner, Pop-up Text, Ticker | Region Detection + Fill |
+| 🔄 Moving Watermark | স্থান-পরিবর্তনশীল Watermark | Motion Tracking + Removal |
+
+**Technical Requirements:**
+- Background Inpainting — Remove করা জায়গা Background দিয়ে স্বাভাবিকভাবে পূরণ হবে
+- Frame-by-Frame Processing — প্রতিটি Frame-এ Detection ও Removal
+- Moving Element Tracking — নড়াচড়া করা Watermark-ও Track করে Remove করবে
+- Clean Output — Remove করার পর কোনো কালো দাগ বা Artifact থাকবে না
+- Fully Automatic — কোনো User Input ছাড়াই চলবে
+
 | Analysis Item | Requirement |
 |---|---|
 | Video Type | Human / Animal / Bird / Cartoon Detection |
@@ -288,6 +308,7 @@ User একটি Real Video Upload করবে। AI সেই ভিডিও
 
 | বিষয় | কী হবে |
 |---|---|
+| 🏷️ Logo / Watermark / Text | **AI স্বয়ংক্রিয়ভাবে Remove করবে** (Upload-এর পরপরই) |
 | 🎬 ভিজুয়াল | কার্টুন/অ্যানিমেশন ক্যারেক্টার ও সিন (Original Footage নয়) |
 | 🗣️ Dialogue Content | **একদম একই কথা** — Original ভিডিওর মূল সংলাপ |
 | 🎙️ Voice Audio | **সম্পূর্ণ নতুন AI Generated Voice** (Original শিল্পীর গলা নয়) |
@@ -295,7 +316,13 @@ User একটি Real Video Upload করবে। AI সেই ভিডিও
 
 ### 6.3 Copyright Protection Strategy
 
-**সবচেয়ে গুরুত্বপূর্ণ — Voice Copyright:**
+**Logo / Watermark / Text Removal:**
+- Original Video Upload-এর পরপরই AI স্বয়ংক্রিয়ভাবে সব Logo, Watermark ও On-screen Text সনাক্ত করবে
+- AI Inpainting দিয়ে Remove করা জায়গা স্বাভাবিকভাবে পূরণ করবে
+- Moving Watermark-ও Track করে Remove করবে
+- ফলে Visual Copyright Element-মুক্ত Clean Footage পাওয়া যাবে
+
+**Voice Copyright:**
 - Original ভিডিওর Voice Clip Final Output-এ কোনো অবস্থায় থাকবে না
 - AI Speech-to-Text দিয়ে Original কথা Transcript করবে
 - সেই একই কথা সম্পূর্ণ নতুন AI Voice Model দিয়ে Generate করবে
@@ -306,15 +333,16 @@ User একটি Real Video Upload করবে। AI সেই ভিডিও
 
 ```
 1. Original Video Upload
-2. Speech-to-Text & Transcript Extraction
-3. Scene & Action Analysis (Action + Timing Mapping)
-4. Cartoon Character Generation (Original Character-এর Cartoon রূপ)
-5. Animation Style নির্বাচন
-6. Scene-by-Scene Cartoon Frame Generation
-7. Voice Re-generation (একই কথা + নতুন AI Voice)
-8. Cartoon Lip-Sync & Timing Sync
-9. Royalty-Free BGM & Sound Effects
-10. ✅ Final Copyright-Safe Cartoon Video Export
+2. 🧹 Auto Copyright Element Removal (Logo, Watermark, Text — Automatic)
+3. Speech-to-Text & Transcript Extraction
+4. Scene & Action Analysis (Action + Timing Mapping)
+5. Cartoon Character Generation (Original Character-এর Cartoon রূপ)
+6. Animation Style নির্বাচন
+7. Scene-by-Scene Cartoon Frame Generation
+8. Voice Re-generation (একই কথা + নতুন AI Voice)
+9. Cartoon Lip-Sync & Timing Sync
+10. Royalty-Free BGM & Sound Effects
+11. ✅ Final Copyright-Safe Cartoon Video Export
 ```
 
 ### 6.5 Animation Style Options
@@ -694,6 +722,7 @@ Phase 5: Cross-Mode Integration & Optimization
 ## 23. ACCEPTANCE CRITERIA
 
 ### Mode 01 (Funny Dubbing)
+- [ ] Working Video Upload-এর পর Logo/Watermark/Text স্বয়ংক্রিয়ভাবে Remove হচ্ছে
 - [ ] Reference Video Upload ও Training Profile তৈরি হচ্ছে
 - [ ] Working Video Analysis সম্পন্ন হচ্ছে
 - [ ] ৩-৫টি Funny Script তৈরি হচ্ছে
@@ -704,6 +733,8 @@ Phase 5: Cross-Mode Integration & Optimization
 - [ ] সব ভাষায় Content Same থাকছে
 
 ### Mode 02 (Cartoon Re-Creation)
+- [ ] Upload-এর পরপরই Logo/Watermark/On-screen Text Remove হচ্ছে
+- [ ] Remove করার পর Video Natural দেখাচ্ছে (কোনো Artifact নেই)
 - [ ] Original Video Transcript Extraction হচ্ছে
 - [ ] Cartoon Character তৈরি হচ্ছে
 - [ ] Scene-by-Scene Cartoon Frame তৈরি হচ্ছে
@@ -718,4 +749,4 @@ Phase 5: Cross-Mode Integration & Optimization
 
 ---
 
-*PRD Version: 1.0 | Created: 2026-10-31 | Source: idea.md v2.2*
+*PRD Version: 1.1 | Updated: 2026-10-31 | Added: Auto Logo/Watermark/Text Removal (Pre-processing)*
