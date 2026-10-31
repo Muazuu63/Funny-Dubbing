@@ -20,11 +20,14 @@
 ### 1.2 Product Summary
 একটি Unified AI-powered Desktop/Web Application যেখানে ১১টি আলাদা Production Mode থাকবে। User ভিডিও Upload করবে (বা Concept দেবে) এবং AI সম্পূর্ণ Production Pipeline — Analysis, Script, Voice, Sync, Editing, Export — নিজেই সম্পন্ন করবে।
 
-### 1.3 Target User
-- Content Creator যারা Funny/Comedy Video বানান
-- Dubbing Creator যারা Original Video-তে নতুন ভাষায় কণ্ঠ দেন
-- Cartoon / Animation Creator
-- Multi-language Video Producer
+### 1.3 Primary User & System Scope (Personal Studio — Single User)
+- **Primary User:** Software Owner (একক ব্যবহারকারী - আপনি নিজে)।
+- **Architecture Model:** সম্পূর্ণ লোকাল পার্সোনাল প্রোডাকশন স্টুডিও (No Public SaaS)।
+- **Out of Scope (যা যা থাকবে না):**
+  - কোনো পাবলিক ইউজার রেজিস্ট্রেশন বা লগইন সিস্টেম থাকবে না।
+  - কোনো সাবস্ক্রিপশন, পেমেন্ট গেটওয়ে বা বিলিং সিস্টেম থাকবে না।
+  - কোনো টিম বা মাল্টি-ইউজার রোল ম্যানেজমেন্ট থাকবে না।
+  - প্রাইভেট লোকাল ওয়ার্কস্পেস থাকবে এবং সমস্ত ডেটা ব্যবহারকারীর নিজস্ব পিসিতে অফলাইনে সুরক্ষিত থাকবে।
 
 ### 1.4 Core Philosophy
 > **"User শুধু Video Upload করবে — AI বাকি সব করবে।"**
@@ -162,25 +165,21 @@ Profile নতুন Reference Video যোগ করলে Update হবে এ
 **Input:** Original Working Video (MP4, MOV, MKV)
 **Video Upload Support:** Duration Detection, Resolution Detection, Audio Detection, Upload Progress, File Validation
 
-### 5.4.0 Pre-Processing — Auto Copyright Element Removal (নতুন)
+### 5.4.0 Pre-Processing — Clean Media Inpainting & Branding Eraser
 
-> **Rule:** Working Video Upload হওয়ার পর Analysis শুরু হওয়ার **আগেই** AI স্বয়ংক্রিয়ভাবে সম্ভাব্য Copyright-sensitive উপাদান সনাক্ত করে Remove করবে।
+> **Rule:** ব্যবহারকারীর নিজের বা অনুমতিপ্রাপ্ত ফুটেজের ক্ষেত্রে অপ্রয়োজনীয় পুরাতন চ্যানেল লোগো, সাবটাইটেল টেক্সট ওভারলে এবং ব্যানার মুছে ফ্রেশ ডাবিং আউটপুট তৈরির জন্য AI Inpainting দিয়ে স্বয়ংক্রিয়ভাবে ক্লিন ফুটেজ তৈরি করা হবে। এটি কোনো কপিরাইট জালিয়াতির জন্য নয়, বরং মিডিয়া ক্লিন-আপ প্রি-প্রসেসর।
 
 | Element Type | Examples | Removal Method |
 |---|---|---|
-| 🏷️ Logo | Channel Logo, Brand Logo, Network Logo | AI Inpainting |
-| ©️ Watermark | Copyright Sign, Semi-transparent Overlay | Frame-by-frame Detection |
-| 📝 On-screen Text | Channel Name, Caption Overlay, Lower Third | Text Detection + Inpainting |
-| 📺 Channel Branding | Subscribe Button, Outro Element | Object Detection + Removal |
-| 🔲 Promo Graphic | Banner, Pop-up Text, Ticker | Region Detection + Fill |
-| 🔄 Moving Watermark | স্থান-পরিবর্তনশীল Watermark | Motion Tracking + Removal |
+| 🏷️ Logo / Watermark | চ্যানেল ওয়াটারমার্ক, হ্যান্ডেল ট্যাগ | AI Inpainting ফিল |
+| 📝 On-screen Text | পুরাতন অন-স্ক্রিন টেক্সট, সাবটাইটেল ওভারলে | Text Mask + Background Fill |
+| 📺 Channel Branding | সাবস্ক্রাইব বাটন, প্রমোশনাল গ্রাফিক্স | Object Removal |
+| 🔄 Moving Watermark | নড়াচড়া করা গ্রাফিক্স | Optical Flow Tracking + Fill |
 
 **Technical Requirements:**
-- Background Inpainting — Remove করা জায়গা Background দিয়ে স্বাভাবিকভাবে পূরণ হবে
-- Frame-by-Frame Processing — প্রতিটি Frame-এ Detection ও Removal
-- Moving Element Tracking — নড়াচড়া করা Watermark-ও Track করে Remove করবে
-- Clean Output — Remove করার পর কোনো কালো দাগ বা Artifact থাকবে না
-- Fully Automatic — কোনো User Input ছাড়াই চলবে
+- Background Inpainting — রিমুভ করা জায়গা লোকাল AI দিয়ে স্বাভাবিকভাবে পূরণ হবে।
+- Clean Output — রিমুভ করার পর কোনো কালো দাগ বা ব্লার থাকবে না।
+- Local Engine — কোনো ক্লাউড বিল ছাড়া অফলাইনে FFmpeg ও LaMa দিয়ে চলবে।
 
 | Analysis Item | Requirement |
 |---|---|
@@ -309,33 +308,27 @@ Character 3  →  Voice C
 
 ## 6. MODE 02 — CARTOON VIDEO RE-CREATION STUDIO
 
-### 6.1 Overview
-User একটি Real Video Upload করবে। AI সেই ভিডিওর একই Content, Story, Action ও Dialogue বজায় রেখে সম্পূর্ণ নতুন Cartoon/Animation Video তৈরি করবে — Copyright-Safe পদ্ধতিতে।
+### 6.1 Overview & Boundary Clarification
+- **Mode 02 (Cartoon Re-Creation):** ব্যবহারকারী একটি আসল ভিডিও আপলোড করবেন। AI সেই ভিডিওর **মূল গল্প, দৃশ্য, অ্যাকশন এবং সংলাপের মূল অর্থ (Meaning & Story Context)** অপরিবর্তিত রেখে প্রতিটি চরিত্রকে কার্টুনে রূপান্তর করবে এবং নতুন AI ভয়েস দিয়ে রিক্রিয়েট করবে। (এখানে কোনো নতুন গল্প বানানো হবে না)।
+- **Mode 03 (Autonomous Creator)-এর সাথে পার্থক্য:** Mode 03 সম্পূর্ণ স্বাধীনভাবে শূন্য থেকে AI-র নিজের আইডিয়া ও স্ক্রিপ্ট নিয়ে সম্পূর্ণ নতুন কন্টেন্ট তৈরি করে। Mode 02 কখনোই নতুন গল্প বা অপ্রাসঙ্গিক স্ক্রিপ্ট বানাবে না; বরং আপলোড করা ভিডিওর হুবহু কার্টুন রিফ্লেকশন হবে।
 
 ### 6.2 Core Concept (গুরুত্বপূর্ণ)
 
 | বিষয় | কী হবে |
 |---|---|
-| 🏷️ Logo / Watermark / Text | **AI স্বয়ংক্রিয়ভাবে Remove করবে** (Upload-এর পরপরই) |
-| 🎬 ভিজুয়াল | কার্টুন/অ্যানিমেশন ক্যারেক্টার ও সিন (Original Footage নয়) |
-| 🗣️ Dialogue Content | **একদম একই কথা** — Original ভিডিওর মূল সংলাপ |
-| 🎙️ Voice Audio | **সম্পূর্ণ নতুন AI Generated Voice** (Original শিল্পীর গলা নয়) |
-| 🎵 Music & SFX | নতুন AI Generated / Royalty-Free (Original Soundtrack নয়) |
+| 🏷️ লোগো / পুরাতন টেক্সট | AI লোকাল ইনপেইন্টিং দিয়ে মুছে ফ্রেশ ফ্রেম তৈরি করবে |
+| 🎬 ভিজুয়াল | কার্টুন/অ্যানিমেশন ক্যারেক্টার ও সিন (Original Footage রূপান্তর) |
+| 🗣️ সংলাপের অর্থ (Meaning) | **আসল সংলাপের হুবহু অর্থ ও অভিব্যক্তি সংরক্ষিত থাকবে** |
+| 🎙️ Voice Audio | **সম্পূর্ণ নতুন AI Generated Voice** (আসল শিল্পীর স্বর বাদ) |
+| 🎵 Music & SFX | রয়্যালটি-ফ্রি ফ্রি সাউন্ড ও ব্যাকগ্রাউন্ড ইফেক্টস |
 
-### 6.3 Copyright Protection Strategy
+### 6.3 Voice & Identity Separation Strategy
 
-**Logo / Watermark / Text Removal:**
-- Original Video Upload-এর পরপরই AI স্বয়ংক্রিয়ভাবে সব Logo, Watermark ও On-screen Text সনাক্ত করবে
-- AI Inpainting দিয়ে Remove করা জায়গা স্বাভাবিকভাবে পূরণ করবে
-- Moving Watermark-ও Track করে Remove করবে
-- ফলে Visual Copyright Element-মুক্ত Clean Footage পাওয়া যাবে
-
-**Voice Copyright:**
-- Original ভিডিওর Voice Clip Final Output-এ কোনো অবস্থায় থাকবে না
-- AI Speech-to-Text দিয়ে Original কথা Transcript করবে
-- সেই একই কথা সম্পূর্ণ নতুন AI Voice Model দিয়ে Generate করবে
-- নতুন Voice-এ Original শিল্পীর গলার সাথে কোনো মিল থাকবে না
-- ফলে Audio Copyright Claim বা Voice-Match Detection এড়ানো সম্ভব হবে
+**Voice Security:**
+- আসল ভিডিওর কোনো ভয়েস ক্লিপ আউটপুটে রাখা হবে না।
+- লোকাল Whisper দিয়ে আসল কথাগুলো ট্রান্সক্রিপ্ট করা হবে।
+- সেই একই অর্থবোধক কথাগুলো নতুন AI Voice মডেল দিয়ে ক্যারেক্টার অনুযায়ী জেনারেট হবে।
+- ফলে মূল শিল্পীর কণ্ঠস্বরের সাথে কোনো মিল থাকবে না।
 
 ### 6.4 Re-Creation Workflow
 
@@ -768,4 +761,46 @@ Phase 5: Cross-Mode Integration & Optimization
 
 ---
 
-*PRD Version: 1.1 | Updated: 2026-10-31 | Added: Auto Logo/Watermark/Text Removal (Pre-processing)*
+## 24. SYSTEM ARCHITECTURE & RESOURCE SPECIFICATIONS (অতিরিক্ত গুরুত্বপূর্ণ সেকশনসমূহ)
+
+### 24.1 Personal Hardware Profiles & Requirements
+যেহেতু এটি পার্সোনাল ডেক্সটপ স্টুডিও এবং জিরো-বাজেট প্রজেক্ট, তাই হার্ডওয়্যার অনুযায়ী প্রসেসিং স্কেলিং করা হবে:
+
+| কনফিগারেশন স্তর | প্রস্তাবিত স্পেক্স | ব্যাকএন্ড কৌশল |
+|---|---|---|
+| **মিনিমাম (Low End)** | CPU i5/Ryzen 5, 16GB RAM, No Dedicated GPU | Quantized Lightweight Models (CPU ONNX), Gemini Free API ফর স্ক্রিপ্টিং, Edge-TTS |
+| **স্ট্যান্ডার্ড (Mid End)** | 16GB RAM, NVIDIA GPU (4GB-6GB VRAM, যেমন: GTX 1660 / RTX 3050) | Demucs ও Whisper অফলাইনে দ্রুত চলবে, Wav2Lip GPU এক্সিলারেশন পাবে |
+| **হাই-এন্ড (High End)** | 32GB RAM, NVIDIA RTX 3060/4060+ (8GB-12GB+ VRAM) | Stable Diffusion কার্টুন রেন্ডারিং লোকালি হাই স্পিডে চলবে |
+
+### 24.2 Free AI Provider Registry & Fallback Policy
+কোনো একটি ফ্রি সার্ভিস ডাউন হলে অটোমেটিক ব্যাকআপ কার্যকর হবে:
+
+| প্রসেসিং টাস্ক | Primary Free Engine (লোকাল) | Secondary Free Fallback (ক্লাউড API) | ফলব্যাক আচরণ |
+|---|---|---|---|
+| স্ক্রিপ্ট ও ডায়ালগ | Gemini 1.5 Flash (Free Tier) | Gemini 1.5 Pro (Free Tier) / Local Small LLM (Ollama) | API কোটা রিচ করলে লোকাল হালকা মডেলে শিফট হবে |
+| ভয়েস জেনারেশন (TTS) | Edge-TTS (Free Neural Voice) | Bark / Meta MMS (Local Offline) | নেটওয়ার্ক এরর হলে অফলাইন লোকাল ইঞ্জিনে চলবে |
+| স্টেম সেপারেশন | Demucs v4 (Local) | Spleeter (Local Lightweight) | VRAM কম হলে হালকা মডেলে প্রসেস হবে |
+| লিপ-সিঙ্ক | Wav2Lip (Local GPU/CPU) | SadTalker (Local) | ক্যারেক্টার টাইপ অনুযায়ী সেরা মডেল নির্বাচন |
+
+### 24.3 Resource Management & Processing Pipeline (ক্র্যাশ প্রতিরোধ)
+- **Sequential Model Execution (একক মডেল লোড-আনলোড):**
+  - সাধারণ পিসিতে মেমরি ওভারফ্লো এড়াতে একই সাথে একাধিক ভারী AI মডেল মেমরিতে রাখা হবে না।
+  - পাইপলাইন রুল: `Demucs রান হবে -> আউটপুট সেভ করে মেমরি ফ্রি করবে -> এরপর Whisper রান হবে -> কাজ শেষে মেমরি ক্লিন করবে -> এরপর TTS/লিপ-সিঙ্ক রান হবে`।
+- **Local Storage Management:**
+  - কোনো ক্লাউড স্টোরেজ খরচ নেই; সমস্ত প্রজেক্ট ফাইল লোকাল ডিরেক্টরিতে স্ট্রাকচার্ড ক্যাশ ফোল্ডারে সেভ থাকবে।
+  - ব্যবহারকারী যেকোনো সময় ওল্ড ক্যাশ ক্লিন করতে পারবেন।
+
+### 24.4 Feature Feasibility Matrix (বাস্তবধর্মী সক্ষমতা বিশ্লেষণ)
+
+| ফিচার | ফ্রিতে সক্ষমতার স্তর | টেকনিক্যাল বাস্তবতা ও কৌশল |
+|---|---|---|
+| **Funny Dubbing (Mode 01)** | 🟢 ১০০% বাস্তবসম্মত ও ফ্রি | Gemini Free + Edge-TTS + Demucs দিয়ে পিসিতে সম্পূর্ণ স্মুথলি চলবে। |
+| **Delta Voice Re-rendering** | 🟢 ১০০% বাস্তবসম্মত | ক্যাশ সিস্টেমে শুধু নির্দিষ্ট টাইমস্ট্যাম্পের ডায়ালগ রেন্ডার হবে। |
+| **Clean Media Branding Eraser** | 🟢 ১০০% বাস্তবসম্মত | FFmpeg ও ইনপেইন্টিং মাস্ক দিয়ে টেক্সট/লোগো অফলাইনে মুছে ফেলা যাবে। |
+| **Multi-speaker Voice Identity** | 🟡 হাই-মিডিয়াম বাস্তবসম্মত | Whisper + Diarization দিয়ে স্পিকার আলাদা করে আলাদা কণ্ঠে ডাবিং। |
+| **Cartoon Re-Creation (Mode 02)** | 🟡 মিডিয়াম বাস্তবসম্মত (GPU নির্ভর) | ফ্রেম-বাই-ফ্রেম অ্যানিমেশনে প্রচুর জিপিউ লাগে; তাই Key-frame Image + Lip-sync দিয়ে অপটিমাইজ করা হবে। |
+| **Autonomous Creator (Mode 03)** | 🟡 মিডিয়াম বাস্তবসম্মত | সম্পূর্ণ গল্প ও ভয়েস ফ্রিতে হবে; তবে রিয়েল ভিডিও জেনারেশনের জন্য হাই স্পেক্স বা ফ্রি স্টক ফুটেজ স্টিচিং সহায়ক হবে। |
+
+---
+
+*PRD Version: 2.0 | Updated: 2026-10-31 | Finalized for Personal Studio, 100% Free Stack, Resource Management & Realistic Feasibility*
