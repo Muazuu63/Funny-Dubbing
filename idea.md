@@ -29,42 +29,61 @@ Main Dashboard-এ প্রতিটি Production Mode আলাদা **Card*
 |---|---|---|
 | 01 | 🎭 Funny Video Dubbing Studio | Priority 1 |
 | 02 | 🎨 Cartoon Video Re-Creation Studio | Priority 1 |
-| 03 | ✨ AI Video Enhancement Studio | Priority 2 |
-| 04 | 🎙️ AI Voice Studio | Priority 2 |
-| 05 | 📄 AI Subtitle & Translation Studio | Priority 2 |
-| 06 | 📱 AI Shorts & Reels Creator | Priority 3 |
-| 07 | ✂️ AI Video Editor Studio | Priority 3 |
-| 08 | 🖼️ AI Thumbnail Creator | Priority 3 |
-| 09 | 🎭 AI Background & Object Studio | Priority 4 |
-| 10 | 🎵 AI Music & Sound Studio | Priority 4 |
+| 03 | 🤖 AI Autonomous Content Creator | Priority 1 |
+| 04 | ✨ AI Video Enhancement Studio | Priority 2 |
+| 05 | 🎙️ AI Voice Studio | Priority 2 |
+| 06 | 📄 AI Subtitle & Translation Studio | Priority 2 |
+| 07 | 📱 AI Shorts & Reels Creator | Priority 3 |
+| 08 | ✂️ AI Video Editor Studio | Priority 3 |
+| 09 | 🖼️ AI Thumbnail Creator | Priority 3 |
+| 10 | 🎭 AI Background & Object Studio | Priority 4 |
+| 11 | 🎵 AI Music & Sound Studio | Priority 4 |
 
 ---
 
 ## 🎭 MODE 01 — Funny Video Dubbing Studio
 
 ### মূল উদ্দেশ্য
-Reference Video থেকে Comedy Style শিখে, Working Video-তে Funny Dubbing করা — Bangla ও Hindi দুই ভাষায়।
+Reference Video থেকে Comedy Style শিখে, Working Video-তে Funny Dubbing করা।
+
+**সমর্থিত Output ভাষা:** Bangla 🇧🇩 | Hindi 🇮🇳 | English 🇬🇧 *(User যখন বলবে তখনই English Version তৈরি হবে — Default নয়)*
 
 ### Features
-- Reference Video Training (Comedy Style Learning)
+- Reference Video Training (Comedy Style + Voice Style Learning)
 - Funny Script Generation (৩-৫টি)
 - Automatic Best Script Selection (AI)
 - Character-wise Voice Generation
-- Multilingual Dubbing (Bangla + Hindi)
+- Multilingual Dubbing (Bangla + Hindi + English on demand)
 - Adaptive Lip-Sync (Human / Animal / Bird / Cartoon)
 - Final Video Rendering
 
 ### Training / Reference Library
 
-User একাধিক Trending Funny Dubbing Video Upload করবে। AI বিশ্লেষণ করে শিখবে:
+User একাধিক Trending Funny Dubbing Video Upload করবে। AI শুধু Comedy Style নয়, **ভয়েস কীভাবে ব্যবহার করতে হবে** সেটাও বিস্তারিতভাবে বিশ্লেষণ করে শিখবে।
 
+#### AI যা শিখবে — Comedy Style
 ```
 Comedy Style           →  Humour Pattern, Punchline Style
-Character Personality  →  Voice Pitch, Tone, Delivery
 Timing                 →  Comedy Timing, Reaction Timing
 Editing Style          →  Sound Effects, Background Music
 Visual Style           →  Subtitle Style, Synchronization Method
 ```
+
+#### AI যা শিখবে — Voice & Character Voice Analysis (নতুন বিস্তারিত)
+
+| বিশ্লেষণের বিষয় | AI কী শিখবে |
+|---|---|
+| 🎙️ Voice Pitch & Tone | প্রতিটি চরিত্রের গলার উচ্চতা, গভীরতা ও রং |
+| 😄 Voice Emotion | রাগ, কষ্ট, মজা, অবাক — প্রতিটি আবেগ কীভাবে কণ্ঠে আসে |
+| ⏱️ Dialogue Delivery Speed | দ্রুত/ধীর/স্বাভাবিক — কোন পরিস্থিতিতে কোন গতি |
+| 🎭 Character-wise Voice Pattern | ভিলেন, কমিক, নায়ক, বয়স্ক — প্রতিটি ক্যারেক্টার টাইপের আলাদা কণ্ঠস্বর |
+| 💥 Punchline Voice Style | পাঞ্চলাইনের সময় গলার পরিবর্তন কেমন হয় |
+| 🔊 Voice Modulation | কণ্ঠের ওঠানামা ও Expression |
+| 🤣 Comedy Reaction Voice | অবাক হওয়া, হাসি, ভয় — Reaction-এর কণ্ঠস্বর |
+| 👤 Human vs Cartoon Voice Diff | মানুষ, পশু, পাখি বা কার্টুনের জন্য আলাদা ভয়েস স্টাইল |
+
+> [!IMPORTANT]
+> Training Video-এর Voice বিশ্লেষণ করে AI শিখবে **Working Video-তে কোন Character-এর জন্য কেমন ধরনের Voice বেছে নিতে হবে।** শুধু Pitch বা Tone নয়, পুরো Voice Personality ও Delivery Pattern শিখবে।
 
 | Video Type | AI কী শিখবে |
 |---|---|
@@ -235,7 +254,102 @@ Royalty-Free BGM ও Sound Effects যোগ করা
 
 ---
 
-## ✨ MODE 03 — AI Video Enhancement Studio
+## 🤖 MODE 03 — AI Autonomous Content Creator
+
+### মূল উদ্দেশ্য
+
+> [!IMPORTANT]
+> **এই Mode-এ User কোনো Video বা Content Upload করবে না।**
+> AI নিজে থেকে সম্পূর্ণ Original Content তৈরি করবে — Script, Voice, Visual এবং Final Video সব কিছু।
+> User শুধু বলে দেবে কী ধরনের Content চাই এবং কোন কোন ভাষায় ভিডিও বানাতে হবে।
+
+### কীভাবে কাজ করবে
+
+**User-এর কাজ (মাত্র ৩টি):**
+1. Topic / Concept / Genre বলা *(যেমন: "একটি মজার বিড়ালের গল্প" বা "office comedy")*
+2. Output Language বেছে নেওয়া *(Bangla / Hindi / English / যেকোনো)*
+3. AI-এর তৈরি Voice শুনে **Approve** করা — তারপর AI নিজেই বাকি সব করবে।
+
+### AI-এর সম্পূর্ণ Autonomous Workflow
+
+```
+User Topic / Concept ইনপুট দেবে
+        ↓
+AI নিজে Research করে Content Idea তৈরি করবে
+        ↓
+AI নিজে Script / Story / Dialogue লিখবে
+        ↓
+AI নিজে Character Design করবে (Visual / Cartoon / Animation)
+        ↓
+AI নিজে Scene-by-Scene Storyboard তৈরি করবে
+        ↓
+AI নিজে Visual / Animation / Video Frame Generate করবে
+        ↓
+AI নিজে প্রতিটি Character-এর জন্য আলাদা Voice Generate করবে
+        ↓
+AI নিজে Lip-Sync ও Visual Synchronization করবে
+        ↓
+⏸ User-এর কাছে Voice Preview পাঠাবে — Approval নেবে
+        ↓
+User Approve করলে → AI নিজে BGM, SFX, Subtitle যোগ করবে
+        ↓
+AI নিজে Final Video Render করবে
+        ↓
+✅ নির্বাচিত সব ভাষায় আলাদা আলাদা Final Video তৈরি হবে
+```
+
+### Language Selection System
+
+> [!NOTE]
+> User নিজেই বলে দেবে কোন কোন ভাষায় ভিডিও বানাতে হবে। AI তখনই সেই ভাষায় ভিডিও তৈরি করবে।
+
+| User বললে | AI কী করবে |
+|---|---|
+| "শুধু বাংলায়" | শুধু Bangla Version |
+| "বাংলা ও হিন্দি" | Bangla + Hindi দুটি আলাদা ভিডিও |
+| "বাংলা, হিন্দি ও ইংরেজি" | তিনটি আলাদা ভিডিও |
+| "সব ভাষায়" | Bangla + Hindi + English + User-specified Languages |
+
+**Available Languages:**
+- 🇧🇩 Bangla (বাংলা)
+- 🇮🇳 Hindi (हिन्दी)
+- 🇬🇧 English
+- 🇸🇦 Arabic
+- অন্যান্য ভাষা প্রয়োজনে
+
+### Content Types (AI যা তৈরি করতে পারবে)
+
+| Content Type | বিবরণ |
+|---|---|
+| 🎭 Funny / Comedy Video | AI নিজে কমেডি স্ক্রিপ্ট ও ক্যারেক্টার তৈরি করবে |
+| 📖 Story-based Video | একটি গল্পের উপর ভিত্তি করে ভিডিও |
+| 🐾 Animal / Nature Comedy | পশুপাখির কমেডি কন্টেন্ট |
+| 🎨 Animated Short Film | সম্পূর্ণ AI-তৈরি অ্যানিমেশন ভিডিও |
+| 📚 Educational Funny Video | মজাদার শিক্ষামূলক কন্টেন্ট |
+| 🌐 Topic-based Comedy | User-দেওয়া যেকোনো বিষয়ে কমেডি ভিডিও |
+
+### Approval System
+
+**AI Voice Preview পাঠাবে User-এর কাছে:**
+```
+▶ Voice Preview শোনা
+🔄 Voice পছন্দ না হলে Regenerate
+✏️ নির্দিষ্ট Dialogue পরিবর্তন
+✅ Approve → Final Video Production শুরু
+❌ Reject → AI আবার নতুন Voice Generate করবে
+```
+
+> [!CAUTION]
+> User Approve না করা পর্যন্ত Final Video তৈরি হবে না। কিন্তু Script, Character, Scene — এসবের জন্য কোনো Approval লাগবে না। AI সেগুলো নিজেই সিদ্ধান্ত নেবে।
+
+### Final Output
+- User-নির্বাচিত প্রতিটি ভাষায় আলাদা আলাদা Final Video
+- Character-wise Voice, Subtitle, SFX, BGM সহ
+- Export: MP4, 1080p, H.264
+
+---
+
+## ✨ MODE 04 — AI Video Enhancement Studio
 
 > [!NOTE]
 > Priority 2 — Core Architecture তৈরির পর Implement হবে।
@@ -413,6 +527,7 @@ Software-এর মধ্যে একটি **Shared Settings System** থা�
 **Priority 1 (প্রথমে):**
 - 🎭 Funny Video Dubbing Studio
 - 🎨 Cartoon Video Re-Creation Studio
+- 🤖 AI Autonomous Content Creator
 
 **Priority 2:**
 - 🎙️ AI Voice Studio
