@@ -48,6 +48,23 @@ Reference Video থেকে Comedy Style শিখে, Working Video-তে Fun
 
 **সমর্থিত Output ভাষা:** Bangla 🇧🇩 | Hindi 🇮🇳 | English 🇬🇧 *(User যখন বলবে তখনই English Version তৈরি হবে — Default নয়)*
 
+### Language Selection — User নিজেই বেছে নেবে
+
+> [!IMPORTANT]
+> Working Video Upload করার সময় User বলে দেবে কোন কোন ভাষায় ভিডিও চাই।
+> **Script ও Content সব ভাষায় একদম Same থাকবে** — শুধু ভাষা পরিবর্তন হবে, কন্টেন্ট নয়।
+
+| User যা বলবে | কী হবে |
+|---|---|
+| শুধু **"Bangla"** | শুধু ১টি Bangla ভিডিও |
+| শুধু **"Hindi"** | শুধু ১টি Hindi ভিডিও |
+| **"Bangla + Hindi"** | ২টি আলাদা ভিডিও — Bangla ও Hindi |
+| **"Bangla + Hindi + English"** | ৩টি আলাদা ভিডিও — একই Content, তিন ভাষায় |
+| অন্য যেকোনো ভাষা | সেই ভাষায়ও তৈরি করা যাবে |
+
+> [!NOTE]
+> যা Bangla-তে বলা হবে — সেই একই ডায়ালগ ও গল্প Hindi বা English-এও থাকবে। শুধু ভাষা অনুযায়ী স্বাভাবিকভাবে Adapt হবে।
+
 ### Features
 - Reference Video Training (Comedy Style + Voice Style Learning)
 - Funny Script Generation (৩-৫টি)
