@@ -1,39 +1,62 @@
 # 🎬 AI Funny Dubbing & Video Production Studio
-### Project Idea Document
+### Project Idea Document — Unified AI Video Production Platform
 
 ---
 
 > [!IMPORTANT]
-> এটি একটি সম্পূর্ণ AI-powered Automated Funny Video Production Studio — যেখানে User শুধু Video Upload করবে এবং AI বাকি সব Production কাজ করবে।
+> এটি একটি সম্পূর্ণ **Unified AI-powered Video Production Platform** — যেখানে ১০টি আলাদা Production Mode থাকবে। User শুধু Video Upload করবে এবং AI বাকি সব Production কাজ করবে।
 
 ---
 
 ## 📌 Project Vision
 
-একটি Advanced AI-powered System যা Trending Funny Dubbing Video থেকে Comedy Style শিখে, Original Working Video বিশ্লেষণ করে, Creative Funny Script তৈরি করে এবং সম্পূর্ণ **Bangla ও Hindi Dubbed Final Video** তৈরি করে দেয় — Character-wise আলাদা Voice ও Adaptive Visual Synchronization সহ।
+একটি Advanced AI-powered **All-in-One Video Production Platform** যেখানে Funny Dubbing থেকে শুরু করে Cartoon Re-Creation, Video Enhancement, Voice Studio, Subtitle ও আরও অনেক কিছু একই Software-এ পাওয়া যাবে। প্রতিটি Production Mode স্বাধীনভাবে কাজ করবে এবং প্রয়োজনে একে অপরের Output ব্যবহার করতে পারবে।
 
 ---
 
-## 🗂️ Main Dashboard Sections
+## 🗂️ Main Dashboard — Production Modes
 
-| Section | বিবরণ |
-|---|---|
-| 🎓 Training / Reference Library | Reference Funny Video Upload ও Comedy Style শেখার জায়গা |
-| 🎬 Create New Project | নতুন Working Video দিয়ে Production শুরু |
-| 📁 My Projects | সব পুরোনো Project-এর তালিকা |
-| 🎙️ Voice Library | সব Available Voice-এর Collection |
-| ⚙️ AI Processing Status | Real-time Processing Progress |
-| 📺 Final Videos | তৈরি হওয়া Final Video দেখা ও Download |
-| ⚙️ Settings | API Key, Preferences ইত্যাদি |
+Main Dashboard-এ প্রতিটি Production Mode আলাদা **Card** হিসেবে দেখাবে।
+
+প্রতিটি Card-এ থাকবে:
+- Mode Name ও Feature Description
+- Start New Project
+- Recent Projects
+- Processing Status
+- Output History
+
+| # | Mode | Status |
+|---|---|---|
+| 01 | 🎭 Funny Video Dubbing Studio | Priority 1 |
+| 02 | 🎨 Cartoon Video Re-Creation Studio | Priority 1 |
+| 03 | ✨ AI Video Enhancement Studio | Priority 2 |
+| 04 | 🎙️ AI Voice Studio | Priority 2 |
+| 05 | 📄 AI Subtitle & Translation Studio | Priority 2 |
+| 06 | 📱 AI Shorts & Reels Creator | Priority 3 |
+| 07 | ✂️ AI Video Editor Studio | Priority 3 |
+| 08 | 🖼️ AI Thumbnail Creator | Priority 3 |
+| 09 | 🎭 AI Background & Object Studio | Priority 4 |
+| 10 | 🎵 AI Music & Sound Studio | Priority 4 |
 
 ---
 
-## 🎓 SECTION ONE — Training / Reference Video Library
+## 🎭 MODE 01 — Funny Video Dubbing Studio
 
 ### মূল উদ্দেশ্য
-User একাধিক Trending Funny Dubbing Video Upload করবে। এই ভিডিওগুলো শুধু AI-কে **Comedy Style ও Expected Output** বোঝানোর জন্য — Working Video হিসেবে ব্যবহার করা যাবে না।
+Reference Video থেকে Comedy Style শিখে, Working Video-তে Funny Dubbing করা — Bangla ও Hindi দুই ভাষায়।
 
-### AI কী শিখবে?
+### Features
+- Reference Video Training (Comedy Style Learning)
+- Funny Script Generation (৩-৫টি)
+- Automatic Best Script Selection (AI)
+- Character-wise Voice Generation
+- Multilingual Dubbing (Bangla + Hindi)
+- Adaptive Lip-Sync (Human / Animal / Bird / Cartoon)
+- Final Video Rendering
+
+### Training / Reference Library
+
+User একাধিক Trending Funny Dubbing Video Upload করবে। AI বিশ্লেষণ করে শিখবে:
 
 ```
 Comedy Style           →  Humour Pattern, Punchline Style
@@ -43,8 +66,6 @@ Editing Style          →  Sound Effects, Background Music
 Visual Style           →  Subtitle Style, Synchronization Method
 ```
 
-### বিভিন্ন Video Type থেকে আলাদা Learning
-
 | Video Type | AI কী শিখবে |
 |---|---|
 | 👤 Human | Lip-Sync Style, Facial Expression Dubbing |
@@ -52,36 +73,16 @@ Visual Style           →  Subtitle Style, Synchronization Method
 | 🐦 Bird | Beak Movement, Head Movement Sync |
 | 🎨 Cartoon / Animation | Mouth Movement Animation Style |
 
-### Training Profile
-সব Reference Video বিশ্লেষণের পর AI একটি **Reusable Comedy Style Profile** তৈরি করবে:
-
-- Preferred Comedy Style
-- Preferred Voice & Character Voice
-- Dialogue Style ও Humour Pattern
-- Editing Style ও Sound Design Preference
+**Training Profile** — সব Reference Video বিশ্লেষণের পর AI একটি Reusable Comedy Style Profile তৈরি করবে:
+- Preferred Comedy Style, Voice & Character Voice
+- Dialogue Style, Humour Pattern
+- Editing Style, Sound Design Preference
 - Visual Synchronization Preference
 
 > [!NOTE]
-> নতুন Reference Video যোগ করলে Training Profile Update হবে। Reference Video-এর Original Dialogue কখনো Copy করা যাবে না — শুধু **Style ও Creative Direction** নেওয়া হবে।
+> Reference Video-এর Original Dialogue কখনো Copy করা যাবে না — শুধু **Style ও Creative Direction** নেওয়া হবে।
 
----
-
-## 🎬 SECTION TWO — Working Video / Create New Project
-
-### মূল উদ্দেশ্য
-User তার Original Video Upload করবে এবং পূর্বে তৈরি Training Profile নির্বাচন করবে। এই Original Video-ই হবে Final Dubbing-এর **মূল Footage**।
-
-### Video Upload Support
-- ✅ MP4, MOV, MKV Format
-- ✅ Duration ও Resolution Detection
-- ✅ Audio Detection
-- ✅ Upload Progress ও File Validation
-
----
-
-## 🔍 Working Video Analysis
-
-Script তৈরির আগে AI সম্পূর্ণ Video বিশ্লেষণ করবে:
+### Working Video Analysis
 
 ```
 ✔ Video Type Identification (Human / Animal / Bird / Cartoon)
@@ -94,97 +95,34 @@ Script তৈরির আগে AI সম্পূর্ণ Video বিশ্�
 ✔ Story Context & Comedy Opportunity
 ```
 
-প্রতিটি Scene-এর জন্য **Timestamp + Visual Description** তৈরি হবে। এই Analysis-ই Script Generation-এর ভিত্তি।
+### Script Generation
 
----
-
-## 📝 Funny Script Generation
-
-AI ন্যূনতম **৩-৫টি আলাদা Funny Dubbing Script** তৈরি করবে — সবগুলো User দেখতে পাবে।
-
-### প্রতিটি Script-এ থাকবে
+প্রতিটি Script-এ থাকবে:
 
 | উপাদান | বিবরণ |
 |---|---|
 | Script Title | Script-এর নাম |
 | Scene Number & Timestamp | কোন দৃশ্যে কখন |
-| Character Name | কে বলছে |
+| Character Name & Emotion | কে কীভাবে বলছে |
 | Character Dialogue | কী বলছে |
-| Character Emotion | কীভাবে বলছে |
 | Voice Delivery Style | Delivery Instruction |
 | Comedy Timing & Punchline | কখন Punch আসবে |
 | Suggested Sound Effects | কোন Sound Effect দরকার |
 
 > [!IMPORTANT]
-> Script অবশ্যই Original Video-এর Visual Action ও Story Context-এর সঙ্গে মিলতে হবে। Comedy হতে হবে **Natural, Creative ও Entertaining**।
+> AI নিজেই Best Script নির্বাচন করবে — User-এর কাছ থেকে Script Approval নেওয়া হবে না।
 
----
-
-## 🤖 Automatic Best Script Selection
-
-> [!IMPORTANT]
-> এটি অত্যন্ত গুরুত্বপূর্ণ Feature — User-এর কাছ থেকে Script Approval নেওয়া হবে না।
-
-AI নিজেই নিচের Criteria বিশ্লেষণ করে Best Script বেছে নেবে:
-
-- Comedy Quality & Originality
-- Scene ও Character Relevance
-- Dialogue Quality ও Entertainment Value
-- Comedy Timing ও Punchline Quality
-
-✅ Best Script নির্বাচনের পর **স্বয়ংক্রিয়ভাবে Bangla Voice Generation শুরু হবে।**
-✅ সব Script Project-এ সংরক্ষিত থাকবে।
-
----
-
-## 🎙️ Character-wise Different Voice System
-
-প্রতিটি Speaking Character-এর জন্য **আলাদা Voice** ব্যবহার করা হবে।
+### Character-wise Different Voice System
 
 ```
-Character 1  →  Voice A
+Character 1  →  Voice A  (সারা Video একই Voice)
 Character 2  →  Voice B
 Character 3  →  Voice C
-Character 4  →  Voice D
 ```
 
-একই Character পুরো Video-তে **একই Voice Identity** বজায় রাখবে।
+Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expressive
 
-### Voice Personality Options
-
-| ধরন | উদাহরণ |
-|---|---|
-| লিঙ্গ | Male, Female |
-| বয়স | Young, Old |
-| Pitch | Deep, High Pitch |
-| Style | Funny, Cartoon, Expressive |
-
-> [!NOTE]
-> Character-এর Personality ও আচরণ অনুযায়ী AI নিজেই উপযুক্ত Voice নির্বাচন করবে। Bangla ও Hindi উভয়ের জন্য আলাদা Character Voice Mapping সংরক্ষণ হবে।
-
----
-
-## 🗣️ Bangla Voice Generation
-
-- Natural Conversational Bangla
-- বাংলাদেশের দর্শক-উপযোগী ভাষা
-- প্রতিটি Dialogue-এ Humour, Emotion ও Comedy Timing
-- প্রতিটি Character-এর জন্য আলাদা Voice
-- Generation-এর পর User-কে Preview দেওয়া হবে
-
----
-
-## ✅ Bangla Voice Review & Approval
-
-এটি **বাধ্যতামূলক Approval Stage**। User নিচের বিষয়গুলো যাচাই করবে:
-
-- [ ] Dialogue কি Video-এর সঙ্গে মিলেছে?
-- [ ] Character অনুযায়ী Voice সঠিক?
-- [ ] Comedy ঠিকমতো কাজ করছে?
-- [ ] Punchline ও Timing সঠিক?
-- [ ] Voice Natural ও Entertaining?
-
-### Available Controls
+### Bangla Voice Review & Approval (বাধ্যতামূলক)
 
 ```
 ▶ Play / Pause                  📥 Download Audio
@@ -195,47 +133,9 @@ Character 4  →  Voice D
 ```
 
 > [!CAUTION]
-> User Approve না করা পর্যন্ত Final Video Production শুরু হবে না। Reject করলে পরিবর্তনের সুযোগ দেওয়া হবে।
+> Bangla Voice Approve না হওয়া পর্যন্ত Final Video Production শুরু হবে না।
 
----
-
-## 🇮🇳 Hindi Voice Generation
-
-Bangla Approval-এর পর Hindi Version তৈরি হবে।
-
-- একই Best Script-এর Comedy Concept ও Scene Structure বজায় থাকবে
-- **Word-to-Word Translation নয়** — Natural Hindi Adaptation
-- Hindi-speaking দর্শকরাও একইভাবে Comedy উপভোগ করতে পারবে
-- প্রতিটি Character-এর জন্য আলাদা Hindi Voice
-- উভয় ভাষায় Character-এর Voice Personality সামঞ্জস্যপূর্ণ রাখা হবে
-
----
-
-## 🔄 Adaptive Visual & Voice Synchronization System
-
-> [!IMPORTANT]
-> সব ধরনের Video-তে একই Lip-Sync Method ব্যবহার করা যাবে না। AI Video-এর ধরন অনুযায়ী উপযুক্ত Method নির্বাচন করবে।
-
-### Synchronization Method by Video Type
-
-```mermaid
-flowchart TD
-    A["Working Video Input"] --> B{"Character Type?"}
-    B --> C["👤 Human"]
-    B --> D["🐾 Animal"]
-    B --> E["🐦 Bird"]
-    B --> F["🎨 Cartoon / Animation"]
-    
-    C --> C1["AI Lip-Sync\nReal Mouth Movement Sync"]
-    D --> D1["Natural Movement\nBody Language & Reaction Sync"]
-    E --> E1["Beak & Head Movement\nNatural Behavior Sync"]
-    F --> F1["Animation Style\nMouth Movement Sync"]
-    
-    C1 --> G["Final Synchronized Video"]
-    D1 --> G
-    E1 --> G
-    F1 --> G
-```
+### Adaptive Visual Synchronization
 
 | Video Type | Synchronization Method |
 |---|---|
@@ -245,131 +145,352 @@ flowchart TD
 | 🎨 Cartoon | Character Animation Style অনুযায়ী Mouth Sync |
 | 🚫 Non-speaking | Action-based / Reaction-based / Off-screen Voiceover |
 
-> [!NOTE]
-> Lip-Sync সম্ভব না হলে জোর করে প্রয়োগ করা যাবে না। সবচেয়ে গুরুত্বপূর্ণ হলো Final Video যেন **Natural, Funny ও Entertaining** হয়।
+### Final Output
+- **VIDEO 1** — 🇧🇩 Bangla Dubbed (Character Voice + Subtitle + SFX + BGM)
+- **VIDEO 2** — 🇮🇳 Hindi Dubbed (Character Voice + Subtitle + SFX + BGM)
+- Export: MP4, 1080p, H.264, High Quality Audio
 
 ---
 
-## 🎞️ Final Video Editing
+## 🎨 MODE 02 — Cartoon Video Re-Creation Studio
 
-Voice Approval-এর পর Final Production শুরু:
+### মূল উদ্দেশ্য
 
-- Original Dialogue Audio Replace বা Mix
-- Character-wise Voice বসানো
-- Scene অনুযায়ী Dialogue Synchronize
-- Funny Sound Effects যোগ
-- Background Music যোগ
-- Voice ও Music Balance
-- Original Ambient Sound সংরক্ষণ
-- Bangla ও Hindi Subtitle তৈরি
+> [!IMPORTANT]
+> User একটি Real Video Upload করবে। AI সেই ভিডিওর **একই Content, Story ও Scene Structure** বজায় রেখে সম্পূর্ণ নতুন Cartoon/Animation Video তৈরি করবে।
+>
+> **Copyright Protection সর্বোচ্চ অগ্রাধিকার।** Original Voice, Music, Footage — কোনোটিই Final Output-এ থাকবে না।
+
+### Copyright-Safe Re-Creation নীতি
+
+| কী পরিবর্তন হবে | কীভাবে |
+|---|---|
+| 🎙️ Voice | সম্পূর্ণ নতুন AI-generated Voice — Original Voice-এর কোনো অংশ ব্যবহার নয় |
+| 🎬 Visual | Original Footage সরাসরি ব্যবহার নয় — Scene-by-Scene Cartoon Re-Creation |
+| 🎵 Music | Original Soundtrack নয় — AI-generated বা Royalty-free Music |
+| 📝 Script | Original Dialogue-এর Concept নিয়ে নতুনভাবে লেখা — Word-for-word copy নয় |
+
+> [!CAUTION]
+> **Voice সবচেয়ে গুরুত্বপূর্ণ Copyright ক্ষেত্র।** Original ভিডিওর কোনো Voice Clip কোনো অবস্থায় Final Output-এ ব্যবহার করা যাবে না। সম্পূর্ণ নতুন AI Voice Generate করতে হবে।
+
+### Re-Creation Workflow
+
+```
+Original Video Upload
+        ↓
+Video Analysis (Scene, Character, Story, Dialogue)
+        ↓
+Content Map তৈরি (Scene-by-Scene Story Structure)
+        ↓
+Character Design Generation (Cartoon Style)
+        ↓
+Animation Style নির্বাচন
+        ↓
+Scene-by-Scene Cartoon Re-Creation
+        ↓
+New Script তৈরি (Original Concept — নতুন ভাষায়)
+        ↓
+Language নির্বাচন (Bangla / Hindi / English / Other)
+        ↓
+AI Voice Generation (Character-wise — সম্পূর্ণ নতুন)
+        ↓
+Cartoon Lip-Sync
+        ↓
+AI-generated Background Music & Sound Effects
+        ↓
+Final Cartoon Video Export
+```
+
+### Features
+
+- **Original Video Analysis** — Scene, Character, Story, Dialogue Detection
+- **Character Detection** — Original Character Identify করা
+- **Cartoon Character Creation** — Original Character-এর Cartoon Version AI-তে তৈরি
+- **Animation Style Selection** — 2D Flat, Anime, 3D, Comic Book, Watercolor ইত্যাদি
+- **Scene-by-Scene Re-Creation** — প্রতিটি Scene আলাদাভাবে Cartoon-এ রূপান্তর
+- **Language Selection** — Bangla, Hindi, English ও অন্যান্য
+- **AI Voice Generation** — প্রতিটি Character-এর জন্য আলাদা নতুন Voice
+- **Cartoon Lip-Sync** — Animated Mouth Movement Synchronization
+- **AI Background Music** — Royalty-free, Scene-appropriate
+- **Final Cartoon Video** — Export-ready MP4
+
+### Animation Style Options
+
+| Style | বিবরণ |
+|---|---|
+| 🎨 2D Flat | Simple, Clean Cartoon Look |
+| 🇯🇵 Anime | Japanese Animation Style |
+| 🎬 3D Animation | Realistic 3D Cartoon |
+| 📚 Comic Book | Comic Panel Style |
+| 🖌️ Watercolor | Soft, Artistic Look |
+| 🕹️ Pixel Art | Retro Pixel Style |
+
+### Character Creation System
+
+- Original Character-এর Visual থেকে Cartoon Character Design
+- Character Color Scheme, Expression, Costume
+- Character-specific Cartoon Mouth Shapes (Lip-Sync এর জন্য)
+- Character Library-তে Save করার সুবিধা
+
+---
+
+## ✨ MODE 03 — AI Video Enhancement Studio
+
+> [!NOTE]
+> Priority 2 — Core Architecture তৈরির পর Implement হবে।
+
+**Features:**
+- Video Upscaling ও Resolution Enhancement
+- Noise Reduction ও Video Sharpening
+- Lighting ও Color Correction
+- Frame Interpolation (FPS বৃদ্ধি)
+- Video Stabilization
+
+---
+
+## 🎙️ MODE 04 — AI Voice Studio
+
+> [!NOTE]
+> Priority 2 — Core Architecture তৈরির পর Implement হবে।
+
+**Features:**
+- Text-to-Speech (Bangla, Hindi, English ও অন্যান্য)
+- Character-wise Voice Generation
+- Emotion-based Voice Acting
+- Authorized Voice Cloning
+- Voice Enhancement ও Noise Removal
+- Speed ও Pitch Control
+
+---
+
+## 📄 MODE 05 — AI Subtitle & Translation Studio
+
+> [!NOTE]
+> Priority 2 — Core Architecture তৈরির পর Implement হবে।
+
+**Features:**
+- Automatic Subtitle Generation (Speech-to-Text)
+- Subtitle Editing
+- Bangla, Hindi, English Translation
+- Other Language Support
+- Subtitle Synchronization
+- SRT / VTT Export
+
+---
+
+## 📱 MODE 06 — AI Shorts & Reels Creator
+
+> [!NOTE]
+> Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
+
+**Features:**
+- Long Video থেকে Viral Moment Detection
+- Automatic Short Clip Generation
+- Vertical Video Conversion
+- Automatic Captions
+- Smart Reframing
+- Multiple Shorts একসঙ্গে Generate
+
+---
+
+## ✂️ MODE 07 — AI Video Editor Studio
+
+> [!NOTE]
+> Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
+
+**Features:**
+- Cut, Trim, Split, Merge
+- Scene Reordering
+- Transition Effects
+- Audio Replacement, Background Music, Sound Effects
+- Aspect Ratio Conversion
+- Timeline-based Editing
+
+---
+
+## 🖼️ MODE 08 — AI Thumbnail Creator
+
+> [!NOTE]
+> Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
+
+**Features:**
+- Video Frame Analysis
+- Multiple Thumbnail Concepts
+- Text ও Title Placement
+- Background Replacement ও Enhancement
+- YouTube Thumbnail Export
+
+---
+
+## 🎭 MODE 09 — AI Background & Object Studio
+
+> [!NOTE]
+> Priority 4 — শেষ পর্যায়ে Implement হবে।
+
+**Features:**
+- Background Removal ও Replacement
+- Object Removal ও Replacement
+- Scene Background Generation
+- Green Screen Processing
+
+---
+
+## 🎵 MODE 10 — AI Music & Sound Studio
+
+> [!NOTE]
+> Priority 4 — শেষ পর্যায়ে Implement হবে।
+
+**Features:**
+- AI Background Music Generation
+- Scene-based ও Comedy Sound Effects
+- Cinematic Sound Effects
+- Audio Mixing ও Enhancement
+- Music ও Voice Balance
+
+---
+
+## 🏗️ Unified Software Architecture
+
+সব Production Mode একই Software-এর মধ্যে থাকবে। প্রতিটি Mode-এর Processing Workflow আলাদা হলেও **Shared System** একই থাকবে।
+
+### Shared Systems
+
+```
+✅ User Dashboard & Project Management
+✅ Video Upload System & File Storage
+✅ AI Model Integration Layer
+✅ Character Library
+✅ Voice Library
+✅ Style Preset Library
+✅ Audio Library (SFX + BGM)
+✅ Rendering Engine
+✅ Export Manager
+✅ Processing Queue
+✅ Error Handling & Notification System
+```
+
+> [!IMPORTANT]
+> একটি Mode-এর কাজ অন্য Mode-এর কাজকে **কখনো বাধাগ্রস্ত করবে না।**
+
+---
+
+## 🔗 Cross-Mode Integration
+
+একটি Mode-এর Output অন্য Mode-এ সরাসরি ব্যবহার করা যাবে।
+
+**Cross-Mode Flow Examples:**
+- Funny Dubbing → Video Enhancement → Shorts Creator → Thumbnail Creator
+- Cartoon Re-Creation → Subtitle Studio → Enhancement → Shorts Creator
+- AI Voice Studio → Funny Dubbing / Cartoon Re-Creation
+- Character Creator → Cartoon Re-Creation Studio
+
+---
+
+## ⚙️ Global Production Settings
+
+Software-এর মধ্যে একটি **Shared Settings System** থাকবে। প্রতিটি Mode-এ আলাদাভাবে Override করার সুবিধাও থাকবে।
+
+| Setting | Default |
+|---|---|
+| Default Video Resolution | 1080p |
+| Default Aspect Ratio | 16:9 |
+| Default Export Format | MP4 (H.264) |
+| Preferred Language | Bangla |
+| Audio Quality | High |
+| Video Quality | High |
+| Default Voice Style | Natural |
+| Default Animation Style | 2D Flat |
+| Storage Location | Local / Cloud |
+
+---
+
+## 📊 Development Priority
+
+> [!IMPORTANT]
+> সব Feature একসঙ্গে Implement করার চেষ্টা করা হবে না। Core Architecture আগে, তারপর Priority অনুসারে।
+
+**Priority 1 (প্রথমে):**
+- 🎭 Funny Video Dubbing Studio
+- 🎨 Cartoon Video Re-Creation Studio
+
+**Priority 2:**
+- 🎙️ AI Voice Studio
+- 📄 AI Subtitle & Translation
+- ✨ AI Video Enhancement
+
+**Priority 3:**
+- 📱 AI Shorts & Reels Creator
+- ✂️ AI Video Editor
+- 🖼️ AI Thumbnail Creator
+
+**Priority 4:**
+- 🎭 AI Background & Object Studio
+- 🎵 AI Music & Sound Studio
 
 > [!WARNING]
-> Background Music ও Sound Effects যেন Dialogue-এর Voice ঢেকে না ফেলে।
-
----
-
-## 📺 Final Video Preview & Export
-
-### দুটি আলাদা Final Video
-
-#### 🇧🇩 VIDEO 1 — Bangla Dubbed
-- সম্পূর্ণ বাংলা Dialogue
-- Character-wise Different Voice
-- Adaptive Visual Synchronization
-- বাংলা Subtitle
-- Comedy Sound Effects + Background Music
-
-#### 🇮🇳 VIDEO 2 — Hindi Dubbed
-- সম্পূর্ণ হিন্দি Dialogue
-- Character-wise Different Voice
-- Adaptive Visual Synchronization
-- হিন্দি Subtitle
-- Comedy Sound Effects + Background Music
-
-### Export Settings
-- Format: **MP4**
-- Resolution: **1080p** (Source সমর্থন করলে)
-- Audio: **High Quality**
-- Codec: **H.264**
-- আলাদা Voiceover Audio Download-এর সুবিধা
+> যে Feature এখনো Implement হয়নি, সেটিকে **"Coming Soon"** বা **"Not Configured"** হিসেবে দেখাতে হবে। Fake Processing বা Fake Output দেখানো যাবে না।
 
 ---
 
 ## 💾 Project Management
 
-প্রতিটি Project আলাদাভাবে Save হবে এবং পরবর্তীতে আগের জায়গা থেকে কাজ চালিয়ে যাওয়া যাবে।
+প্রতিটি Project আলাদাভাবে Save হবে। পরবর্তীতে আগের জায়গা থেকে কাজ চালিয়ে যাওয়া যাবে।
 
-### Project-এ যা সংরক্ষিত থাকবে
+### প্রতিটি Project-এ সংরক্ষিত থাকবে
+
 ```
 📹 Original Working Video
-🎓 Reference Training Profile
+🎓 Reference Training Profile (Funny Dubbing-এর ক্ষেত্রে)
+🎨 Animation Style & Character Design (Cartoon Mode-এর ক্ষেত্রে)
 🔍 Video Analysis Data
 🎬 Scene Information & Timestamps
-📝 All Generated Scripts (3-5টি)
+📝 Generated Scripts
 ⭐ AI Selected Best Script
-🔊 Bangla Voice Files
-🔊 Hindi Voice Files
+🎙️ Voice Files (Bangla / Hindi / Other)
 🗺️ Character Voice Mapping
 🔄 Synchronization Data
-📄 Subtitle Files (Bangla + Hindi)
-🎬 Final Video Files (Bangla + Hindi)
+📄 Subtitle Files
+🎬 Final Video Files
 ```
 
 ---
 
 ## ⚙️ Processing Status & Error Handling
 
-Real-time Processing Stage দেখানো হবে:
-
+**Funny Dubbing Workflow:**
 ```
-1. Uploading
+1. Uploading Video
 2. Analyzing Video
-3. Detecting Characters
+3. Detecting Characters & Scenes
 4. Generating Scripts (3-5টি)
-5. Selecting Best Script
+5. Selecting Best Script (AI)
 6. Generating Bangla Voice
-7. ⏸ Waiting for Voice Approval  ← User Action Required
+7. ⏸ Waiting for Voice Approval ← User Action Required
 8. Generating Hindi Voice
 9. Processing Synchronization
-10. Editing Video
-11. Rendering Final Video
+10. Editing Final Video
+11. Rendering
 12. ✅ Completed
+```
+
+**Cartoon Re-Creation Workflow:**
+```
+1. Uploading Original Video
+2. Analyzing Video Content
+3. Detecting Characters & Story
+4. Creating Content Map
+5. Generating Cartoon Characters
+6. Scene-by-Scene Animation Rendering
+7. Generating New Script & Voice
+8. Cartoon Lip-Sync Processing
+9. Adding Music & Sound Effects
+10. Final Rendering
+11. ✅ Completed
 ```
 
 - Long Video Processing-এর জন্য **Progress Bar**
 - Processing Failed হলে **Error Details**
-- সম্ভব হলে আগের সফল Step থেকে **Resume** করার সুবিধা
-
----
-
-## 🔄 Complete Production Workflow
-
-```mermaid
-flowchart TD
-    A["🎓 Reference Video Upload"] --> B["AI Reference Analysis"]
-    B --> C["Comedy Style Learning"]
-    C --> D["Training Profile তৈরি"]
-    D --> E["✅ Profile Saved"]
-
-    E --> F["🎬 Working Video Upload"]
-    F --> G["Training Profile নির্বাচন"]
-    G --> H["Working Video Analysis"]
-    H --> I["Character & Scene Detection"]
-    I --> J["3-5টি Funny Script Generate"]
-    J --> K["🤖 AI Best Script নির্বাচন"]
-    K --> L["Bangla Voice Generate"]
-    L --> M["Character-wise Voice Assignment"]
-    M --> N["Bangla Voice Preview"]
-    N --> O{"👤 User Approval?"}
-    O -- "❌ Reject" --> P["Voice Modify / Regenerate"]
-    P --> N
-    O -- "✅ Approve" --> Q["Hindi Voice Generate"]
-    Q --> R["Hindi Character-wise Voice"]
-    R --> S["Bangla & Hindi Synchronization"]
-    S --> T["Final Video Editing"]
-    T --> U["Final Preview — Bangla & Hindi"]
-    U --> V["🎬 Export & Download"]
-```
+- আগের সফল Step থেকে **Resume** করার সুবিধা
 
 ---
 
@@ -381,18 +502,17 @@ flowchart TD
 | Category | প্রয়োজনীয় Technology |
 |---|---|
 | AI Video Understanding | Scene ও Character Detection Model |
-| Script Generation | LLM (Large Language Model) |
-| Multilingual TTS | Bangla ও Hindi Text-to-Speech |
-| Character Voice | Multi-speaker Voice Cloning / Selection |
-| Audio Processing | Voice Mixing, Background Music, Sound FX |
-| Lip-Sync | AI Lip-Sync Model |
+| Script / Content Generation | LLM (Large Language Model) |
+| Cartoon / Image Generation | AI Image & Animation Generation Model |
+| Multilingual TTS | Bangla, Hindi ও অন্যান্য Text-to-Speech |
+| Character Voice | Multi-speaker Voice Generation |
+| Audio Processing | Voice Mixing, BGM, Sound FX |
+| Lip-Sync | AI Lip-Sync Model (Human + Cartoon) |
 | Adaptive Sync | Video Type-based Sync Engine |
 | Video Rendering | Final Video Composition |
 | Subtitle | Auto Subtitle Generation |
 | Backend | API, Database, File Storage |
-
-> [!CAUTION]
-> **কোনো Fake Processing বা Fake Progress ব্যবহার করা যাবে না।** যে Feature বাস্তবে Implement হয়নি, সেটিকে Completed দেখানো যাবে না। প্রতিটি Feature বাস্তব Backend Processing-এর সঙ্গে সংযুক্ত থাকতে হবে।
+| Copyright Detection | Content Similarity Check |
 
 ---
 
@@ -400,15 +520,16 @@ flowchart TD
 
 | অগ্রাধিকার | বিষয় |
 |---|---|
-| 🥇 | Reference Video থেকে Comedy Style শেখা |
-| 🥇 | Working Video সঠিকভাবে বিশ্লেষণ |
-| 🥇 | Creative Funny Script তৈরি |
-| 🥇 | AI-এর স্বয়ংক্রিয় Best Script Selection |
-| 🥇 | Natural Bangla Voice Generation |
-| 🥇 | Natural Hindi Voice Generation |
-| 🥇 | প্রতিটি Character-এর জন্য আলাদা Voice |
-| 🥇 | Human / Animal / Bird / Cartoon অনুযায়ী Adaptive Sync |
+| 🥇 | Unified Platform Architecture তৈরি |
+| 🥇 | Funny Dubbing — Reference Learning ও Script Generation |
+| 🥇 | Cartoon Re-Creation — Copyright-Safe Video তৈরি |
+| 🥇 | সম্পূর্ণ নতুন Voice — Original Voice কোনোভাবেই নয় |
+| 🥇 | Character-wise আলাদা Voice প্রতিটি Mode-এ |
+| 🥇 | Natural Bangla ও Hindi Voice Generation |
+| 🥇 | Adaptive Synchronization (Human / Animal / Bird / Cartoon) |
+| 🥇 | Cross-Mode Integration |
 | 🥇 | High-quality Final Video Production |
+| 🥇 | ভবিষ্যতে নতুন Mode সহজে Add করার ব্যবস্থা |
 
 ---
 
@@ -416,8 +537,8 @@ flowchart TD
 
 > **"User শুধু Video Upload করবে — AI বাকি সব করবে।"**
 
-User-এর একমাত্র বাধ্যতামূলক কাজ হলো **Bangla Voice Approve করা**। বাকি সব — Script Selection, Voice Generation, Synchronization, Editing, Export — সম্পূর্ণ AI-powered ও Automated।
+User-এর একমাত্র বাধ্যতামূলক কাজ হলো **Bangla Voice Approve করা** (Funny Dubbing Mode-এ)। বাকি সব — Script Selection, Character Design, Voice Generation, Synchronization, Editing, Export — সম্পূর্ণ AI-powered ও Automated।
 
 ---
 
-*Document Version: 1.0 | Created: 2026-10-31*
+*Document Version: 2.0 | Updated: 2026-10-31 | New: Unified Platform + Cartoon Re-Creation Studio (Copyright-Safe) + Cross-Mode Integration*
