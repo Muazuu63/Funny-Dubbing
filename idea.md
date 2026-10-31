@@ -118,28 +118,24 @@ Visual Style           →  Subtitle Style, Synchronization Method
 > [!NOTE]
 > Reference Video-এর Original Dialogue কখনো Copy করা যাবে না — শুধু **Style ও Creative Direction** নেওয়া হবে।
 
-### 🧹 Video Pre-Processing — Auto Copyright Element Removal
+### 🧹 Video Pre-Processing — Clean Media & Branding Removal (Personal/Authorized Footage)
 
 > [!IMPORTANT]
-> Working Video Upload হওয়ার পর Analysis শুরু করার **আগেই** AI স্বয়ংক্রিয়ভাবে ভিডিও থেকে সম্ভাব্য Copyright-sensitive উপাদানগুলো সনাক্ত করে Remove করবে।
+> **ব্যবহারকারীর নিজস্ব বা অনুমতিপ্রাপ্ত ভিডিও প্রসেসিং:**
+> Working Video Upload হওয়ার পর Analysis শুরু করার আগেই AI ভিডিও থেকে অনাকাঙ্ক্ষিত লোগো, সাবটাইটেল টেক্সট ওভারলে এবং অপ্রয়োজনীয় গ্রাফিক্স রিমুভ করে ক্লিন ফুটেজ তৈরি করবে।
+> 
+> *নীতিগত স্পষ্টীকরণ:* এটি কোনো বাণিজ্যিক চুরি বা কপিরাইট লঙ্ঘন এড়ানোর জন্য নয়; বরং নিজের ভিডিওতে থাকা পুরাতন চ্যানেল ব্র্যান্ডিং, সোশ্যাল মিডিয়া হ্যান্ডেল ও টেক্সট মুছে ফ্রেশ ডাবিং আউটপুট তৈরির জন্য একটি **Clean Media Inpainting Pre-processor**।
 
-**AI যা স্বয়ংক্রিয়ভাবে সনাক্ত ও Remove করবে:**
+**AI যা শনাক্ত ও রিমুভ করবে:**
 
-| উপাদান | উদাহরণ |
-|---|---|
-| 🏷️ Logo | Channel Logo, Brand Logo, Watermark |
-| 📝 Text / Overlay | Channel Name, Caption Overlay, Lower Third |
-| ©️ Watermark | Copyright Sign, Website URL |
-| 📺 Channel Branding | Subscribe Button, Outro Element |
-| 🔲 On-screen Graphic | Promo Banner, Pop-up Text |
-
-**Remove পদ্ধতি:**
-- AI Background Inpainting — Remove করা জায়গা স্বাভাবিকভাবে পূরণ হবে
-- Frame-by-Frame Processing — প্রতিটি Frame-এ Detection ও Removal
-- Moving Watermark Detection — স্থান পরিবর্তনশীল Watermark-ও Remove করতে পারবে
+| উপাদান | উদাহরণ | রিমুভাল পদ্ধতি |
+|---|---|---|
+| 🏷️ পুরাতন লোগো / স্টিকার | চ্যানেল ওয়াটারমার্ক, হ্যান্ডেল ট্যাগ | AI Inpainting দিয়ে ফিল |
+| 📝 টেক্সট ওভারলে | পুরাতন ক্যাপশন, অন-স্ক্রিন টাইটেল | Text Mask + Background Fill |
+| 🔲 সোশ্যাল ব্র্যান্ডিং | সাবস্ক্রাইব বাটন, প্রমোশনাল গ্রাফিক্স | Object Removal |
 
 > [!NOTE]
-> Remove করার পর ভিডিও Natural দেখাবে — কোনো কালো দাগ বা খালি জায়গা থাকবে না। এই Pre-processing সম্পূর্ণ Automatic।
+> Remove করার পর ভিডিও ন্যাচারাল দেখাবে—কোনো দাগ বা বিকৃতি থাকবে না। এই প্রি-প্রসেসিং সম্পূর্ণ লোকাল ওপেন-সোর্স ইনপেইন্টিং দিয়ে চলবে।
 
 ### Working Video Analysis
 
@@ -406,7 +402,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 🎙️ MODE 04 — AI Voice Studio
+## 🎙️ MODE 05 — AI Voice Studio
 
 > [!NOTE]
 > Priority 2 — Core Architecture তৈরির পর Implement হবে।
@@ -421,7 +417,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 📄 MODE 05 — AI Subtitle & Translation Studio
+## 📄 MODE 06 — AI Subtitle & Translation Studio
 
 > [!NOTE]
 > Priority 2 — Core Architecture তৈরির পর Implement হবে।
@@ -436,7 +432,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 📱 MODE 06 — AI Shorts & Reels Creator
+## 📱 MODE 07 — AI Shorts & Reels Creator
 
 > [!NOTE]
 > Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
@@ -451,7 +447,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## ✂️ MODE 07 — AI Video Editor Studio
+## ✂️ MODE 08 — AI Video Editor Studio
 
 > [!NOTE]
 > Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
@@ -466,7 +462,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 🖼️ MODE 08 — AI Thumbnail Creator
+## 🖼️ MODE 09 — AI Thumbnail Creator
 
 > [!NOTE]
 > Priority 3 — Priority 2 সম্পন্ন হওয়ার পর Implement হবে।
@@ -480,7 +476,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 🎭 MODE 09 — AI Background & Object Studio
+## 🎭 MODE 10 — AI Background & Object Studio
 
 > [!NOTE]
 > Priority 4 — শেষ পর্যায়ে Implement হবে।
@@ -493,7 +489,7 @@ AI নিজে Final Video Render করবে
 
 ---
 
-## 🎵 MODE 10 — AI Music & Sound Studio
+## 🎵 MODE 11 — AI Music & Sound Studio
 
 > [!NOTE]
 > Priority 4 — শেষ পর্যায়ে Implement হবে।
