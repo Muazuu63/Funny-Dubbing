@@ -675,34 +675,34 @@ User কোনো Video বা Content Upload করবে না। শুধ�
 
 ---
 
-## 20. TECHNICAL REQUIREMENTS & AI PROVIDER INTEGRATION
+## 20. TECHNICAL REQUIREMENTS — 100% FREE & ZERO-COST ARCHITECTURE
 
-### 20.1 High-Level Component Mapping
+> [!IMPORTANT]
+> **ব্যবহারকারীর মূল নীতি: সম্পূর্ণ ফ্রি (Zero Budget / No Paid Subscription)।**
+> কোনো পেইড API বা ক্রেডিট কার্ড লাগবে না। সিস্টেমের প্রতিটি মডিউল সম্পূর্ণ বিনামূল্যে চলার মতো ওপেন-সোর্স লাইব্রেরি এবং গুগলের ফ্রি ডেভেলপার টায়ার দিয়ে ডিজাইন করা হলো।
 
-| Category | Recommended Model / Technology | Deployment Option |
+### 20.1 100% Free Technology Stack Mapping
+
+| প্রসেসিং ধাপ | ফ্রি সমাধান / প্রযুক্তি | কেন সম্পূর্ণ ফ্রি? |
 |---|---|---|
-| AI Video Understanding | Gemini 1.5 Pro / Flash (Multimodal Video Analysis) | Cloud API |
-| Speech-to-Text | OpenAI Whisper / Gemini Multimodal Audio | Cloud API / Local |
-| LLM (Script / Translation) | Claude 3.5 Sonnet / Gemini 1.5 Pro | Cloud API |
-| Audio Stem Separation | Demucs v4 / Spleeter (Vocal vs Ambient Sound) | Local GPU / Cloud Worker |
-| Image / Cartoon Generation | Stable Diffusion XL (ControlNet / LoRA) / Midjourney API | Local / Cloud API |
-| Multilingual TTS | ElevenLabs Multilingual v2 / Azure Cognitive Speech | Cloud API |
-| Lip-Sync Engine | Wav2Lip / LivePortrait / SadTalker | Local GPU / Cloud Worker |
-| Video Editing & Inpainting | FFmpeg + ProPainter / LaMa (Video Inpainting) | Local / Cloud Engine |
-| Subtitle Engine | Whisper timestamping + FFmpeg SRT Burn-in | Local Engine |
+| **১. লোগো ও ওয়াটারমার্ক রিমুভাল** | **FFmpeg + LaMa Inpainting** | সম্পূর্ণ ফ্রি ওপেন-সোর্স লোকাল লাইব্রেরি ($০) |
+| **২. অডিও স্টেম সেপারেশন (ভোকাল ও মিউজিক আলাদা)** | **Demucs v4 / Spleeter** | মেটা (Facebook)-এর সম্পূর্ণ ফ্রি ওপেন-সোর্স মডেল ($০) |
+| **৩. ভিডিও অ্যানালাইসিস ও কমেডি স্ক্রিপ্ট তৈরি** | **Google AI Studio (Gemini 1.5 Flash Free Tier)** | কোনো ক্রেডিট কার্ড ছাড়া জিমেইল দিয়ে প্রতিদিন প্রচুর ফ্রি কোটা ($০) |
+| **৪. স্পিচ-টু-টেক্সট (ট্রান্সক্রিপ্ট)** | **OpenAI Whisper (Local Base/Small Model)** | লোকাল মেশিনে অফলাইনে চলে, কোনো এপিআই বিল নেই ($০) |
+| **৫. বাংলা, হিন্দি ও ইংরেজি ভয়েস (TTS)** | **Edge-TTS (Microsoft Neural Voice Engine)** | মাইক্রোসফটের অত্যন্ত ন্যাচারাল বাংলা/হিন্দি ভয়েস ফ্রি পাইথন লাইব্রেরি দিয়ে জেনারেট হয় ($০) |
+| **৬. লিপ-সিঙ্ক (Lip-Sync Engine)** | **Wav2Lip / SadTalker** | ফ্রি ওপেন-সোর্স লিপ-সিঙ্ক মডেল ($০) |
+| **৭. কার্টুন ফ্রেম ও ক্যারেক্টার রিক্রিয়েশন** | **Stable Diffusion v1.5 / SDXL (ComfyUI / WebUI)** | নিজস্ব পিসিতে অফলাইনে সম্পূর্ণ ফ্রি চলে ($০) |
+| **৮. সাবটাইটেল তৈরি ও বার্ন-ইন** | **Whisper Timestamps + FFmpeg** | সম্পূর্ণ ফ্রি ও লোকাল ($০) |
+| **৯. ব্যাকগ্রাউন্ড মিউজিক ও সাউন্ড ইফেক্টস** | **FreeSound / YouTube Audio Library Integration** | রয়্যালটি-ফ্রি ফ্রি সাউন্ড লাইব্রেরি ($০) |
 
-### 20.2 AI Subscription & API Key Architecture (BYOK - Bring Your Own Key)
+### 20.2 জিরো-কস্ট সেটআপ গাইড (Zero-Cost Setup Policy)
 
-> **Rule:** ব্যবহারকারী নিজের পেইড সাবস্ক্রিপশন (Gemini Advanced, Google Cloud, Anthropic Claude, OpenAI ইত্যাদি) কীভাবে প্ল্যাটফর্মে সহজে যুক্ত করতে পারবেন:
-
-1. **Settings > AI Providers Management:**
-   - ড্যাশবোর্ডে ডেডিকেটেড **"AI API Configuration"** প্যানেল থাকবে।
-   - ব্যবহারকারী সরাসরি তার **Gemini API Key**, **Claude API Key**, **OpenAI API Key**, বা **ElevenLabs API Key** ইনপুট দিতে পারবেন।
-2. **Key Security (নিরাপত্তা):**
-   - সব API Key লোকাল মেশিনে এনক্রিপ্টেড আকারে (`.env` বা OS Credential Vault) সংরক্ষিত থাকবে।
-3. **Smart Fallback & Provider Switching:**
-   - স্ক্রিপ্ট রাইটিং বা ভিডিও অ্যানালাইসিসে ইউজার ড্রপডাউন থেকে সিলেক্ট করতে পারবেন: "Use Gemini 1.5 Pro" অথবা "Use Claude 3.5 Sonnet"।
-   - একটি প্রোভাইডার লিমিট রিচ করলে স্বয়ংক্রিয়ভাবে অল্টারনেটিভ প্রোভাইডারে সুইচ করার অপশন থাকবে।
+1. **গুগল এআই স্টুডিও ফ্রি কি (Google AI Studio Free Key):**
+   - ব্যবহারকারী কেবল `aistudio.google.com` থেকে একটি সাধারণ ফ্রি API Key নিয়ে ড্যাশবোর্ডে বসাবেন। এতে কোনো পেমেন্ট মেথড বা ক্রেডিট কার্ড লাগে না।
+2. **লোকাল রিসোর্স অপটিমাইজেশন:**
+   - হালকা ও অপটিমাইজড মডেল (Lightweight ONNX / Quantized Models) ব্যবহার করা হবে যাতে সাধারণ কনফিগারেশনের কম্পিউটারেও স্মুথভাবে রান করে।
+3. **পেইড সার্ভিস সম্পূর্ণরূপে অপশনাল:**
+   - ElevenLabs বা Claude-এর মতো পেইড সার্ভিসকে "Optional / Disabled by Default" রাখা হবে। ডিফল্টভাবে সিস্টেম 100% ফ্রি ইঞ্জিনে চলবে।
 
 ---
 
