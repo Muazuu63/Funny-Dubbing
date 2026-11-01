@@ -559,11 +559,11 @@ User কোনো Video বা Content Upload করবে না। শুধ�
 | Audio Library | SFX + BGM Collection |
 | Rendering Engine | Final Video Composition |
 | Export Manager | Multi-format, Multi-language Export |
-| Processing Queue | Parallel Processing Management |
+| Processing Queue | Sequential Job Queue & Resource Management (FIFO — একবারে একটি ভারী টাস্ক) |
 | Error Handling | Detailed Error Report |
 | Notification System | Processing Update Alerts |
 
-> **Rule:** একটি Mode-এর Processing অন্য Mode-কে বাধাগ্রস্ত করবে না।
+> **Rule:** সাধারণ পার্সোনাল পিসির মেমরি ওভারফ্লো বা ক্র্যাশ রোধ করতে Processing Queue কঠোরভাবে **Sequential (একটির পর একটি)** চলবে। কোনো ভারী AI মডেল সমান্তরালভাবে (Parallel) মেমরিতে লোড করা যাবে না। একটি Mode বা Job-এর কাজ সম্পূর্ণ শেষ হয়ে VRAM/RAM মুক্ত হলে পরবর্তী Job শুরু হবে।
 
 ---
 
