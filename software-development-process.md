@@ -1,7 +1,7 @@
 # 🛠️ Software Development Process & Technical Execution Plan
 ### Project: AI Funny Dubbing & Video Production Studio (AI-VPS)
 **Document Version:** 1.0  
-**Target Environment:** Local Windows PC (`http://localhost:7860` / `8000`)  
+**Target Environment:** Local Windows PC (`http://127.0.0.1:8000`)  
 **Core Framework:** Python 3.10+ (FastAPI Backend) + HTML5/Tailwind/Vanilla JS Desktop UI + SQLite (Zero-Dependency)
 
 ---
@@ -10,7 +10,7 @@
 
 ```mermaid
 flowchart TD
-    User([User in Browser]) <-->|Localhost:7860| WebUI[Web Dashboard UI]
+    User([User in Browser]) <-->|http://127.0.0.1:8000| WebUI[Web Dashboard UI]
     WebUI <-->|REST API / WebSockets| APIServer[FastAPI Server Engine]
     
     subgraph Data & Persistence [Zero-Dependency Local Storage]
@@ -103,7 +103,7 @@ funny-videos/
 
 ### 🚀 ফেজ ০: ফাউন্ডেশন ও কোর আর্কিটেকচার (Foundation Layer)
 1. **ভার্চুয়াল এনভায়রনমেন্ট ও ডিপেন্ডেন্সি সেটআপ:** FastAPI, Uvicorn, SQLite, Aiofiles ইত্যাদি সেটআপ।
-2. **লোকালহোস্ট অটো-লঞ্চার:** `main.py` রান করলে ফ্রি পোর্ট (7860/8000) চেক করে স্বয়ংক্রিয়ভাবে ব্রাউজারে ড্যাশবোর্ড ওপেন করবে।
+2. **লোকালহোস্ট অটো-লঞ্চার:** `main.py` রান করলে পোর্ট `8000` (`http://127.0.0.1:8000`)-এ সার্ভার চালু হবে এবং স্বয়ংক্রিয়ভাবে ব্রাউজারে ড্যাশবোর্ড ওপেন করবে।
 3. **SQLite ডাটাবেজ স্কিমা ডিজাইন:** 
    * `projects` টেবিল (আইডি, মোড, ইনপুট ভিডিও পাথ, নির্বাচিত ভাষা, স্টেটাস)।
    * `checkpoints` টেবিল (প্রতিটি স্টেপের ক্যাশ পাথ ও কমপ্লিশন স্টেট)।

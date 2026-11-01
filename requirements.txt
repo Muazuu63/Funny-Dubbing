@@ -1,0 +1,38 @@
+# Core Lightweight Dependencies (Essential Infrastructure)
+# Run: pip install -r requirements.txt
+
+fastapi>=0.110.0
+uvicorn[standard]>=0.28.0
+pydantic>=2.6.0
+pydantic-settings>=2.2.0
+aiosqlite>=0.20.0
+aiofiles>=23.2.1
+python-multipart>=0.0.9
+websockets>=12.0
+psutil>=5.9.8
+keyring>=24.3.0
+requests>=2.31.0
+opencv-python-headless>=4.9.0
+
+# -----------------------------------------------------------------------------
+# Optional Engine Dependencies (Installed on-demand after Hardware & License Preflight)
+# Do not install automatically unless hardware requirements (RAM/VRAM) are verified.
+# -----------------------------------------------------------------------------
+# Online Optional Engine (requires internet; availability not guaranteed):
+# edge-tts>=6.1.10
+
+# Audio Separation (Demucs v4):
+# demucs>=4.0.1
+
+# Speech-to-Text (Whisper):
+# openai-whisper>=20231117
+
+# PyTorch Engine (CUDA 12.1 vs CPU pinned build):
+# CUDA: pip install torch==2.2.2+cu121 torchaudio==2.2.2+cu121 --index-url https://download.pytorch.org/whl/cu121
+# CPU:  pip install torch==2.2.2+cpu torchaudio==2.2.2+cpu --index-url https://download.pytorch.org/whl/cpu
+
+# Advanced Heavy Engines (On-demand):
+# bark
+# wav2lip
+# lama
+# real-esrgan

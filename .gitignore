@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Environment & Credentials
+.env
+.env.local
+*.key
+*.pem
+
+# SQLite DB files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# AI-VPS Storage (keep directory structure via .gitkeep)
+storage/models/*
+!storage/models/.gitkeep
+storage/projects/*
+!storage/projects/.gitkeep
+storage/training_profiles/*
+!storage/training_profiles/.gitkeep
+
+# Executable binaries
+bin/*
+!bin/.gitkeep
+*.exe
+
+# Frontend / Node
+node_modules/
+frontend/dist/
+frontend/node_modules/
+.npm
