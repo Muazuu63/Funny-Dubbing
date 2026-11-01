@@ -88,10 +88,10 @@
 
 ### ২. TTS Engine Classification, Offline Compatibility & Quality Realities
 ইঞ্জিনগুলোকে তিনটি সুস্পষ্ট বিভাগে ভাগ করা হয়েছে:
-1. **Free Online Engines:** Edge-TTS — উচ্চমানের নিউরাল ভয়েস তৈরি করে, তবে **সক্রিয় ইন্টারনেট কানেকশন আবশ্যক**। এটি অফলাইন ইঞ্জিন নয় এবং স্থায়ী ফ্রি হিসেবে গ্যারান্টি দেওয়া যায় না। অফলাইন মোড চালু থাকলে এতে কোনো রিকোয়েস্ট যাবে না।
+1. **Online Engines (Edge-TTS — Internet Required; Free Availability Not Guaranteed):** উচ্চমানের নিউরাল ভয়েস তৈরি করে, তবে **সক্রিয় ইন্টারনেট কানেকশন আবশ্যক**। এটি অফলাইন ইঞ্জিন নয় এবং ভবিষ্যতে এর ফ্রি প্রাপ্যতা নিশ্চিত নয়। অফলাইন মোড চালু থাকলে এতে কোনো রিকোয়েস্ট যাবে না।
 2. **Local Offline Engines (Bark / Meta MMS):** সম্পূর্ণ অফলাইনে লোকাল পিসিতে চলে।
    * *ফার্স্ট-টাইম ডাউনলোড ও স্টোরেজ:* প্রথমবার চালুর সময় মডেল লোকাল ফাইল সিস্টেমে ডাউনলোড হয়ে সংরক্ষিত হবে।
-   * *রিসোর্স ও CPU Fallback:* কোনো নির্দিষ্ট VRAM স্থায়ী হার্ডকোড থাকবে না; মডেলের সুনির্দিষ্ট মেমরি অনুযায়ী RAM/VRAM যাচাই হবে এবং প্রয়োজনে **CPU Fallback Mode** সমর্থন করবে।
+   * *রিসোর্স ও CPU Fallback:* কোনো নির্দিষ্ট VRAM স্থায়ী হার্ডকোড থাকবে না; CPU Fallback will be available only when supported by the selected model, runtime and dependencies; performance may be significantly slower.
    * *কোয়ালিটি ও লাইসেন্সিং সতর্কতা:* লাইসেন্স ও ডিপেন্ডেন্সি যাচাই করতে হবে। নির্বাচিত মডেলটি স্থানীয়ভাবে টেস্ট করার পূর্বে বাংলা, হিন্দি বা ইংরেজিতে নিখুঁত প্রাকৃতিক ভয়েস দেওয়ার কোনো অলীক নিশ্চয়তা দেওয়া যাবে না।
 3. **Paid Engines:** Backend ও Frontend উভয় লেভেলে স্থায়ীভাবে Blocked।
 
@@ -101,7 +101,7 @@
 * **সমান্তরাল হালকা টাস্ক:** ভারী মডেল যখন লাইনে থাকবে, তখন হালকা UI রেসপন্স, ডাটাবেজ রিড-রাইট ও ফাইল প্রসেসিং প্যারালালে সচল থাকবে।
 
 ### ৪. Checkpoint-Based Resume, 4-Track Mixer & Audio Pacing Safety
-* **Checkpoint-Based Resume:** প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ রেফারেন্স ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
+* **Checkpoint & Output File Verification:** প্রতিটি সফল প্রসেসিং স্টেপের পর SQLite-এ ক্যাশ রেফারেন্স সেভ হবে। A checkpoint must be marked successful only after its output file is verified, stored at the expected path, and its metadata is committed successfully. রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
 * **Demucs 4 Audio Tracks & Limiter Protection:**
   1. `Original Audio Backup` (মূল ভিডিওর আসল মাস্টার অডিও — **ডুপ্লিকেট সাউন্ড এড়াতে ডিফল্টভাবে MUTED থাকবে**, তবে রিস্টোরেশনের জন্য সংরক্ষিত)।
   2. `Demucs Vocal Stem` (আলাদা করা ভোকাল — গান বা অন্যান্য আওয়াজও থাকতে পারে)।
@@ -109,8 +109,8 @@
   4. `New AI Voice` (নতুন জেনারেটেড সিন্থেটিক ভয়েস)।
   * *সুরক্ষা ও ক্লিপিং হ্রাস:* প্রতি ট্র্যাকে Volume Slider (0-150%), Mute ও Solo কন্ট্রোল থাকবে। মিক্সারে **Master Output Level Meter, Peak Clipping Detector ও Master Audio Limiter / Loudness Normalizer** থাকবে। এটি অতিরিক্ত গেইনে অডিও বিকৃতি বা ফেটে যাওয়ার ঝুঁকি উল্লেখযোগ্যভাবে কমাবে; তবে ফাইনাল রেন্ডারের পূর্বে ব্যবহারকারীকে প্রিভিউ শুনে নিশ্চিত হতে হবে।
 * **Audio Speed-Stretch (Playback Speed Multiplier) & Dialogue Safety:**
-  - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর ফ্রেম সংখ্যা বা মোট দৈর্ঘ্য কোনোভাবেই পরিবর্তন হবে না**।
-  - টাইমিং সিঙ্কে **Playback Speed Multiplier (0.85x ধীর – 1.25x দ্রুত)** রেঞ্জে স্বাভাবিক Silence Padding সহ ভয়েসের গতি সামঞ্জস্য করা হবে।
+  - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর Frame Count বা মোট Duration কোনোভাবেই পরিবর্তন হবে না**।
+  - টাইমিং সিঙ্কে **Playback Speed Multiplier (0.85x ধীর – 1.00x স্বাভাবিক – 1.25x দ্রুত)** রেঞ্জে ভয়েসের গতি সামঞ্জস্য করা হবে; কথা শেষ হয়ে গেলে দৃশ্যের বাকি অংশে স্বাভাবিক **Silence Padding** ব্যবহার করা হবে।
   - **কোনো অর্থপূর্ণ ডায়ালগ স্বয়ংক্রিয়ভাবে মুছে ফেলা বা ট্রিম করা সম্পূর্ণ নিষিদ্ধ।**
   - ডায়ালগ অনুমোদিত স্পিড রেঞ্জে ফিট না হলে Warning দেবে এবং ডায়ালগ কাটছাঁট করতে **ব্যবহারকারীর স্পষ্ট অনুমোদন (User Approval)** লাগবে।
 * **Mode 02 Dialogue & Copyright Policy:**
