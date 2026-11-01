@@ -323,15 +323,16 @@ Character 3  →  Voice C
 | 🏷️ লোগো / পুরাতন টেক্সট | AI লোকাল ইনপেইন্টিং দিয়ে মুছে ফ্রেশ ফ্রেম তৈরি করবে |
 | 🎬 ভিজুয়াল | কার্টুন/অ্যানিমেশন ক্যারেক্টার ও সিন (Original Footage রূপান্তর) |
 | 🗣️ সংলাপের অর্থ (Meaning) | **আসল সংলাপের হুবহু অর্থ ও অভিব্যক্তি সংরক্ষিত থাকবে** |
-| 🎙️ Voice Audio | **সম্পূর্ণ নতুন AI Generated Voice** (আসল শিল্পীর স্বর বাদ) |
-| 🎵 Music & SFX | রয়্যালটি-ফ্রি ফ্রি সাউন্ড ও ব্যাকগ্রাউন্ড ইফেক্টস |
+| 🎙️ Voice Audio | **User Selection: Real Voice অথবা AI Voice** |
+| 🎵 Music & SFX | লাইসেন্সড বা ফ্রি সাউন্ড ও ব্যাকগ্রাউন্ড ইফেক্টস |
 
-### 6.3 Voice Architecture: Real Voice vs AI Voice Selection & Re-rendering
+### 6.3 Voice Architecture: Real Voice vs AI Voice Selection & Usage Rights
 
-**User Voice Option:**
+**User Voice Option & Rights Policy:**
 কার্টুন রিক্রিয়েশন মোডে ব্যবহারকারীর স্পষ্ট পছন্দ থাকবে:
-1. **Option A: Real Voice (অরিজিনাল অডিও):** মূল ভিডিওর আসল সংলাপ ও শিল্পীর কণ্ঠ সরাসরি কার্টুন অ্যানিমেশনের সাথে সিঙ্ক হবে।
-2. **Option B: AI Voice (কপিরাইট মুক্ত নতুন কণ্ঠ):** মূল অডিওর সংলাপ লোকাল Whisper দিয়ে ট্রান্সক্রিপ্ট করে নতুন AI ভয়েস মডেল দিয়ে রিক্রিয়েট হবে, যাতে মূল শিল্পীর গলার সাথে কোনো মিল না থাকে।
+1. **Option A: Real Voice (অরিজিনাল অডিও):** মূল ভিডিওর নিজস্ব সংলাপ ও কণ্ঠ সরাসরি কার্টুন অ্যানিমেশনের সাথে সিঙ্ক হবে (ব্যবহারকারীর প্রয়োজনীয় অধিকার থাকতে হবে)।
+2. **Option B: AI Voice (বিকল্প সিন্থেটিক কণ্ঠ):** মূল অডিওর সংলাপ লোকাল Whisper দিয়ে ট্রান্সক্রিপ্ট করে নতুন AI ভয়েস মডেল দিয়ে রিক্রিয়েট হবে। 
+   * *স্পষ্টীকরণ:* AI Voice একটি বিকল্প ভয়েস অপশন; এটি ব্যবহার করলেই পুরো ভিডিও স্বয়ংক্রিয়ভাবে Copyright-Free হয়ে যায় এমন কোনো অযৌক্তিক নিশ্চয়তা সিস্টেম দেবে না।
 
 **Flexible Switching & Delta Re-rendering:**
 - ব্যবহারকারী প্রথমে **"Real Voice"** দিয়ে কার্টুন আউটপুট এক্সপোর্ট করলেও, পরবর্তীতে চাইলে পুরো ভিডিও রি-জেনারেট না করে **শুধুমাত্র এক ক্লিকে "AI Voice"-এ রি-রেন্ডার** করতে পারবেন।
@@ -784,25 +785,25 @@ Phase 5: Cross-Mode Integration & Optimization
 ### 24.2 Free AI Provider Registry & Fallback Policy
 কোনো একটি ফ্রি সার্ভিস ডাউন হলে অটোমেটিক ব্যাকআপ কার্যকর হবে:
 
-| প্রসেসিং টাস্ক | Primary Free Engine (লোকাল) | Secondary Free Fallback (ক্লাউড API) | ফলব্যাক আচরণ |
+| প্রসেসিং টাস্ক | Primary Free Engine | Secondary Fallback | ইঞ্জিন শ্রেণি ও ফলব্যাক আচরণ |
 |---|---|---|---|
-| স্ক্রিপ্ট ও ডায়ালগ | Google AI Studio Active Free Tier (Configurable Model ID, যেমন: Gemini 2.0 Flash / Free Tier) | Local Small LLM (Ollama) / Secondary Free Config | নির্দিষ্ট হার্ডকোডেড কোটা নয়; Active Rate Limit ও 429 পর্যবেক্ষণ করে কাজ Pause করবে এবং Quota পাওয়া গেলে Checkpoint থেকে Resume করবে |
-| ভয়েস জেনারেশন (TTS) | Edge-TTS (Free Neural Voice) | Bark / Meta MMS (Local Offline) | নেটওয়ার্ক এরর হলে অফলাইন লোকাল ইঞ্জিনে চলবে |
-| স্টেম সেপারেশন | Demucs v4 (Local) + Master Audio Preservation | Spleeter (Local Lightweight) | VRAM কম হলে হালকা মডেলে প্রসেস হবে এবং অরিজিনাল অডিও মাস্টার হিসেবে সংরক্ষিত থাকবে |
-| লিপ-সিঙ্ক | Wav2Lip (Local GPU/CPU) | SadTalker (Local) | ক্যারেক্টার টাইপ অনুযায়ী সেরা মডেল নির্বাচন |
+| স্ক্রিপ্ট ও ডায়ালগ | Google AI Studio Active Free Tier (Configurable Model ID) | Local Small LLM (Ollama) / Secondary Free Config | **Free Online API:** কোনো হার্ডকোডেড মডেল আইডি নেই। ফ্রি টিয়ার সক্রিয়তা নিশ্চিত না হয়ে কল করা যাবে না। কোটা শেষ হলে Pause এবং Quota পেলে Checkpoint থেকে Resume |
+| ভয়েস জেনারেশন (TTS) | Edge-TTS | Bark / Meta MMS | **Free Online Engine (Edge-TTS):** ইন্টারনেট আবশ্যক, অফলাইন ক্লাসিফিকেশন নয়। **Local Offline Engine (Bark/MMS):** অফলাইন মোডে স্বয়ংক্রিয়ভাবে সক্রিয় হবে |
+| স্টেম সেপারেশন | Demucs v4 + Master Audio Preservation | Spleeter (Local Lightweight) | **Local Offline Engine:** লোকাল পিসিতে সম্পূর্ণ অফলাইনে চলবে |
+| লিপ-সিঙ্ক | Wav2Lip (Local GPU/CPU) | SadTalker (Local) | **Local Offline Engine:** লোকাল পিসিতে অফলাইনে চলবে |
 
-### 24.3 Resource Management, Dynamic Quota & Checkpoint Pipeline (ক্র্যাশ ও ডেটা লস প্রতিরোধ)
-- **Configurable LLM & Dynamic Quota Observer:**
-  - কোনো নির্দিষ্ট মডেল আইডি বা ১৫ RPM/১৫০০ RPD কোটা কোডে হার্ডকোড থাকবে না।
-  - সিস্টেম রেসপন্স হেডার ও রেট লিমিট স্ট্যাটাস পর্যবেক্ষণ করবে।
-  - কোটা ফুরিয়ে গেলে স্বয়ংক্রিয়ভাবে প্রসেস **Pause** করবে এবং ডাটাবেজে বর্তমান অগ্রগতি চেকপয়েন্ট হিসেবে সেভ রাখবে।
-  - নতুন এপিআই কী বা কোটা পুনরায় পাওয়া গেলে আগের সম্পন্ন হওয়া কাজ বাদ দিয়ে ঠিক পেন্ডিং ধাপ থেকে **Resume** করবে।
-- **Sequential Model Execution (একক মডেল লোড-আনলোড):**
-  - সাধারণ পিসিতে মেমরি ওভারফ্লো এড়াতে একই সাথে একাধিক ভারী AI মডেল মেমরিতে রাখা হবে না।
+### 24.3 Resource-Aware Sequential Processing & Checkpoint-Based Recovery
+- **Resource-Aware Sequential Execution & Process Recycling:**
+  - সাধারণ পিসিতে মেমরি ওভারফ্লো এড়াতে একবারে একটি ভারী AI মডেল লোড হবে।
   - পাইপলাইন রুল: `Demucs রান হবে -> আউটপুট সেভ করে মেমরি ফ্রি করবে -> এরপর Whisper রান হবে -> কাজ শেষে মেমরি ক্লিন করবে -> এরপর TTS/লিপ-সিঙ্ক রান হবে`।
-- **Local Storage Management:**
-  - কোনো ক্লাউড স্টোরেজ খরচ নেই; সমস্ত প্রজেক্ট ফাইল লোকাল ডিরেক্টরিতে স্ট্রাকচার্ড ক্যাশ ফোল্ডারে সেভ থাকবে।
-  - ব্যবহারকারী যেকোনো সময় ওল্ড ক্যাশ ক্লিন করতে পারবেন।
+  - **Memory Guard:** শুধুমাত্র `gc.collect()` বা `torch.cuda.empty_cache()` দিয়ে VRAM ফাঁকা হওয়ার শতভাগ গ্যারান্টি নেই। তাই RAM/VRAM সক্রিয়ভাবে পর্যবেক্ষণ করা হবে এবং মেমরি আটকে থাকলে প্রয়োজন অনুযায়ী ব্যাকএন্ড **Worker Process Restart** করে ফ্রেশ মেমরি নিশ্চিত করা হবে। পর্যাপ্ত মেমরি না থাকলে ভারী টাস্ক কিউতে অপেক্ষা করবে।
+  - হালকা UI, ডাটাবেজ এবং ফাইল অপস সমান্তরালভাবে (Parallel) চলবে।
+- **Checkpoint-Based Recovery Pipeline (Zero Loss & Zero Extra Cost):**
+  - প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ ও স্টেট SQLite ডাটাবেজে সংরক্ষিত হবে।
+  - কোটা ফুরিয়ে গেলে বা ইন্টারনেট ড্রপ করলে টাস্ক `PAUSED (Quota Exhausted / Network Error)` অবস্থায় যাবে।
+  - `retry-after` রেসপন্স হেডার থাকলে সেই নির্দিষ্ট সময় পর্যবেক্ষণ করা হবে।
+  - ব্যবহারকারী নতুন কনফিগারেশন দিলে বা কোটা সচল হলে আগের সফল কাজ বাদ দিয়ে শুধুমাত্র অসমাপ্ত ধাপ থেকে পুনরায় **Resume** করবে।
+  - কোনো অবস্থাতেই পেইড এপিআই বা অটো-বিলিং চালু হবে না।
 
 ### 24.4 Feature Feasibility Matrix (বাস্তবধর্মী সক্ষমতা বিশ্লেষণ)
 

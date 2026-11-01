@@ -233,36 +233,25 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 
 > [!IMPORTANT]
 > **ব্যবহারকারীর মূল চাওয়া:**
-> অরিজিনাল ভিডিওটিই হুবহু Re-create হয়ে **কার্টুন ভিডিও** হবে—অর্থাৎ দৃশ্য, অ্যাকশন, ক্যারেক্টার এবং **ডায়ালগের কথা/কন্টেন্ট (Dialogue Transcript) একদম সেম থাকবে**।
+> অরিজিনাল ভিডিওটিই Re-create হয়ে **কার্টুন ভিডিও** হবে—অর্থাৎ দৃশ্য, অ্যাকশন, ক্যারেক্টার এবং সংলাপের মূল অর্থ ও কমিক নির্যাস সংরক্ষিত থাকবে।
 > 
-> **কিন্তু কপিরাইট সুরক্ষার কৌশল (বিশেষ করে ভয়েস):**
-> অরিজিনাল ভিডিওর নিজস্ব অডিও/ভয়েস ট্র্যাক ফাইনালে কখনোই বাজবে না (যাতে অডিও কপিরাইট স্ট্রাইক না আসে)।
-> AI অরিজিনাল ভিডিও শুনে তার প্রতিটি সংলাপ/কথোপকথন (Exact Speech/Content) তুলে নেবে। এরপর সেই একই ডায়ালগ হুবহু রেখে **সম্পূর্ণ নতুন AI Character Voice** দিয়ে পুনরায় ডাবিং/জেনারেট করবে।
-> 
-> ফলে:
-> - **ভিজুয়াল:** অরিজিনাল ভিডিওর দৃশ্য ও অ্যাকশন হুবহু কার্টুন স্টাইলে রূপান্তর হবে।
-> - **কন্টেন্ট/কথা:** অরিজিনাল ভিডিওর মূল ডায়ালগ ও সময়সূচি (Timing) ঠিক সেম থাকবে।
-> - **ভয়েস:** অরিজিনাল মানুষের ভয়েসের সাথে কোনো মিল থাকবে না (নতুন AI Voice Actor), যাতে কোনো প্রকার Audio Copyright বা Voice-Match Claim না আসে!
-
-### Voice Selection & Flexible Audio Re-rendering (Real Voice vs AI Voice)
-
-> [!IMPORTANT]
-> Mode 02-তে কার্টুন ভিডিও রেন্ডার করার সময় ব্যবহারকারীর সামনে ভয়েসের দুটি স্পষ্ট অপশন থাকবে:
-> 1. **Option A: Real Voice (অরিজিনাল শিল্পীর আসল গলার আওয়াজ)** — মূল ভিডিওর আসল সংলাপ অডিও সরাসরি কার্টুন অ্যানিমেশনে বসবে।
-> 2. **Option B: AI Voice (সম্পূর্ণ নতুন AI ভয়েস অ্যাক্টর — কপিরাইট মুক্ত)** — মূল অডিও বাদ দিয়ে একই অর্থবোধক সংলাপে সম্পূর্ণ নতুন AI ক্যারেক্টার ভয়েস জেনারেট হবে।
+> **ভয়েস অধিকার ও বিকল্প নির্বাচন নীতি:**
+> - কার্টুন ভিডিও রেন্ডারের সময় ব্যবহারকারীর সামনে দুটি ভয়েস অপশন থাকবে: **Real Voice** অথবা **AI Voice**।
+> - **Real Voice:** ব্যবহারকারীর নিজস্ব বা ব্যবহারের অধিকারপ্রাপ্ত অরিজিনাল সংলাপ সরাসরি কার্টুন অ্যানিমেশনের সাথে সিঙ্ক হবে।
+> - **AI Voice:** অরিজিনাল অডিও বাদ দিয়ে একই অর্থবোধক সংলাপে নতুন AI ভয়েস জেনারেট করা হবে (এটি একটি বিকল্প ভয়েস অপশন, কোনো স্বত্বাধিকার বা কপিরাইট-মুক্ত গ্যারান্টি নয়)।
 > 
 > **🔄 Flexible Switching (ভয়েস রূপান্তরের সুবিধা):**
-> ব্যবহারকারী যদি প্রথমে **"Real Voice"** দিয়ে কার্টুন ভিডিও আউটপুট নেন, তবে পরবর্তীতে পুরো ভিডিও পুনরায় না বানিয়ে **শুধুমাত্র এক ক্লিকে "AI Voice"-এ রি-রেন্ডার** করে নিতে পারবেন। সিস্টেম আলাদা অডিও ক্যাশ লেয়ার সংরক্ষণ করবে যাতে যেকোনো সময় এক ভয়েস থেকে অন্য ভয়েসে সুইফটলি রূপান্তর করা যায়।
+> ব্যবহারকারী যদি প্রথমে **"Real Voice"** দিয়ে কার্টুন ভিডিও আউটপুট নেন, তবে পরবর্তীতে পুরো ভিডিও পুনরায় না বানিয়ে **শুধুমাত্র এক ক্লিকে "AI Voice"-এ রি-রেন্ডার** করে নিতে পারবেন। সিস্টেম আলাদা অডিও ক্যাশ লেয়ার সংরক্ষণ করবে।
 
-### Copyright-Safe Re-Creation পদ্ধতি
+### Cartoon Re-Creation রূপান্তর পদ্ধতি
 
-| বিষয় | অরিজিনাল ভিডিও | ফাইনাল কার্টুন ভিডিওতে কী হবে | কপিরাইট সুরক্ষার কৌশল |
+| বিষয় | অরিজিনাল ভিডিও | ফাইনাল কার্টুন ভিডিওতে কী হবে | রূপান্তর ও অধিকার নীতি |
 |---|---|---|---|
-| 🎬 ভিজুয়াল ও দৃশ্য | আসল ক্যামেরা ফুটেজ / মানুষ | কার্টুন / অ্যানিমেশন ক্যারেক্টার ও সিন | সম্পূর্ণ নতুন AI Generated কার্টুন ফ্রেম (Visual Copyright মুক্ত) |
+| 🎬 ভিজুয়াল ও দৃশ্য | আসল ক্যামেরা ফুটেজ / মানুষ | কার্টুন / অ্যানিমেশন ক্যারেক্টার ও সিন | সম্পূর্ণ নতুন AI Generated কার্টুন ফ্রেম |
 | 🗣️ সংলাপের বিষয়বস্তু (Content) | যা যা কথা বা গল্প ছিল | **একই ডায়ালগের মূল অর্থ ও কমিক পাঞ্চ সংরক্ষিত** | কন্টেন্ট ও গল্পের নির্যাস অক্ষুণ্ণ রাখা হবে |
-| 🏷️ Logo / Watermark / Text | অরিজিনাল ভিডিওর Logo ও Copyright Element | **AI স্বয়ংক্রিয়ভাবে Remove করবে** | Visual Copyright উপাদান মুক্ত ক্লিন ফুটেজ |
-| 🎙️ ভয়েস (Voice Audio) | অরিজিনাল শিল্পীর ভয়েস ট্র্যাক | **User Selection: Real Voice অথবা AI Voice** | AI Voice নির্বাচন করলে অরিজিনাল শিল্পীর গলার স্বর বাদ দিয়ে নতুন কণ্ঠ প্রয়োগ (Audio Copyright মুক্ত) |
-| 🎵 ব্যাকগ্রাউন্ড মিউজিক / SFX | মূল ভিডিওর গান/মিউজিক | নতুন AI Generated Royalty-Free মিউজিক | মিউজিক কপিরাইট প্রটেকশন |
+| 🏷️ Logo / Watermark / Text | অরিজিনাল ফুটেজের অপ্রয়োজনীয় লোগো/টেক্সট | **AI স্বয়ংক্রিয়ভাবে Remove করবে** | ক্লিন মিডিয়া ফ্রেম তৈরি |
+| 🎙️ ভয়েস (Voice Audio) | অরিজিনাল শিল্পীর ভয়েস ট্র্যাক | **User Selection: Real Voice অথবা AI Voice** | Real Voice-এ অরিজিনাল অডিও সংরক্ষিত থাকে; AI Voice-এ নতুন সিন্থেটিক কণ্ঠ যুক্ত হয় (বিকল্প ভয়েস হিসেবে) |
+| 🎵 ব্যাকগ্রাউন্ড মিউজিক / SFX | মূল ভিডিওর অডিও ট্র্যাক | লাইসেন্সড বা ফ্রি সাউন্ড ও ব্যাকগ্রাউন্ড ইফেক্টস | অরিজিনাল সাউন্ড ও নতুন সাউন্ডের ম্যানুয়াল মিক্সিং |
 
 ### Re-Creation Workflow
 
@@ -689,11 +678,12 @@ Software-এর মধ্যে একটি **Shared Settings System** থা�
 | AI Video Understanding & Script | Configurable Google AI Studio Free Tier Model (e.g. Gemini 2.0 Flash / Active Free Tier, No Hardcoded Model) |
 | Dynamic Quota & Rate Limit | Active Quota Observer (Headers/429 monitoring, Pause & Checkpoint Auto-Resume) |
 | Audio Stem Separation | Demucs v4 (Vocal & Accompaniment Split) + Master Audio Preservation + Manual Audio Balance |
-| Multilingual TTS | Edge-TTS (Bangla, Hindi, English Neural Voices) |
+| Multilingual TTS | Free Online: Edge-TTS (Neural) / Local Offline: Bark/MMS (No Online-to-Offline Confusion) |
 | Shared Training Center | Reusable Profile & Preset Repository (No heavy fine-tuning) |
 | Lip-Sync | Wav2Lip / SadTalker |
 | Video Rendering | FFmpeg Static Engine |
 | Backend & Database | Python (FastAPI) + SQLite (Zero-Dependency) |
+| Resource Management | Resource-Aware Sequential Execution + Worker Restart Capability |
 
 ---
 
@@ -703,8 +693,8 @@ Software-এর মধ্যে একটি **Shared Settings System** থা�
 |---|---|
 | 🥇 | Unified Platform Architecture তৈরি |
 | 🥇 | Funny Dubbing — Reference Learning ও Script Generation |
-| 🥇 | Cartoon Re-Creation — Copyright-Safe Video তৈরি |
-| 🥇 | সম্পূর্ণ নতুন Voice — Original Voice কোনোভাবেই নয় |
+| 🥇 | Cartoon Re-Creation — Flexible Audio & Character Transformation |
+| 🥇 | Flexible Voice System — Real Voice ও AI Voice অপশন |
 | 🥇 | Character-wise আলাদা Voice প্রতিটি Mode-এ |
 | 🥇 | Natural Bangla ও Hindi Voice Generation |
 | 🥇 | Adaptive Synchronization (Human / Animal / Bird / Cartoon) |
