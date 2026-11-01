@@ -78,28 +78,45 @@
 
 ## ৩. গুরুত্বপূর্ণ ৪টি সংশোধনের কারিগরি বাস্তবায়ন
 
-### ১. Dynamic Gemini Model Configuration
-* **ডাইনামিক সিলেকশন:** কোডে কোনো নির্দিষ্ট মডেল আইডি স্থায়ী থাকবে না। ব্যবহারকারী Settings থেকে Google AI Studio-র সক্রিয় ফ্রি মডেল নির্বাচন করতে পারবেন।
-* **ফ্রি টিয়ার ভ্যালিডেশন:** মডেল কল করার পূর্বে তার Active স্ট্যাটাস এবং Free Tier Eligibility নিশ্চিত করা হবে। ফ্রি টিয়ার নিশ্চিত না হলে কোনো রিকোয়েস্ট যাবে না।
-* **সতর্কবার্তা ও ফেইল-সেফ:** কোনো মডেল বন্ধ হয়ে গেলে বা ফ্রি কোটা তুলে নিলে সিস্টেম ব্যবহারকারীকে সতর্ক করবে। কোনো পেইড মডেলে স্বয়ংক্রিয় Fallback নিষিদ্ধ।
+### ১. Dynamic Gemini Model Configuration & Eligibility Validation
+* **ডাইনামিক সিলেকশন ও ভেরিফায়েড লিস্ট:** কোডে কোনো নির্দিষ্ট মডেল আইডি স্থায়ী থাকবে না। User Settings-এ একটি "Verified Free Models" তালিকা থাকবে এবং ব্যবহারকারী সেখান থেকে মডেল নির্বাচন বা কাস্টমাইজ করতে পারবেন।
+* **ডুয়েল ভ্যালিডেশন (Availability vs Free Tier):** শুধু মডেলটি সক্রিয় (Available) থাকলেই সেটি কল করা যাবে না; তার Free Tier Eligibility আলাদাভাবে সক্রিয় কি না তা নিশ্চিত হতে হবে।
+* **সতর্কবার্তা ও হার্ড-লক:** মডেল বন্ধ হলে বা ফ্রি টিয়ার থেকে বাদ পড়লে সফটওয়্যার ব্যবহারকারীকে সতর্ক করবে। কোনো পেইড মডেল বা পেইড বিলিং-এ কোনো অবস্থাতেই Fallback করা যাবে না।
 
-### ২. TTS Engine Classification (Online vs Offline)
+### ২. TTS Engine Classification & Quality Realities (Online vs Offline)
 ইঞ্জিনগুলোকে তিনটি সুস্পষ্ট বিভাগে ভাগ করা হয়েছে:
-1. **Local Offline Engines:** Bark / Meta MMS — ইন্টারনেট ছাড়া লোকাল কম্পিউটারে সম্পূর্ণ অফলাইনে চলে।
-2. **Free Online Engines:** Edge-TTS — উচ্চমানের নিউরাল ভয়েস তৈরি করে, তবে **সক্রিয় ইন্টারনেট কানেকশন আবশ্যক**। এটি অফলাইন ইঞ্জিন নয় এবং একে স্থায়ী ফ্রি হিসেবে দাবি করা যাবে না। অফলাইন মোড চালু থাকলে এটিতে কোনো রিকোয়েস্ট যাবে না।
+1. **Free Online Engines:** Edge-TTS — উচ্চমানের নিউরাল ভয়েস তৈরি করে, তবে **সক্রিয় ইন্টারনেট কানেকশন আবশ্যক**। এটি অফলাইন ইঞ্জিন নয় এবং স্থায়ী ফ্রি হিসেবে গ্যারান্টি দেওয়া যায় না। অফলাইন মোড চালু থাকলে এতে কোনো রিকোয়েস্ট যাবে না।
+2. **Local Offline Engines:** Bark / Meta MMS — সম্পূর্ণ অফলাইনে লোকাল পিসিতে চলে। 
+   * *বাস্তবতা ও সীমাবদ্ধতা:* বাংলা, হিন্দি ও ইংরেজির ভয়েস কোয়ালিটি Edge-TTS-এর সমকক্ষ নয়। Bark-এর জন্য উল্লেখযোগ্য VRAM/RAM (৪GB+) এবং মডেল ডাউনলোড স্পেস আবশ্যক। কোনো লোকাল ইঞ্জিন সব ভাষায় নিখুঁত প্রাকৃতিক ভয়েস দেবে—এমন অলীক নিশ্চয়তা দেওয়া যাবে না।
 3. **Paid Engines:** সম্পূর্ণ Disabled।
 
-### ৩. Resource-Aware Sequential Processing & Memory Recycling
-* **Worker Process Recycling:** পাইথনের `gc.collect()` এবং `torch.cuda.empty_cache()` সবসময় VRAM সম্পূর্ণ মুক্ত করতে পারে না। তাই প্রতিটি ভারী মডেল আনলোডের পর মেমরি পর্যবেক্ষণ করা হবে; মেমরি লিক বা ব্লকেজ থাকলে ব্যাকএন্ড **Worker Process রিস্টার্ট** করে মেমরি ১০০% পরিষ্কার করা হবে।
+### ৩. Resource-Aware Sequential Processing & Memory Recovery Mechanism
+* **Worker Process Recycling:** পাইথনের `gc.collect()` এবং `torch.cuda.empty_cache()` VRAM সম্পূর্ণ ফাঁকা করার শতভাগ নিশ্চয়তা দেয় না। তাই Worker Shutdown ও Process Exit নিশ্চিত করার পর মেমরি রিকভারি মেকানিজম হিসেবে ব্যাকএন্ড **Worker Process Restart** কার্যকর করা হবে এবং RAM/VRAM পুনরায় মেপে নিশ্চিত করা হবে। পর্যাপ্ত রিসোর্স না পাওয়া পর্যন্ত পরবর্তী ভারী মডেল চালু হবে না।
 * **Resource Readiness Gate:** পরবর্তী ভারী মডেল চালানোর পূর্বে পর্যাপ্ত RAM/VRAM নিশ্চিত না হওয়া পর্যন্ত টাস্ক কিউতে অপেক্ষা করবে।
 * **সমান্তরাল হালকা টাস্ক:** ভারী মডেল যখন লাইনে থাকবে, তখন হালকা UI রেসপন্স, ডাটাবেজ রিড-রাইট ও ফাইল প্রসেসিং প্যারালালে সচল থাকবে।
 
-### ৪. Copyright, Voice Rights & Checkpoint Resume Policy
-* **Mode 02 Voice Rights:** Real Voice ব্যবহারের জন্য ব্যবহারকারীর বৈধ অধিকার থাকতে হবে। AI Voice ব্যবহার করলেই পুরো ভিডিও কপিরাইট-মুক্ত হয়ে যায়—এমন দাবি নিষিদ্ধ; এটি শুধুই একটি বিকল্প ভয়েস অপশন।
-* **Checkpoint State Engine:** 
-  * প্রতিটি সফল স্টেপ SQLite-এ সংরক্ষিত হবে।
-  * কোটা বা নেটওয়ার্ক ফেইলিওরে টাস্ক `PAUSED` স্টেটে যাবে। `retry-after` হেডার পাওয়া গেলে সেই সময় পর্যন্ত অপেক্ষা করবে।
-  * রিজিউম করার সময় পূর্বের সম্পন্ন হওয়া স্টেপ পুনরায় রেন্ডার হবে না; শুধুমাত্র অসম্পূর্ণ স্টেপ নতুন কনফিগারেশন পাওয়ার পর চলবে।
+### ৪. Checkpoint-Based Resume & Audio Mixing Architecture
+* **Checkpoint-Based Resume:** `Instant Resume` নয়; প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
+* **Demucs 5-Track Interactive Mixer:** Demucs কোনো পারফেক্ট অ্যাম্বিয়েন্ট আইসোলেটর নয়। তাই অডিও মিক্সারে স্পষ্টভাবে ৫টি ট্র্যাক থাকবে:
+  1. Original Audio Backup (মাস্টার ব্যাকআপ)
+  2. Demucs Vocal Stem (আলাদা করা ভোকাল)
+  3. Demucs Accompaniment Stem (আলাদা করা ব্যাকগ্রাউন্ড)
+  4. New AI Voice (নতুন জেনারেটেড ভয়েস)
+  5. Manual Volume Adjustment (প্রতিটি ট্র্যাকের ভলিউম ব্যালেন্সিং কন্ট্রোল)
+* **Mode 02 Dialogue & Copyright Policy:**
+  * অরিজিনাল স্টোরি, কনসেপ্ট, সিন সিকোয়েন্স, ক্যারেক্টার রোল ও অ্যাকশন বজায় থাকবে।
+  * প্রয়োজন অনুযায়ী Meaning-Preserving Contextual Dialogue Adaptation করা যাবে।
+  * Real Voice ব্যবহারের ক্ষেত্রে বৈধ অধিকার থাকতে হবে। AI Voice কোনো Copyright-Free Guarantee নয়; এটি কেবল একটি বিকল্প সিন্থেটিক ভয়েস।
+
+### ৫. Voice Approval Gate & Output Language Matrix (Enforced)
+* **Primary Language Voice Approval:** Default Primary Language হবে **Bangla**। ব্যবহারকারী প্রথমে বাংলায় ভয়েস প্রিভিউ শুনে Approve করবেন। Approval না পাওয়া পর্যন্ত Final Video Processing শুরু হবে না।
+* **Output Language Matrix (Strict User-Selection):**
+  - `"Bangla"` = ১টি বাংলা ভিডিও
+  - `"hindi"` = ১টি হিন্দি ভিডিও
+  - `"english"` = ১টি ইংরেজি ভিডিও
+  - `"Bangla + Hindi"` = ২টি আলাদা ভিডিও
+  - `"Bangla + Hindi + english"` = ৩টি আলাদা ভিডিও
+  - শুধুমাত্র ব্যবহারকারীর নির্বাচিত ভাষার আউটপুটই তৈরি হবে।
 
 ---
 
