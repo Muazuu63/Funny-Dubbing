@@ -4,7 +4,7 @@
 ---
 
 > [!IMPORTANT]
-> এটি একটি সম্পূর্ণ **Unified AI-powered Video Production Platform** — যেখানে ১০টি আলাদা Production Mode থাকবে। User শুধু Video Upload করবে এবং AI বাকি সব Production কাজ করবে।
+> এটি একটি সম্পূর্ণ **Unified AI-powered Video Production Platform** — যেখানে ১১টি আলাদা Production Mode থাকবে। User শুধু Video Upload করবে এবং AI বাকি সব Production কাজ করবে।
 
 ---
 
@@ -48,22 +48,24 @@ Reference Video থেকে Comedy Style শিখে, Working Video-তে Fun
 
 **সমর্থিত Output ভাষা:** Bangla 🇧🇩 | Hindi 🇮🇳 | English 🇬🇧 *(User যখন বলবে তখনই English Version তৈরি হবে — Default নয়)*
 
-### Language Selection — User নিজেই বেছে নেবে
+### Language Selection & Output System — User নিজেই বেছে নেবে
 
 > [!IMPORTANT]
 > Working Video Upload করার সময় User বলে দেবে কোন কোন ভাষায় ভিডিও চাই।
-> **Script ও Content সব ভাষায় একদম Same থাকবে** — শুধু ভাষা পরিবর্তন হবে, কন্টেন্ট নয়।
+> **Default Language:** Bangla 🇧🇩 (Voice Preview & Approval প্রথমে বাংলায় হবে)।
+> **Script ও Content সব ভাষায় একদম Same থাকবে** — শুধু ভাষা পরিবর্তন ও পাঞ্চলাইন অনুযায়ী স্বাভাবিকভাবে Adapt হবে।
 
-| User যা বলবে | কী হবে |
+| User যা সিলেক্ট করবে | কী আউটপুট হবে |
 |---|---|
-| শুধু **"Bangla"** | শুধু ১টি Bangla ভিডিও |
-| শুধু **"Hindi"** | শুধু ১টি Hindi ভিডিও |
+| **"Bangla"** (Default) | শুধু ১টি Bangla ভিডিও |
+| **"hindi"** | শুধু ১টি Hindi ভিডিও |
+| **"english"** | শুধু ১টি English ভিডিও |
 | **"Bangla + Hindi"** | ২টি আলাদা ভিডিও — Bangla ও Hindi |
-| **"Bangla + Hindi + English"** | ৩টি আলাদা ভিডিও — একই Content, তিন ভাষায় |
-| অন্য যেকোনো ভাষা | সেই ভাষায়ও তৈরি করা যাবে |
+| **"Bangla + Hindi + english"** | ৩টি আলাদা ভিডিও — একই Content, তিন ভাষায় |
+| অন্য যেকোনো ভাষা | সেই নির্বাচিত ভাষায় তৈরি হবে |
 
 > [!NOTE]
-> যা Bangla-তে বলা হবে — সেই একই ডায়ালগ ও গল্প Hindi বা English-এও থাকবে। শুধু ভাষা অনুযায়ী স্বাভাবিকভাবে Adapt হবে।
+> যা Bangla-তে থাকবে — সেই একই ডায়ালগের অর্থ ও কমিক টাইমিং Hindi বা English-এ বজায় থাকবে।
 
 ### Features
 - Reference Video Training (Comedy Style + Voice Style Learning)
@@ -177,7 +179,7 @@ Character 3  →  Voice C
 
 Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expressive
 
-### Bangla Voice Review & Approval (বাধ্যতামূলক)
+### Primary Voice Review & Approval (বাধ্যতামূলক — Default: Bangla)
 
 ```
 ▶ Play / Pause                  📥 Download Audio
@@ -188,7 +190,7 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 ```
 
 > [!CAUTION]
-> Bangla Voice Approve না হওয়া পর্যন্ত Final Video Production শুরু হবে না।
+> ব্যবহারকারীর নির্বাচিত Primary Language (ডিফল্ট: Bangla) Voice Approve না হওয়া পর্যন্ত Final Video Production শুরু হবে না। ইউজার চাইলে প্রিভিউতে ভাষা পরিবর্তন করতে পারবেন।
 
 ### Adaptive Visual Synchronization
 
@@ -201,8 +203,13 @@ Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expres
 | 🚫 Non-speaking | Action-based / Reaction-based / Off-screen Voiceover |
 
 ### Final Output
-- **VIDEO 1** — 🇧🇩 Bangla Dubbed (Character Voice + Subtitle + SFX + BGM)
-- **VIDEO 2** — 🇮🇳 Hindi Dubbed (Character Voice + Subtitle + SFX + BGM)
+- **User Selection অনুযায়ী ভিডিও রেন্ডার হবে:**
+  - যদি `"Bangla"` সিলেক্ট করা থাকে: শুধু ১টি Bangla Dubbed ভিডিও
+  - যদি `"hindi"` সিলেক্ট করা থাকে: শুধু ১টি Hindi Dubbed ভিডিও
+  - যদি `"english"` সিলেক্ট করা থাকে: শুধু ১টি English Dubbed ভিডিও
+  - যদি `"Bangla + Hindi"` সিলেক্ট করা থাকে: ২টি আলাদা ভিডিও (Bangla & Hindi)
+  - যদি `"Bangla + Hindi + english"` সিলেক্ট করা থাকে: ৩টি আলাদা ভিডিও (Bangla, Hindi, English)
+- প্রতিটি ভিডিওতে থাকবে: Character Voice + Subtitle + SFX + Ambient BGM
 - Export: MP4, 1080p, H.264, High Quality Audio
 
 ---

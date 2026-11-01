@@ -97,21 +97,22 @@ User-এর একমাত্র বাধ্যতামূলক অ্যা
 ### 5.1 Overview
 Reference Video থেকে Comedy Style ও Voice Style শিখে, Original Working Video-তে Character-wise Funny Dubbing করা। User-নির্বাচিত ভাষায় Final Video Export করা।
 
-### 5.2 Language Selection (User-controlled)
+### 5.2 Language Selection & Output System (User-controlled)
 
-**Rule:** User Working Video Upload করার সময় Output Language বেছে নেবে। Script ও Content সব ভাষায় Same থাকবে — শুধু ভাষা পরিবর্তন হবে।
+**Rule:** User Working Video Upload করার সময় Output Language বেছে নেবে। ডিফল্ট ভাষা থাকবে **"Bangla"**। Script ও Content সব ভাষায় Same থাকবে — শুধু ভাষা ও কমিক ডেলিভারি স্বাভাবিকভাবে Adapt হবে।
 
-| User Input | System Output |
+| User Input Selection | System Output |
 |---|---|
-| "শুধু Bangla" | ১টি Bangla Video |
-| "শুধু Hindi" | ১টি Hindi Video |
-| "Bangla + Hindi" | ২টি আলাদা Video |
-| "Bangla + Hindi + English" | ৩টি আলাদা Video |
-| অন্য যেকোনো ভাষা | সেই ভাষায় Video |
+| **"Bangla"** (Default) | শুধু ১টি Bangla Video |
+| **"hindi"** | শুধু ১টি Hindi Video |
+| **"english"** | শুধু ১টি English Video |
+| **"Bangla + Hindi"** | ২টি আলাদা Video (Bangla & Hindi) |
+| **"Bangla + Hindi + english"** | ৩টি আলাদা Video (Bangla, Hindi, English) |
+| অন্য যেকোনো ভাষা | সেই নির্দিষ্ট ভাষায় Video |
 
 **Supported Languages:** Bangla 🇧🇩, Hindi 🇮🇳, English 🇬🇧, Arabic 🇸🇦, ও অন্যান্য
 
-> **Note:** English Default নয় — User বললেই তৈরি হবে।
+> **Note:** English Default নয় — User বললেই তৈরি হবে। ডিফল্ট সিলেকশন থাকবে Bangla।
 
 ### 5.3 Reference Video Training Library
 
@@ -239,7 +240,7 @@ Character 3  →  Voice C
 
 ### 5.8 Voice Approval Flow (বাধ্যতামূলক)
 
-**Approval Stage:** Bangla Voice তৈরি হওয়ার পর User অবশ্যই Approve করতে হবে।
+**Approval Stage:** ব্যবহারকারীর নির্বাচিত Primary Language (ডিফল্ট: Bangla) Voice তৈরি হওয়ার পর User অবশ্যই প্রিভিউ শুনে Approve করতে হবে।
 
 **Available Controls:**
 
@@ -257,7 +258,7 @@ Character 3  →  Voice C
 | ✏️ Edit Individual Dialogue | নির্দিষ্ট Dialogue সম্পাদনা |
 
 **Rule:**
-- User Approve না করা পর্যন্ত Final Video Production শুরু হবে না।
+- User Primary Voice Approve না করা পর্যন্ত Final Video Production শুরু হবে না।
 - Reject করলে পরিবর্তনের সুযোগ দেওয়া হবে।
 - **Delta Re-Rendering (ক্যাশ অপটিমাইজেশন):** রিজেক্ট বা এডিটের সময় সম্পূর্ণ অডিও পুনরায় রেন্ডার হবে না; **শুধু পরিবর্তিত নির্দিষ্ট ডায়ালগ ও টাইমস্ট্যাম্পের ক্যাশ রি-রেন্ডার** হবে। বাকি অপরিবর্তিত অংশ ক্যাশ থেকে জোড়া লাগবে।
 - Script Approval প্রয়োজন নেই — শুধু Voice Approval বাধ্যতামূলক।
