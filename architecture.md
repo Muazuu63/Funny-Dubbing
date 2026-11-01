@@ -9,7 +9,7 @@
 
 ## ১. ওভারভিউ ও মূলনীতি (Core Architectural Principles)
 
-1. **Zero Extra Cost Protection:** কোনো পেইড এপিআই, ক্লাউড জিপিইউ বা স্বয়ংক্রিয় বিলিং চালু হবে না। ফ্রি টিয়ারের নিশ্চয়তা না থাকলে কোনো ক্লাউড মডেল কল করা যাবে না।
+1. **Zero Extra Cost Protection (Permanent Hard-Lock):** বর্তমান v2.0 আর্কিটেকচারে সমস্ত Paid API endpoints, Paid AI Providers, Paid Fallback Models, Paid Cloud GPU Services এবং Automatic Billing ব্যাকএন্ড কোড লেভেলে স্থায়ীভাবে হার্ড-লক ও ব্লক থাকবে। কোনো পেইড সার্ভিস চালু করার সুযোগ নেই; ভবিষ্যতে কোনো পেইড পরিবর্তন আনতে হলে আলাদা অনুমোদিত আর্কিটেকচার রিভিশন প্রয়োজন হবে।
 2. **Local-First Architecture & Storage:** মূল ডাটাবেজ হিসেবে SQLite (WAL Mode) ব্যবহৃত হবে। সমস্ত ভিডিও, অডিও ও ক্যাশ লোকাল ফাইল সিস্টেমে থাকবে। তবে Cloud API ও Online TTS ব্যবহারের সময় প্রয়োজনীয় ডাটা ইন্টারনেটে আদান-প্রদান হতে পারে, যা ব্যবহারকারীকে পরিষ্কারভাবে জানানো হবে।
 3. **Resource-Aware Sequential Processing:** সাধারণ পিসির মেমরি ক্র্যাশ রোধে একবারে একটি ভারী AI মডেল চলবে। প্রয়োজনে Worker Process Recycle/Restart করা হবে।
 4. **Dynamic AI Configuration:** কোনো নির্দিষ্ট মডেল আইডি বা ফিক্সড কোটা হার্ডকোড থাকবে না।
@@ -57,21 +57,21 @@
 |   1. Local Offline Engines: Demucs v4 (Stems), Whisper (STT), Wav2Lip, OpenCV/LaMa    |
 |   2. Free Online Engines: Edge-TTS (ইন্টারনেট আবশ্যক, ফ্রি নিউরাল ভয়েস)                  |
 |   3. Free Cloud API: Google AI Studio Active Free Tier (Dynamic Model ID & Observer)   |
-|   4. Paid Engines: HARD-DISABLED (ব্যবহারকারীর স্পষ্ট অনুমোদন ছাড়া অক্ষম)               |
+|   4. Paid Engines: PERMANENTLY BLOCKED (v2.0-এ কোনো পেইড ইঞ্জিন/বিলিং সম্পূর্ণ নিষিদ্ধ)  |
 +-----------------------------------------------------------------------------------------+
                                              ↕
 +-----------------------------------------------------------------------------------------+
 |                          LAYER 6: MEDIA COMPOSITOR & AUDIO PIPELINE                     |
-|   • Master Audio Track Preservation: আসল অডিওর স্থায়ী ব্যাকআপ সংরক্ষণ                   |
-|   • Interactive Audio Mixer: Demucs স্প্লিট + আসল ট্র্যাকের ম্যানুয়াল লেভেল অ্যাডজাস্ট  |
-|   • Audio Speed-Stretch Pacing Engine: ভিডিওর ফ্রেম নষ্ট না করে ভয়েসের গতি সিঙ্ক        |
+|   • Master Audio Track Preservation: আসল অডিও ব্যাকআপ সংরক্ষণ (ডিফল্ট: Muted)           |
+|   • Interactive 4-Track Audio Mixer: ৪টি আলাদা ট্র্যাক + স্বাধীন ভলিউম/মিউট/সোলো কন্ট্রোল|
+|   • Audio Speed-Stretch Pacing Engine: ফ্রেম নষ্ট না করে 0.85x-1.25x নিরাপদ সিঙ্ক       |
 |   • Mode 02 Delta Re-renderer: কার্টুন মোডে 1-ক্লিকে Real Voice <-> AI Voice সোয়াপ      |
 |   • FFmpeg Engine: মাল্টি-অডিও ট্র্যাকসহ ফাইনাল MP4 (1080p, H.264) রেন্ডারিং             |
 +-----------------------------------------------------------------------------------------+
                                              ↕ (Phase 2 Target)
 +-----------------------------------------------------------------------------------------+
 |                           LAYER 7: LIGHTWEIGHT DESKTOP PACKAGING                        |
-|   • Tauri (Rust Core + System Webview): মাত্র ৩০-৪০ MB র‍্যাম ব্যবহার করে উইন্ডোজ .exe  |
+|   • Tauri (Rust Core + System Webview): নেটিভ সিস্টেম ওয়েবভিউ ব্যবহার করে লাইটওয়েট .exe |
 +-----------------------------------------------------------------------------------------+
 ```
 
@@ -96,30 +96,34 @@
 * **Resource Readiness Gate:** পরবর্তী ভারী মডেল চালানোর পূর্বে পর্যাপ্ত RAM/VRAM নিশ্চিত না হওয়া পর্যন্ত টাস্ক কিউতে অপেক্ষা করবে।
 * **সমান্তরাল হালকা টাস্ক:** ভারী মডেল যখন লাইনে থাকবে, তখন হালকা UI রেসপন্স, ডাটাবেজ রিড-রাইট ও ফাইল প্রসেসিং প্যারালালে সচল থাকবে।
 
-### ৪. Checkpoint-Based Resume & 4-Track Audio Mixer Architecture
+### ৪. Checkpoint-Based Resume, 4-Track Mixer & Audio Pacing
 * **Checkpoint-Based Resume:** প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
-* **Demucs 4 Audio Tracks + Individual Volume Controls:** Demucs কোনো পারফেক্ট অ্যাম্বিয়েন্ট আইসোলেটর নয়। অডিও মিক্সারে স্পষ্টভাবে ৪টি অডিও ট্র্যাক এবং প্রতিটির জন্য আলাদা Volume Slider, Mute ও Solo বাটন থাকবে:
-  1. `Original Audio Backup` (মূল ভিডিওর আসল মাস্টার অডিও ব্যাকআপ)
-  2. `Demucs Vocal Stem` (আলাদা করা আসল মানুষের কথা)
-  3. `Demucs Accompaniment Stem` (আলাদা করা ব্যাকগ্রাউন্ড মিউজিক/সাউন্ড)
-  4. `New AI Voice` (নতুন জেনারেটেড ভয়েস)
+* **Demucs 4 Audio Tracks & Default Mute State:** Demucs কোনো পারফেক্ট ডায়ালগ আইসোলেটর নয় (এতে গান বা অন্যান্য ভোকালও থাকতে পারে)। অডিও মিক্সারে স্পষ্টভাবে ৪টি অডিও ট্র্যাক এবং প্রতিটির জন্য আলাদা Volume Slider (0-150%), Mute ও Solo বাটন থাকবে:
+  1. `Original Audio Backup` (মূল ভিডিওর আসল মাস্টার অডিও — **ডুপ্লিকেট সাউন্ড এড়াতে ডিফল্টভাবে MUTED থাকবে**, তবে রিস্টোরেশনের জন্য সংরক্ষিত)।
+  2. `Demucs Vocal Stem` (আলাদা করা মানুষের কথা ও ভোকাল)।
+  3. `Demucs Accompaniment Stem` (আলাদা করা ব্যাকগ্রাউন্ড মিউজিক/পরিবেশের শব্দ)।
+  4. `New AI Voice` (নতুন জেনারেটেড সিন্থেটিক ভয়েস)।
+* **Audio Speed-Stretch & Timeline Synchronization Rules:**
+  - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর কোনো ফ্রেম বা মোট দৈর্ঘ্য পরিবর্তন হবে না**।
+  - বিভিন্ন ভাষার সময়ের পার্থক্য অনুযায়ী টাইমলাইন সিঙ্ক ইঞ্জিন অডিও স্ট্রেচিং, প্যাডিং (নিরবতা যোগ) বা ট্রিম করবে।
+  - স্বাভাবিক কণ্ঠস্বর ঠিক রাখতে স্ট্রেচ রেঞ্জ **`0.85x` থেকে `1.25x`**-এর মধ্যে সীমাবদ্ধ থাকবে; এর বাইরে গেলে সিস্টেম UI-তে সতর্কবার্তা প্রদর্শন করবে।
 * **Mode 02 Dialogue & Copyright Policy:**
   * অরিজিনাল স্টোরি, কনসেপ্ট, সিন সিকোয়েন্স, ক্যারেক্টার রোল ও অ্যাকশন বজায় থাকবে।
   * প্রয়োজন অনুযায়ী Meaning-Preserving Contextual Dialogue Adaptation করা যাবে।
   * Real Voice ব্যবহারের ক্ষেত্রে বৈধ অধিকার থাকতে হবে। AI Voice কোনো Copyright-Free Guarantee নয়; এটি কেবল একটি বিকল্প সিন্থেটিক ভয়েস।
 
-### ৫. Voice Approval Gate, Security & Output Language Matrix
+### ৫. Voice Approval Gate, Security & Standardized Output Language Matrix
 * **Primary Language Voice Approval Timing:** Default Primary Language হবে **Bangla**। ভয়েস প্রিভিউ, স্ক্রিপ্ট তৈরি ও প্রস্তুতিমূলক কাজ প্যারালালে চললেও **Final Video Rendering-এর ঠিক আগে বাংলায় Voice Approval নেওয়া বাধ্যতামূলক**। Approval না পাওয়া পর্যন্ত ফাইনাল রেন্ডারিং শুরু হবে না।
 * **Local Security & Origin Protection:**
   - FastAPI লোকালহোস্ট সার্ভার কঠোরভাবে শুধুমাত্র **`127.0.0.1`**-এ বাইন্ড হবে।
   - লোকাল এপিআই-তে Origin ও CSRF Protection থাকবে।
   - API Key লোকাল ডিস্কে সাধারণ ফাইলে না রেখে উইন্ডোজের নিজস্ব **Windows Credential Manager**-এ নিরাপদে এনক্রিপ্টেড অবস্থায় সংরক্ষিত থাকবে।
-* **Output Language Matrix (Strict User-Selection):**
+* **Output Language Matrix (Strict User-Selection & Capitalization):**
   - `"Bangla"` = ১টি বাংলা ভিডিও
-  - `"hindi"` = ১টি হিন্দি ভিডিও
-  - `"english"` = ১টি ইংরেজি ভিডিও
+  - `"Hindi"` = ১টি হিন্দি ভিডিও
+  - `"English"` = ১টি ইংরেজি ভিডিও
   - `"Bangla + Hindi"` = ২টি আলাদা ভিডিও
-  - `"Bangla + Hindi + english"` = ৩টি আলাদা ভিডিও
+  - `"Bangla + Hindi + English"` = ৩টি আলাদা ভিডিও
   - শুধুমাত্র ব্যবহারকারীর নির্বাচিত ভাষার আউটপুটই তৈরি হবে।
 
 ---
