@@ -120,6 +120,19 @@ Visual Style           →  Subtitle Style, Synchronization Method
 > [!NOTE]
 > Reference Video-এর Original Dialogue কখনো Copy করা যাবে না — শুধু **Style ও Creative Direction** নেওয়া হবে।
 
+### 🏛️ Shared System: Training Center & Reference Hub
+
+> [!IMPORTANT]
+> **Training Center কোনো আলাদা Production Mode নয়; মোট Production Mode ১১টি-ই থাকবে।**
+> এটি একটি **Shared Foundation System**, যার অধীনে তৈরি ও সংরক্ষিত হবে:
+> - **Voice Profiles:** বিভিন্ন চরিত্রের জন্য পিচ, স্পিড, ইমোশন ও ভয়েস সেটিংস।
+> - **Character Profiles:** ক্যারেক্টার ফেস এমবেডিং ও ভিজ্যুয়াল রেফারেন্স শিট।
+> - **Video & Comedy Style Profiles:** রেফারেন্স ভিডিও থেকে শেখা হিউমার প্যাটার্ন, পাঞ্চলাইন টাইমিং ও এডিটিং স্টাইল।
+> - **Language & Dialogue Preferences:** ডিফল্ট ভাষা, পেসিং ও অডিও স্ট্রেচ প্রেফারেন্স।
+> - **Reusable Reference Library:** ট্রেন্ডিং কমেডি ভিডিও ও সাউন্ড এফেক্টের ক্যাশ রিপোজিটরি।
+> 
+> *প্রযুক্তিগত স্পষ্টীকরণ:* লোকাল পিসির হার্ডওয়্যার সুরক্ষিত রাখতে ভারী মডেলের কোনো জটিল Fine-tuning করা হবে না; এটি সম্পূর্ণ **Profile, Preset, Reference Parameters ও Metadata** ভিত্তিক কাজ করবে, যা যেকোনো Production Mode-এ তাৎক্ষণিকভাবে ব্যবহারযোগ্য হবে।
+
 ### 🧹 Video Pre-Processing — Clean Media & Branding Removal (Personal/Authorized Footage)
 
 > [!IMPORTANT]
@@ -673,18 +686,14 @@ Software-এর মধ্যে একটি **Shared Settings System** থা�
 
 | Category | প্রয়োজনীয় Technology |
 |---|---|
-| AI Video Understanding | Scene ও Character Detection Model |
-| Script / Content Generation | LLM (Large Language Model) |
-| Cartoon / Image Generation | AI Image & Animation Generation Model |
-| Multilingual TTS | Bangla, Hindi ও অন্যান্য Text-to-Speech |
-| Character Voice | Multi-speaker Voice Generation |
-| Audio Processing | Voice Mixing, BGM, Sound FX |
-| Lip-Sync | AI Lip-Sync Model (Human + Cartoon) |
-| Adaptive Sync | Video Type-based Sync Engine |
-| Video Rendering | Final Video Composition |
-| Subtitle | Auto Subtitle Generation |
-| Backend | API, Database, File Storage |
-| Copyright Detection | Content Similarity Check |
+| AI Video Understanding & Script | Configurable Google AI Studio Free Tier Model (e.g. Gemini 2.0 Flash / Active Free Tier, No Hardcoded Model) |
+| Dynamic Quota & Rate Limit | Active Quota Observer (Headers/429 monitoring, Pause & Checkpoint Auto-Resume) |
+| Audio Stem Separation | Demucs v4 (Vocal & Accompaniment Split) + Master Audio Preservation + Manual Audio Balance |
+| Multilingual TTS | Edge-TTS (Bangla, Hindi, English Neural Voices) |
+| Shared Training Center | Reusable Profile & Preset Repository (No heavy fine-tuning) |
+| Lip-Sync | Wav2Lip / SadTalker |
+| Video Rendering | FFmpeg Static Engine |
+| Backend & Database | Python (FastAPI) + SQLite (Zero-Dependency) |
 
 ---
 

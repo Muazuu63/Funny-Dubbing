@@ -267,8 +267,11 @@ Character 3  →  Voice C
 
 **Rule:** Video Type অনুযায়ী আলাদা Sync Method ব্যবহার করতে হবে। সব ভিডিওতে একই Lip-Sync Method নয়।
 
-**Audio Stem Separation (পরিবেশের শব্দ সংরক্ষণ):**
-- অরিজিনাল অডিও থেকে **AI Stem Separation (যেমন: Demucs / Spleeter)** প্রযুক্তি ব্যবহার করে ভোকাল এবং ব্যাকগ্রাউন্ড অ্যাম্বিয়েন্ট সাউন্ড আলাদা করা হবে। অরিজিনাল মানুষের কণ্ঠ বাদ দিয়ে শুধুমাত্র নতুন AI ভয়েস ট্র্যাক যুক্ত হবে, এবং মূল ব্যাকগ্রাউন্ড সাউন্ড অক্ষুণ্ণ রাখা হবে।
+**Audio Stem Separation & Master Audio Preservation:**
+- অরিজিনাল অডিও থেকে **AI Stem Separation (যেমন: Demucs v4 / Spleeter)** প্রযুক্তি ব্যবহার করে ভোকাল এবং অ্যাকমপ্যানিমেন্ট/ব্যাকগ্রাউন্ড সাউন্ড আলাদা করা হবে।
+- **বাস্তবসম্মত অডিও আর্কিটেকচার:** কোনো এআই সেপারেশন ইঞ্জিন ব্যাকগ্রাউন্ড সাউন্ড নিখুঁত রাখার ১০০% নিশ্চয়তা দিতে পারে না। তাই আপলোড করা মূল ভিডিওর **Original Audio Track সবসময় মাস্টার ব্যাকআপ হিসেবে সংরক্ষিত থাকবে**।
+- আউটপুট তৈরির সময় Demucs-এর আলাদা করা ব্যাকগ্রাউন্ড অডিও ট্র্যাকের সাথে প্রয়োজনে অরিজিনাল অডিও ব্যালেন্স ও রিস্টোরেশনের সুযোগ থাকবে।
+- ব্যবহারকারীকে অডিও প্রিভিউতে ব্যাকগ্রাউন্ড সাউন্ড ও ভয়েসের ভলিউম লেভেল ম্যানুয়ালি অ্যাডজাস্ট (Manual Audio Mixing) করার কন্ট্রোল দেওয়া হবে।
 
 **Timing & Speech Speed Stretch Rule:**
 - ফাইনাল ভিডিওর ভয়েস টাইমিং হুবহু অরিজিনাল ভিডিওর ভয়েস টাইমিংয়ের সাথে মিল থাকতে হবে।
@@ -552,9 +555,10 @@ User কোনো Video বা Content Upload করবে না। শুধ�
 | System | Description |
 |---|---|
 | User Dashboard | Central Control Panel |
+| Training Center Core | Shared Reference & Profile Hub (Voice, Character, Comedy & Style Presets — No Heavy Fine-tuning) |
 | Project Management | সব Mode-এর Project একসাথে |
 | Video Upload System | Multi-format Upload |
-| File Storage | Local ও Cloud Support |
+| File Storage | Local SQLite + Structured File System |
 | AI Model Integration Layer | সব AI Model-এর Unified Interface |
 | Character Library | তৈরি করা Character সংরক্ষণ |
 | Voice Library | Available ও Generated Voice |
@@ -566,6 +570,7 @@ User কোনো Video বা Content Upload করবে না। শুধ�
 | Error Handling | Detailed Error Report |
 | Notification System | Processing Update Alerts |
 
+> **Rule:** Training Center কোনো আলাদা প্রোডাকশন মোড নয়; এটি ১১টি মোডের জন্য একটি সার্বজনীন প্রোফাইল ও এসেট হাব।
 > **Rule:** সাধারণ পার্সোনাল পিসির মেমরি ওভারফ্লো বা ক্র্যাশ রোধ করতে Processing Queue কঠোরভাবে **Sequential (একটির পর একটি)** চলবে। কোনো ভারী AI মডেল সমান্তরালভাবে (Parallel) মেমরিতে লোড করা যাবে না। একটি Mode বা Job-এর কাজ সম্পূর্ণ শেষ হয়ে VRAM/RAM মুক্ত হলে পরবর্তী Job শুরু হবে।
 
 ---
@@ -781,12 +786,17 @@ Phase 5: Cross-Mode Integration & Optimization
 
 | প্রসেসিং টাস্ক | Primary Free Engine (লোকাল) | Secondary Free Fallback (ক্লাউড API) | ফলব্যাক আচরণ |
 |---|---|---|---|
-| স্ক্রিপ্ট ও ডায়ালগ | Gemini 1.5 Flash (Free Tier) | Gemini 1.5 Pro (Free Tier) / Local Small LLM (Ollama) | API কোটা রিচ করলে লোকাল হালকা মডেলে শিফট হবে |
+| স্ক্রিপ্ট ও ডায়ালগ | Google AI Studio Active Free Tier (Configurable Model ID, যেমন: Gemini 2.0 Flash / Free Tier) | Local Small LLM (Ollama) / Secondary Free Config | নির্দিষ্ট হার্ডকোডেড কোটা নয়; Active Rate Limit ও 429 পর্যবেক্ষণ করে কাজ Pause করবে এবং Quota পাওয়া গেলে Checkpoint থেকে Resume করবে |
 | ভয়েস জেনারেশন (TTS) | Edge-TTS (Free Neural Voice) | Bark / Meta MMS (Local Offline) | নেটওয়ার্ক এরর হলে অফলাইন লোকাল ইঞ্জিনে চলবে |
-| স্টেম সেপারেশন | Demucs v4 (Local) | Spleeter (Local Lightweight) | VRAM কম হলে হালকা মডেলে প্রসেস হবে |
+| স্টেম সেপারেশন | Demucs v4 (Local) + Master Audio Preservation | Spleeter (Local Lightweight) | VRAM কম হলে হালকা মডেলে প্রসেস হবে এবং অরিজিনাল অডিও মাস্টার হিসেবে সংরক্ষিত থাকবে |
 | লিপ-সিঙ্ক | Wav2Lip (Local GPU/CPU) | SadTalker (Local) | ক্যারেক্টার টাইপ অনুযায়ী সেরা মডেল নির্বাচন |
 
-### 24.3 Resource Management & Processing Pipeline (ক্র্যাশ প্রতিরোধ)
+### 24.3 Resource Management, Dynamic Quota & Checkpoint Pipeline (ক্র্যাশ ও ডেটা লস প্রতিরোধ)
+- **Configurable LLM & Dynamic Quota Observer:**
+  - কোনো নির্দিষ্ট মডেল আইডি বা ১৫ RPM/১৫০০ RPD কোটা কোডে হার্ডকোড থাকবে না।
+  - সিস্টেম রেসপন্স হেডার ও রেট লিমিট স্ট্যাটাস পর্যবেক্ষণ করবে।
+  - কোটা ফুরিয়ে গেলে স্বয়ংক্রিয়ভাবে প্রসেস **Pause** করবে এবং ডাটাবেজে বর্তমান অগ্রগতি চেকপয়েন্ট হিসেবে সেভ রাখবে।
+  - নতুন এপিআই কী বা কোটা পুনরায় পাওয়া গেলে আগের সম্পন্ন হওয়া কাজ বাদ দিয়ে ঠিক পেন্ডিং ধাপ থেকে **Resume** করবে।
 - **Sequential Model Execution (একক মডেল লোড-আনলোড):**
   - সাধারণ পিসিতে মেমরি ওভারফ্লো এড়াতে একই সাথে একাধিক ভারী AI মডেল মেমরিতে রাখা হবে না।
   - পাইপলাইন রুল: `Demucs রান হবে -> আউটপুট সেভ করে মেমরি ফ্রি করবে -> এরপর Whisper রান হবে -> কাজ শেষে মেমরি ক্লিন করবে -> এরপর TTS/লিপ-সিঙ্ক রান হবে`।

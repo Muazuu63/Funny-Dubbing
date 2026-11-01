@@ -33,7 +33,7 @@ flowchart TD
     end
     
     subgraph External Cloud AI [Priority 2 - Free API]
-        Gemini[Google Gemini 1.5 Flash/Pro Free Tier - 15 RPM]
+        Gemini[Google Free Tier - Configurable Model & Dynamic Quota Observer]
     end
 
     APIServer <--> Queue
@@ -114,9 +114,11 @@ funny-videos/
 ### 🚀 ফেজ ১: সেন্ট্রাল এআই প্রোভাইডার ও সিকিউরিটি লেয়ার (Smart Provider Manager)
 1. **API Key & Google Account Settings:** 
    * সেটিংস পেজে ফ্রি Gemini API Key পেস্ট ও ভ্যালিডেশন সিস্টেম।
-2. **Free-First Router:** 
+   * **Configurable Model ID:** কোনো হার্ডকোডেড মডেল আইডি নয়; সেটিংস থেকে অ্যাক্টিভ ফ্রি মডেল (যেমন: Gemini 2.0 Flash) বেছে নেওয়া যাবে।
+2. **Dynamic Quota Observer & Free-First Router:** 
    * স্ক্রিপ্ট ও বিশ্লেষণের জন্য ফ্রি জেমিনিকে কল করা।
-   * ফ্রি কোটা ওভার হলে মেমরি সেভ করে টাস্ককে `PAUSED (Quota Exceeded)` স্টেটে পাঠানো।
+   * নির্দিষ্ট RPM নয়; রেসপন্স হেডার ও ৪২৯ স্ট্যাটাস ট্র্যাকিং।
+   * ফ্রি কোটা ওভার হলে কাজ সাথে সাথে মেমরি সেভ করে টাস্ককে `PAUSED (Quota Exceeded)` স্টেটে পাঠানো এবং চেকপয়েন্ট সেভ রাখা।
 3. **Zero-Cost Guardrail:** কোনো অবস্থাতেই পেইড এপিআই বা আন-অথরাইজড ক্রেডিট ট্রানজ্যাকশন ব্লক রাখা।
 
 ---
@@ -132,8 +134,8 @@ funny-videos/
 
 ### 🚀 ফেজ ৩: Mode 01 (Funny Video Dubbing Studio) ইমপ্লিমেন্টেশন
 1. **Video Inpainting:** লোগো বা পুরানো টেক্সট মুছে ক্লিন মাস্টার ভিডিও তৈরি।
-2. **Demucs Stem Separation:** ভোকাল রিমুভ করে ব্যাকগ্রাউন্ড অ্যাম্বিয়েন্ট অডিও সেভ করা।
-3. **Video Context Analysis & Multi-Script Generation:** জেমিনি দিয়ে ৩-৫টি স্ক্রিপ্ট তৈরি ও অটোমেটিক সেরা স্ক্রিপ্ট নির্বাচন।
+2. **Demucs Stem Separation & Master Audio Preservation:** ভোকাল রিমুভ করে ব্যাকগ্রাউন্ড অ্যাকমপ্যানিমেন্ট অডিও সেভ করা। একই সাথে মূল ভিডিওর আসল অডিও মাস্টার কপি হিসেবে সংরক্ষণ করা এবং ম্যানুয়াল ব্যালেন্সিং অপশন রাখা।
+3. **Video Context Analysis & Multi-Script Generation:** কনফিগার করা জেমিনি ফ্রি মডেল দিয়ে ৩-৫টি স্ক্রিপ্ট তৈরি ও অটোমেটিক সেরা স্ক্রিপ্ট নির্বাচন।
 4. **Edge-TTS Character Voice Casting:** বিভিন্ন চরিত্রের জন্য আলাদা পিচ/টোনসহ নিউরাল ভয়েস তৈরি।
 5. **Interactive Voice Approval UI:** 
    * ব্রাউজারে অডিও প্লেয়ার; ইউজার বাংলায় ডায়ালগ শুনবেন, ডায়ালগ এডিট করতে পারবেন এবং "Approve" বাটনে ক্লিক করবেন।
