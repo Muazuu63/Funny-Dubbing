@@ -1,6 +1,6 @@
 # 🏛️ Master System Architecture Specification
 ### Project: AI Funny Dubbing & Video Production Studio (AI-VPS)
-**Document Version:** 2.0  
+**Document Version:** 2.1  
 **Scope:** Single-User Personal Local Studio  
 **Cost Model:** ZERO EXTRA COST Hard-Lock Architecture  
 **Target Environment:** Local Windows PC (`http://localhost:7860` / `8000`) $\rightarrow$ Tauri Desktop Installer
@@ -9,7 +9,7 @@
 
 ## ১. ওভারভিউ ও মূলনীতি (Core Architectural Principles)
 
-1. **Zero Extra Cost Protection (Permanent Hard-Lock):** বর্তমান v2.0 আর্কিটেকচারে সমস্ত Paid API endpoints, Paid AI Providers, Paid Fallback Models, Paid Cloud GPU Services এবং Automatic Billing ব্যাকএন্ড কোড লেভেলে স্থায়ীভাবে হার্ড-লক ও ব্লক থাকবে। কোনো পেইড সার্ভিস চালু করার সুযোগ নেই; ভবিষ্যতে কোনো পেইড পরিবর্তন আনতে হলে আলাদা অনুমোদিত আর্কিটেকচার রিভিশন প্রয়োজন হবে।
+1. **Zero Extra Cost Protection (Permanent Hard-Lock):** বর্তমান v2.1 আর্কিটেকচারে সমস্ত Paid API endpoints, Paid AI Providers, Paid Fallback Models, Paid Cloud GPU Services এবং Automatic Billing ব্যাকএন্ড কোড লেভেলে স্থায়ীভাবে হার্ড-লক ও ব্লক থাকবে। কোনো পেইড সার্ভিস চালু করার সুযোগ নেই; ভবিষ্যতে কোনো পেইড পরিবর্তন আনতে হলে আলাদা অনুমোদিত আর্কিটেকচার রিভিশন প্রয়োজন হবে।
 2. **Local-First Architecture & Storage:** মূল ডাটাবেজ হিসেবে SQLite (WAL Mode) ব্যবহৃত হবে। সমস্ত ভিডিও, অডিও ও ক্যাশ লোকাল ফাইল সিস্টেমে থাকবে। তবে Cloud API ও Online TTS ব্যবহারের সময় প্রয়োজনীয় ডাটা ইন্টারনেটে আদান-প্রদান হতে পারে, যা ব্যবহারকারীকে পরিষ্কারভাবে জানানো হবে।
 3. **Resource-Aware Sequential Processing:** সাধারণ পিসির মেমরি ক্র্যাশ রোধে একবারে একটি ভারী AI মডেল চলবে। প্রয়োজনে Worker Process Recycle/Restart করা হবে।
 4. **Dynamic AI Configuration:** কোনো নির্দিষ্ট মডেল আইডি বা ফিক্সড কোটা হার্ডকোড থাকবে না।
@@ -83,7 +83,7 @@
 
 ### ১. Dynamic Gemini Model Configuration & Eligibility Fail-Safe
 * **ডাইনামিক সিলেকশন ও ভেরিফায়েড লিস্ট:** কোডে কোনো নির্দিষ্ট মডেল আইডি স্থায়ী থাকবে না। User Settings-এ একটি "Verified Free Models" তালিকা থাকবে এবং ব্যবহারকারী সেখান থেকে মডেল নির্বাচন বা কাস্টমাইজ করতে পারবেন।
-* **চারটি পৃথক বিষয় হিসেবে ভ্যালিডেশন (Quad-Check Fail-Safe):** Model Availability, Free Tier Eligibility, Billing Configuration এবং Remaining Quota—এই চারটি বিষয়কে আলাদা স্বাধীন বিষয় হিসেবে বিবেচনা করা হবে। API থেকে সরাসরি যাচাই সম্ভব নয় এমন তথ্য নিশ্চিত হয়েছে বলে দাবি করা যাবে না। যদি কোনো একটি তথ্য অজানা (Unknown), অপ্রমাণিত বা অনিরাপদ হয়, তবে ক্লাউড API রিকোয়েস্ট সরাসরি **ব্লক (Fail-Safe Block)** থাকবে।
+* **চারটি পৃথক বিষয় হিসেবে ভ্যালিডেশন (Quad-Check Fail-Safe):** Model Availability, Free Tier Eligibility, Billing Configuration এবং Remaining Quota—এই চারটি বিষয়কে আলাদা স্বাধীন বিষয় হিসেবে বিবেচনা করা হবে। তবে গুগল এপিআই থেকে বিলিং বা অ্যাকাউন্টের অভ্যন্তরীণ সব তথ্য স্বয়ংক্রিয়ভাবে যাচাই করা সম্ভব নাও হতে পারে। তাই ব্যবহারকারীর ডিক্লেয়ারেশন এবং অফিসিয়াল মডেল ভ্যালিডেশন উভয়ই বিবেচনায় থাকবে। যদি কোনো একটি তথ্য অজানা (Unknown), অপ্রমাণিত বা অনিরাপদ হয়, তবে ক্লাউড API রিকোয়েস্ট সরাসরি **ব্লক (Fail-Safe Block)** থাকবে।
 * **সতর্কবার্তা ও ব্যাকএন্ড পার্মানেন্ট হার্ড-লক:** মডেল বন্ধ হলে বা ফ্রি টিয়ার থেকে বাদ পড়লে সফটওয়্যার ব্যবহারকারীকে সতর্ক করবে। Paid Provider শুধু UI-তে নয়, Backend Level-এও স্থায়ীভাবে Block থাকবে। কোনো অবস্থাতেই Paid API, Paid Endpoint, Auto-billing বা Paid Fallback চলবে না।
 
 ### ২. TTS Engine Classification, Offline Compatibility & Quality Realities
@@ -102,17 +102,17 @@
 
 ### ৪. Checkpoint-Based Resume, 4-Track Mixer & Audio Pacing Safety
 * **Checkpoint-Based Resume:** প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ রেফারেন্স ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
-* **Demucs 4 Audio Tracks & Clipping Protection:**
+* **Demucs 4 Audio Tracks & Limiter Protection:**
   1. `Original Audio Backup` (মূল ভিডিওর আসল মাস্টার অডিও — **ডুপ্লিকেট সাউন্ড এড়াতে ডিফল্টভাবে MUTED থাকবে**, তবে রিস্টোরেশনের জন্য সংরক্ষিত)।
   2. `Demucs Vocal Stem` (আলাদা করা ভোকাল — গান বা অন্যান্য আওয়াজও থাকতে পারে)।
   3. `Demucs Accompaniment Stem` (আলাদা করা ব্যাকগ্রাউন্ড মিউজিক/পরিবেশের শব্দ)।
   4. `New AI Voice` (নতুন জেনারেটেড সিন্থেটিক ভয়েস)।
-  * *ক্লিপিং প্রটেকশন:* প্রতি ট্র্যাকে Volume Slider (0-150%), Mute ও Solo কন্ট্রোল থাকবে। মিক্সারে **Master Output Level Meter, Peak Clipping Detector ও Master Audio Limiter / Loudness Normalizer** থাকবে যাতে সাউন্ড কখনোই ফেটে না যায় (Clipping Warning সহ)।
-* **Audio Speed-Stretch & Dialogue Preservation Rules:**
+  * *সুরক্ষা ও ক্লিপিং হ্রাস:* প্রতি ট্র্যাকে Volume Slider (0-150%), Mute ও Solo কন্ট্রোল থাকবে। মিক্সারে **Master Output Level Meter, Peak Clipping Detector ও Master Audio Limiter / Loudness Normalizer** থাকবে। এটি অতিরিক্ত গেইনে অডিও বিকৃতি বা ফেটে যাওয়ার ঝুঁকি উল্লেখযোগ্যভাবে কমাবে; তবে ফাইনাল রেন্ডারের পূর্বে ব্যবহারকারীকে প্রিভিউ শুনে নিশ্চিত হতে হবে।
+* **Audio Speed-Stretch (Playback Speed Multiplier) & Dialogue Safety:**
   - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর ফ্রেম সংখ্যা বা মোট দৈর্ঘ্য কোনোভাবেই পরিবর্তন হবে না**।
-  - বিভিন্ন ভাষার সময়ের পার্থক্য অনুযায়ী টাইমলাইন সিঙ্ক ইঞ্জিন **`0.85x` থেকে `1.25x`** রেঞ্জে স্ট্রেচিং এবং স্বাভাবিক Silence Padding ব্যবহার করবে।
+  - টাইমিং সিঙ্কে **Playback Speed Multiplier (0.85x ধীর – 1.25x দ্রুত)** রেঞ্জে স্বাভাবিক Silence Padding সহ ভয়েসের গতি সামঞ্জস্য করা হবে।
   - **কোনো অর্থপূর্ণ ডায়ালগ স্বয়ংক্রিয়ভাবে মুছে ফেলা বা ট্রিম করা সম্পূর্ণ নিষিদ্ধ।**
-  - ডায়ালগ অনুমোদিত রেঞ্জে ফিট না হলে Warning দেবে এবং ডায়ালগ কাটছাঁট করতে **ব্যবহারকারীর স্পষ্ট অনুমোদন (User Approval)** লাগবে।
+  - ডায়ালগ অনুমোদিত স্পিড রেঞ্জে ফিট না হলে Warning দেবে এবং ডায়ালগ কাটছাঁট করতে **ব্যবহারকারীর স্পষ্ট অনুমোদন (User Approval)** লাগবে।
 * **Mode 02 Dialogue & Copyright Policy:**
   * অরিজিনাল স্টোরি, কনসেপ্ট, সিন সিকোয়েন্স, ক্যারেক্টার রোল ও অ্যাকশন বজায় থাকবে; প্রয়োজন অনুযায়ী Meaning-Preserving Contextual Dialogue Adaptation করা যাবে।
   * Real Voice ব্যবহারের ক্ষেত্রে বৈধ অধিকার থাকতে হবে। AI Voice কোনো Copyright-Free Guarantee নয়; এটি কেবল একটি বিকল্প সিন্থেটিক ভয়েস।
