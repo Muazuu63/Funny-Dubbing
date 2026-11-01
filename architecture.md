@@ -38,8 +38,8 @@
                                              ↕
 +-----------------------------------------------------------------------------------------+
 |                        LAYER 3: LOCAL STORAGE & DATABASE LAYER                          |
-|   • Database: SQLite (with WAL Mode & Native JSON1) — studio.db                         |
-|   • Media Store: Structured Local Disk Storage (/storage/projects/[id]/...)             |
+|   • Database (Metadata Only): SQLite (WAL Mode, JSON1) — প্রজেক্ট মেটাডাটা, চেকপয়েন্ট ও পাথ|
+|   • Local Filesystem (Media & Weights): ভিডিও, অডিও, ক্যাশ ও AI মডেল ফাইলস সরাসরি ডিস্কে|
 +-----------------------------------------------------------------------------------------+
                                              ↕
 +-----------------------------------------------------------------------------------------+
@@ -63,8 +63,10 @@
 +-----------------------------------------------------------------------------------------+
 |                          LAYER 6: MEDIA COMPOSITOR & AUDIO PIPELINE                     |
 |   • Master Audio Track Preservation: আসল অডিও ব্যাকআপ সংরক্ষণ (ডিফল্ট: Muted)           |
-|   • Interactive 4-Track Audio Mixer: ৪টি আলাদা ট্র্যাক + স্বাধীন ভলিউম/মিউট/সোলো কন্ট্রোল|
+|   • Interactive 4-Track Audio Mixer: ৪টি ট্র্যাক + ভলিউম (0-150%), Mute ও Solo কন্ট্রোল  |
+|   • Master Audio Safety: Output Level Meter, Peak Clipping Detector ও Master Limiter     |
 |   • Audio Speed-Stretch Pacing Engine: ফ্রেম নষ্ট না করে 0.85x-1.25x নিরাপদ সিঙ্ক       |
+|   • Dialogue Preservation: স্বয়ংক্রিয় ডায়ালগ ডিলিট সম্পূর্ণ নিষিদ্ধ; ট্রিম করতে সম্মতি লাগবে|
 |   • Mode 02 Delta Re-renderer: কার্টুন মোডে 1-ক্লিকে Real Voice <-> AI Voice সোয়াপ      |
 |   • FFmpeg Engine: মাল্টি-অডিও ট্র্যাকসহ ফাইনাল MP4 (1080p, H.264) রেন্ডারিং             |
 +-----------------------------------------------------------------------------------------+
@@ -79,37 +81,40 @@
 
 ## ৩. গুরুত্বপূর্ণ ৪টি সংশোধনের কারিগরি বাস্তবায়ন
 
-### ১. Dynamic Gemini Model Configuration & Eligibility Validation
+### ১. Dynamic Gemini Model Configuration & Eligibility Fail-Safe
 * **ডাইনামিক সিলেকশন ও ভেরিফায়েড লিস্ট:** কোডে কোনো নির্দিষ্ট মডেল আইডি স্থায়ী থাকবে না। User Settings-এ একটি "Verified Free Models" তালিকা থাকবে এবং ব্যবহারকারী সেখান থেকে মডেল নির্বাচন বা কাস্টমাইজ করতে পারবেন।
-* **চারটি পৃথক বিষয় হিসেবে ভ্যালিডেশন:** Model Availability, Free Tier Eligibility, Billing Configuration এবং Remaining Quota—এই চারটি বিষয়কে আলাদা স্বাধীন বিষয় হিসেবে বিবেচনা করা হবে। API থেকে সরাসরি যাচাই সম্ভব নয় এমন তথ্য নিশ্চিত হয়েছে বলে দাবি করা যাবে না। Free Tier Eligibility নিশ্চিত না হলে কোনো API Request পাঠানো যাবে না।
-* **সতর্কবার্তা ও ব্যাকএন্ড হার্ড-লক:** মডেল বন্ধ হলে বা ফ্রি টিয়ার থেকে বাদ পড়লে সফটওয়্যার ব্যবহারকারীকে সতর্ক করবে। Paid Provider শুধু UI-তে নয়, Backend Level-এও সম্পূর্ণ Block থাকবে। কোনো অবস্থাতেই Paid API, Paid Endpoint, Auto-billing বা Paid Fallback চলবে না।
+* **চারটি পৃথক বিষয় হিসেবে ভ্যালিডেশন (Quad-Check Fail-Safe):** Model Availability, Free Tier Eligibility, Billing Configuration এবং Remaining Quota—এই চারটি বিষয়কে আলাদা স্বাধীন বিষয় হিসেবে বিবেচনা করা হবে। API থেকে সরাসরি যাচাই সম্ভব নয় এমন তথ্য নিশ্চিত হয়েছে বলে দাবি করা যাবে না। যদি কোনো একটি তথ্য অজানা (Unknown), অপ্রমাণিত বা অনিরাপদ হয়, তবে ক্লাউড API রিকোয়েস্ট সরাসরি **ব্লক (Fail-Safe Block)** থাকবে।
+* **সতর্কবার্তা ও ব্যাকএন্ড পার্মানেন্ট হার্ড-লক:** মডেল বন্ধ হলে বা ফ্রি টিয়ার থেকে বাদ পড়লে সফটওয়্যার ব্যবহারকারীকে সতর্ক করবে। Paid Provider শুধু UI-তে নয়, Backend Level-এও স্থায়ীভাবে Block থাকবে। কোনো অবস্থাতেই Paid API, Paid Endpoint, Auto-billing বা Paid Fallback চলবে না।
 
-### ২. TTS Engine Classification & Quality Realities (Online vs Offline)
+### ২. TTS Engine Classification, Offline Compatibility & Quality Realities
 ইঞ্জিনগুলোকে তিনটি সুস্পষ্ট বিভাগে ভাগ করা হয়েছে:
 1. **Free Online Engines:** Edge-TTS — উচ্চমানের নিউরাল ভয়েস তৈরি করে, তবে **সক্রিয় ইন্টারনেট কানেকশন আবশ্যক**। এটি অফলাইন ইঞ্জিন নয় এবং স্থায়ী ফ্রি হিসেবে গ্যারান্টি দেওয়া যায় না। অফলাইন মোড চালু থাকলে এতে কোনো রিকোয়েস্ট যাবে না।
-2. **Local Offline Engines:** Bark / Meta MMS — সম্পূর্ণ অফলাইনে লোকাল পিসিতে চলে।
-   * *বাস্তব রিসোর্স ও কোয়ালিটি রুল:* কোনো নির্দিষ্ট "4GB+ VRAM" স্থায়ীভাবে হার্ডকোড থাকবে না; প্রতিটি মডেলের বাস্তব Resource Requirement অনুযায়ী RAM/VRAM যাচাই করা হবে এবং প্রয়োজনে CPU Mode সমর্থন করবে। বাংলা, হিন্দি ও ইংরেজির ভয়েস কোয়ালিটি Edge-TTS-এর সমকক্ষ নয় এবং কোনো লোকাল ইঞ্জিন সব ভাষায় নিখুঁত প্রাকৃতিক ভয়েস দেবে—এমন অলীক নিশ্চয়তা দেওয়া যাবে না।
-3. **Paid Engines:** Backend ও Frontend উভয় লেভেলে সম্পূর্ণ Disabled।
+2. **Local Offline Engines (Bark / Meta MMS):** সম্পূর্ণ অফলাইনে লোকাল পিসিতে চলে।
+   * *ফার্স্ট-টাইম ডাউনলোড ও স্টোরেজ:* প্রথমবার চালুর সময় মডেল লোকাল ফাইল সিস্টেমে ডাউনলোড হয়ে সংরক্ষিত হবে।
+   * *রিসোর্স ও CPU Fallback:* কোনো নির্দিষ্ট VRAM স্থায়ী হার্ডকোড থাকবে না; মডেলের সুনির্দিষ্ট মেমরি অনুযায়ী RAM/VRAM যাচাই হবে এবং প্রয়োজনে **CPU Fallback Mode** সমর্থন করবে।
+   * *কোয়ালিটি ও লাইসেন্সিং সতর্কতা:* লাইসেন্স ও ডিপেন্ডেন্সি যাচাই করতে হবে। নির্বাচিত মডেলটি স্থানীয়ভাবে টেস্ট করার পূর্বে বাংলা, হিন্দি বা ইংরেজিতে নিখুঁত প্রাকৃতিক ভয়েস দেওয়ার কোনো অলীক নিশ্চয়তা দেওয়া যাবে না।
+3. **Paid Engines:** Backend ও Frontend উভয় লেভেলে স্থায়ীভাবে Blocked।
 
 ### ৩. Resource-Aware Sequential Processing & Memory Recovery Mechanism
 * **Worker Process Recycling:** পাইথনের `gc.collect()` এবং `torch.cuda.empty_cache()` VRAM সম্পূর্ণ ফাঁকা করার শতভাগ নিশ্চয়তা দেয় না। তাই Worker Shutdown ও Process Exit নিশ্চিত করার পর মেমরি রিকভারি মেকানিজম হিসেবে ব্যাকএন্ড **Worker Process Restart** কার্যকর করা হবে এবং RAM/VRAM পুনরায় মেপে নিশ্চিত করা হবে। পর্যাপ্ত রিসোর্স না পাওয়া পর্যন্ত পরবর্তী ভারী মডেল চালু হবে না।
 * **Resource Readiness Gate:** পরবর্তী ভারী মডেল চালানোর পূর্বে পর্যাপ্ত RAM/VRAM নিশ্চিত না হওয়া পর্যন্ত টাস্ক কিউতে অপেক্ষা করবে।
 * **সমান্তরাল হালকা টাস্ক:** ভারী মডেল যখন লাইনে থাকবে, তখন হালকা UI রেসপন্স, ডাটাবেজ রিড-রাইট ও ফাইল প্রসেসিং প্যারালালে সচল থাকবে।
 
-### ৪. Checkpoint-Based Resume, 4-Track Mixer & Audio Pacing
-* **Checkpoint-Based Resume:** প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
-* **Demucs 4 Audio Tracks & Default Mute State:** Demucs কোনো পারফেক্ট ডায়ালগ আইসোলেটর নয় (এতে গান বা অন্যান্য ভোকালও থাকতে পারে)। অডিও মিক্সারে স্পষ্টভাবে ৪টি অডিও ট্র্যাক এবং প্রতিটির জন্য আলাদা Volume Slider (0-150%), Mute ও Solo বাটন থাকবে:
+### ৪. Checkpoint-Based Resume, 4-Track Mixer & Audio Pacing Safety
+* **Checkpoint-Based Resume:** প্রতিটি সফল প্রসেসিং স্টেপের পর ক্যাশ রেফারেন্স ও স্টেট SQLite-এ সেভ থাকবে। রিস্টার্ট বা কোটা রিকভারির পর পূর্বের সফল কাজ পুনরায় না চালিয়ে সরাসরি অসমাপ্ত ধাপ থেকে Checkpoint-Based Resume হবে।
+* **Demucs 4 Audio Tracks & Clipping Protection:**
   1. `Original Audio Backup` (মূল ভিডিওর আসল মাস্টার অডিও — **ডুপ্লিকেট সাউন্ড এড়াতে ডিফল্টভাবে MUTED থাকবে**, তবে রিস্টোরেশনের জন্য সংরক্ষিত)।
-  2. `Demucs Vocal Stem` (আলাদা করা মানুষের কথা ও ভোকাল)।
+  2. `Demucs Vocal Stem` (আলাদা করা ভোকাল — গান বা অন্যান্য আওয়াজও থাকতে পারে)।
   3. `Demucs Accompaniment Stem` (আলাদা করা ব্যাকগ্রাউন্ড মিউজিক/পরিবেশের শব্দ)।
   4. `New AI Voice` (নতুন জেনারেটেড সিন্থেটিক ভয়েস)।
-* **Audio Speed-Stretch & Timeline Synchronization Rules:**
-  - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর কোনো ফ্রেম বা মোট দৈর্ঘ্য পরিবর্তন হবে না**।
-  - বিভিন্ন ভাষার সময়ের পার্থক্য অনুযায়ী টাইমলাইন সিঙ্ক ইঞ্জিন অডিও স্ট্রেচিং, প্যাডিং (নিরবতা যোগ) বা ট্রিম করবে।
-  - স্বাভাবিক কণ্ঠস্বর ঠিক রাখতে স্ট্রেচ রেঞ্জ **`0.85x` থেকে `1.25x`**-এর মধ্যে সীমাবদ্ধ থাকবে; এর বাইরে গেলে সিস্টেম UI-তে সতর্কবার্তা প্রদর্শন করবে।
+  * *ক্লিপিং প্রটেকশন:* প্রতি ট্র্যাকে Volume Slider (0-150%), Mute ও Solo কন্ট্রোল থাকবে। মিক্সারে **Master Output Level Meter, Peak Clipping Detector ও Master Audio Limiter / Loudness Normalizer** থাকবে যাতে সাউন্ড কখনোই ফেটে না যায় (Clipping Warning সহ)।
+* **Audio Speed-Stretch & Dialogue Preservation Rules:**
+  - অডিও স্পিড-স্ট্রেচিংয়ের কারণে **মূল ভিডিওর ফ্রেম সংখ্যা বা মোট দৈর্ঘ্য কোনোভাবেই পরিবর্তন হবে না**।
+  - বিভিন্ন ভাষার সময়ের পার্থক্য অনুযায়ী টাইমলাইন সিঙ্ক ইঞ্জিন **`0.85x` থেকে `1.25x`** রেঞ্জে স্ট্রেচিং এবং স্বাভাবিক Silence Padding ব্যবহার করবে।
+  - **কোনো অর্থপূর্ণ ডায়ালগ স্বয়ংক্রিয়ভাবে মুছে ফেলা বা ট্রিম করা সম্পূর্ণ নিষিদ্ধ।**
+  - ডায়ালগ অনুমোদিত রেঞ্জে ফিট না হলে Warning দেবে এবং ডায়ালগ কাটছাঁট করতে **ব্যবহারকারীর স্পষ্ট অনুমোদন (User Approval)** লাগবে।
 * **Mode 02 Dialogue & Copyright Policy:**
-  * অরিজিনাল স্টোরি, কনসেপ্ট, সিন সিকোয়েন্স, ক্যারেক্টার রোল ও অ্যাকশন বজায় থাকবে।
-  * প্রয়োজন অনুযায়ী Meaning-Preserving Contextual Dialogue Adaptation করা যাবে।
+  * অরিজিনাল স্টোরি, কনসেপ্ট, সিন সিকোয়েন্স, ক্যারেক্টার রোল ও অ্যাকশন বজায় থাকবে; প্রয়োজন অনুযায়ী Meaning-Preserving Contextual Dialogue Adaptation করা যাবে।
   * Real Voice ব্যবহারের ক্ষেত্রে বৈধ অধিকার থাকতে হবে। AI Voice কোনো Copyright-Free Guarantee নয়; এটি কেবল একটি বিকল্প সিন্থেটিক ভয়েস।
 
 ### ৫. Voice Approval Gate, Security & Standardized Output Language Matrix
