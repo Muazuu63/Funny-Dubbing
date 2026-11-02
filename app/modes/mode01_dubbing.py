@@ -360,10 +360,19 @@ class Mode01Dubbing:
                 except Exception:
                     lang_voice_audio.write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
 
-            # Final mux to output video using FFmpeg
+            # Final mux to output video using FFmpeg with automatic watermark / text / logo removal
             final_video_name = f"output_{lang}.mp4"
             final_video_path = project_dir / final_video_name
             ffmpeg_bin = settings.resolve_ffmpeg_binary()
+
+            # Automatically detect any watermarks, text banners, and logos on the video
+            watermark_boxes = self.inpainter.auto_detect_watermark_boxes(input_video_path) if input_video_path else []
+            vf_args = []
+            if watermark_boxes:
+                delogo_filters = [f"delogo=x={b[0]}:y={b[1]}:w={b[2]}:h={b[3]}" for b in watermark_boxes]
+                vf_args = ["-vf", ",".join(delogo_filters), "-c:v", "libx264", "-crf", "20", "-preset", "fast"]
+            else:
+                vf_args = ["-c:v", "copy"]
 
             if input_video_path and input_video_path.exists() and lang_voice_audio.exists():
                 try:
@@ -371,9 +380,9 @@ class Mode01Dubbing:
                         str(ffmpeg_bin), "-y",
                         "-i", str(input_video_path),
                         "-i", str(lang_voice_audio),
+                        *vf_args,
                         "-map", "0:v:0",
                         "-map", "1:a:0",
-                        "-c:v", "copy",
                         "-c:a", "aac",
                         "-b:a", "192k",
                         "-shortest",
