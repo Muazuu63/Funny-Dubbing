@@ -262,6 +262,15 @@ async def delete_project(db: aiosqlite.Connection, project_id: str) -> bool:
     return cursor.rowcount > 0
 
 
+async def update_project_status(db: aiosqlite.Connection, project_id: str, status: str) -> bool:
+    cursor = await db.execute(
+        "UPDATE projects SET status = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?;",
+        (status, project_id)
+    )
+    await db.commit()
+    return cursor.rowcount > 0
+
+
 # ==========================================
 # Task Manifest CRUD (Critical Durability)
 # ==========================================

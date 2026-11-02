@@ -12,7 +12,7 @@ import {
   SystemSettings,
   OutputLanguageOption
 } from './types';
-import { Play, Sparkles, FolderOpen, Film, Video, CheckCircle2, Brain, UploadCloud, Check, X, Mic } from 'lucide-react';
+import { Play, Sparkles, FolderOpen, Film, Video, CheckCircle2, Brain, UploadCloud, Check, X, Mic, Download } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Top Navigation Tabs
@@ -22,6 +22,16 @@ export const App: React.FC = () => {
   const [selectedMode, setSelectedMode] = useState<string>('mode01_dubbing');
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [wsConnected, setWsConnected] = useState<boolean>(false);
+
+  // Completed Final Video state
+  const [completedVideo, setCompletedVideo] = useState<{
+    projectId: string;
+    videoUrl: string;
+    downloadUrl: string;
+    language: string;
+    title: string;
+    filename: string;
+  } | null>(null);
 
   // Mode Specific States
   // Mode 02 states
@@ -109,6 +119,26 @@ export const App: React.FC = () => {
       }
     };
     fetchSettings();
+
+    // Check for any completed projects to display output
+    fetch('/api/v1/projects')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          const completed = data.find((p: any) => p.status === 'COMPLETED');
+          if (completed) {
+            setCompletedVideo({
+              projectId: completed.id,
+              videoUrl: `/api/v1/projects/${completed.id}/download?t=${Date.now()}`,
+              downloadUrl: `/api/v1/projects/${completed.id}/download`,
+              language: (completed.targetLanguages && completed.targetLanguages[0]) || 'Bangla',
+              title: completed.title || 'thirtd-video',
+              filename: `${completed.title || 'dubbed_video'}.mp4`
+            });
+          }
+        }
+      })
+      .catch(() => {});
   }, []);
 
   // WebSocket live telemetry setup
@@ -287,10 +317,18 @@ export const App: React.FC = () => {
       });
       
       if (renderRes.ok) {
+        const renderData = await renderRes.json();
+        setCompletedVideo({
+          projectId: projectId,
+          videoUrl: `/api/v1/projects/${projectId}/download?t=${Date.now()}`,
+          downloadUrl: `/api/v1/projects/${projectId}/download`,
+          language: renderData.language_matrix || outputLang,
+          title: videoTitle || 'Dubbed Video',
+          filename: `dubbed_${outputLang}_${projectId.slice(0, 8)}.mp4`
+        });
         setProgressPercent(100);
         setCurrentStep(`🎉 [${outputLang}] ভাষায় ফাইনাল ভিডিও ডাবিং সফলভাবে সম্পন্ন হয়েছে!`);
         setApprovalState(null);
-        alert(`🎉 অভিনন্দন! আপনার স্ক্রিপ্ট অনুমোদিত হয়েছে এবং [${outputLang}] ভাষায় ফাইনাল ভিডিও ডাবিং সফলভাবে সম্পন্ন হয়েছে!`);
       } else {
         setApprovalState(null);
         setProgressPercent(100);
@@ -610,68 +648,6 @@ export const App: React.FC = () => {
                     </p>
                     <p className="text-xs text-slate-500 mt-1">MP4, MKV, WebM, AVI (Local-First Privacy — No Cloud Upload)</p>
                   </div>
-
-                  {/* Select from Training Library Option */}
-                  {trainingVideos.length > 0 && (
-                    <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
-                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5">
-                        <Brain className="w-3.5 h-3.5 text-purple-400" />
-                        <span>পূর্বে আপলোড করা ট্রেনিং ভিডিও দিয়ে সরাসরি ডাবিং করতে চান?</span>
-                      </span>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowTrainingVideoPicker(!showTrainingVideoPicker)}
-                        className="px-2.5 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg border border-purple-500/30 text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer"
-                      >
-                        <Film className="w-3 h-3 text-purple-400" />
-                        <span>📂 ট্রেনিং লাইব্রেরি থেকে ভিডিও নিন ({trainingVideos.length})</span>
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Training Videos Quick Selector Dropdown / Cards */}
-                  {showTrainingVideoPicker && trainingVideos.length > 0 && (
-                    <div className="mt-3 bg-slate-950 border border-purple-500/30 rounded-xl p-3 space-y-2 animate-in fade-in">
-                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-800 text-[11px] font-bold text-purple-300">
-                        <span>ট্রেনিং ভিডিও তালিকা থেকে যেকোনো একটি সিলেক্ট করুন:</span>
-                        <button
-                          type="button"
-                          onClick={() => setShowTrainingVideoPicker(false)}
-                          className="text-slate-500 hover:text-slate-300"
-                        >
-                          <X className="w-3.5 h-3.5" />
-                        </button>
-                      </div>
-
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1">
-                        {trainingVideos.map((tv, idx) => (
-                          <div
-                            key={idx}
-                            onClick={() => handleSelectTrainingVideoForDubbing(
-                              tv.video_path,
-                              tv.video_name,
-                              tv.video_size_mb,
-                              tv.video_specs?.duration_sec
-                            )}
-                            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500 cursor-pointer transition flex items-center justify-between text-xs group"
-                          >
-                            <div className="min-w-0 flex-1">
-                              <p className="font-semibold text-slate-200 group-hover:text-purple-300 truncate" title={tv.video_name}>
-                                {tv.video_name}
-                              </p>
-                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">
-                                {tv.video_size_mb} MB • {tv.video_specs?.duration_sec ? `${tv.video_specs.duration_sec}s` : '58.8s'}
-                              </p>
-                            </div>
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 shrink-0 font-medium ml-2">
-                              সিলেক্ট করুন
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
 
                   {uploadedVideoInfo && (
                     <div className="mt-3 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between text-xs gap-3">
@@ -1043,6 +1019,57 @@ export const App: React.FC = () => {
                 <p className="text-xs text-slate-500 max-w-md mx-auto">
                   Currently, Phase 1 (P1 Core) features Mode 01 (Dubbing), Mode 02 (Cartoon Re-Creation), and Mode 03 (Autonomous Creator). Please select one of the top 3 active modes above.
                 </p>
+              </section>
+            )}
+
+            {/* Completed Final Dubbed Video Player Card */}
+            {completedVideo && (
+              <section className="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-slate-800 gap-3">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-3.5 h-3.5 rounded-full bg-emerald-400 animate-ping" />
+                    <div>
+                      <h3 className="text-base font-bold text-white flex items-center gap-2">
+                        🎉 ফাইনাল ডাবিং ভিডিও প্রস্তুত! (Final Dubbed Video Ready)
+                        <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono border border-emerald-500/30">
+                          {completedVideo.language}
+                        </span>
+                      </h3>
+                      <p className="text-xs text-slate-400">
+                        আপনার অনুমোদিত স্ক্রিপ্ট অনুযায়ী সম্পূর্ণ ডাবিং রেন্ডার সম্পন্ন হয়েছে। নিচে সরাসরি প্লে করে দেখুন বা ডাউনলোড করুন।
+                      </p>
+                    </div>
+                  </div>
+
+                  <a
+                    href={completedVideo.downloadUrl}
+                    download={completedVideo.filename}
+                    className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs rounded-xl flex items-center space-x-2 shadow-lg shadow-emerald-500/20 transition cursor-pointer shrink-0"
+                  >
+                    <Download className="w-4 h-4" />
+                    <span>📥 ভিডিও ডাউনলোড করুন (Download MP4)</span>
+                  </a>
+                </div>
+
+                {/* Video Player */}
+                <div className="rounded-xl overflow-hidden bg-black border border-slate-800 flex justify-center items-center">
+                  <video
+                    controls
+                    autoPlay
+                    src={completedVideo.videoUrl}
+                    className="w-full max-h-[460px] object-contain"
+                  />
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-500 pt-1">
+                  <span>ফাইল: {completedVideo.filename} | প্রজেক্ট আইডি: {completedVideo.projectId}</span>
+                  <button
+                    onClick={() => setCompletedVideo(null)}
+                    className="text-slate-400 hover:text-slate-200 underline cursor-pointer"
+                  >
+                    প্লেয়ার বন্ধ করুন (Close Player)
+                  </button>
+                </div>
               </section>
             )}
 
