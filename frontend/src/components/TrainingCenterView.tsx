@@ -102,10 +102,12 @@ interface TrainingProfile {
 
 interface TrainingCenterViewProps {
   onSelectProfileForDubbing?: (profile: TrainingProfile) => void;
+  onSelectVideoForDubbing?: (videoPath: string, filename: string, sizeMb?: number, durationSec?: number) => void;
 }
 
 export const TrainingCenterView: React.FC<TrainingCenterViewProps> = ({
-  onSelectProfileForDubbing
+  onSelectProfileForDubbing,
+  onSelectVideoForDubbing
 }) => {
   const [profiles, setProfiles] = useState<TrainingProfile[]>([]);
   const [ledger, setLedger] = useState<VideoLearningRecord[]>([]);
@@ -499,6 +501,22 @@ export const TrainingCenterView: React.FC<TrainingCenterViewProps> = ({
                 </div>
 
                 <div className="flex items-center space-x-2">
+                  {onSelectVideoForDubbing && (
+                    <button
+                      onClick={() => onSelectVideoForDubbing(
+                        activeRecord.video_path,
+                        activeRecord.video_name,
+                        activeRecord.video_size_mb,
+                        activeRecord.video_specs?.duration_sec
+                      )}
+                      className="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white rounded-lg text-xs font-bold transition flex items-center space-x-1.5 shadow-md shadow-emerald-600/20"
+                      title="এই ট্রেনিং ভিডিওটি সরাসরি ডাবিং স্টুডিওতে নিয়ে যান"
+                    >
+                      <Film className="w-3.5 h-3.5" />
+                      <span>🎬 এই ভিডিওটি ডাবিং করুন</span>
+                    </button>
+                  )}
+
                   <button
                     onClick={() => setShowFullMarkdown(!showFullMarkdown)}
                     className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium border border-slate-700 transition flex items-center space-x-1"

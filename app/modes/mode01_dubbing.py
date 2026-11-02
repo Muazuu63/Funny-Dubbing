@@ -90,20 +90,37 @@ class Mode01Dubbing:
             project_dir=project_dir,
         )
 
-        # Step 2: Context Analysis & Script Generation
-        script_res = await self.gemini.generate_script(
-            prompt="Funny scene commentary",
-            target_language="Bangla",
+        # Step 2: Context Analysis & Full-Timeline Script Generation
+        video_duration = 30.0
+        if input_video_path.exists():
+            try:
+                import cv2
+                cap = cv2.VideoCapture(str(input_video_path))
+                if cap.isOpened():
+                    fps = float(cap.get(cv2.CAP_PROP_FPS) or 25.0)
+                    frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+                    if fps > 0 and frames > 0:
+                        video_duration = round(frames / fps, 2)
+                    cap.release()
+            except Exception:
+                pass
+
+        # Generate full-length comedic script matching complete video duration
+        full_script_data = LocalScriptEngine.generate_full_length_script(
+            duration_sec=video_duration,
+            target_language=target_language_matrix
         )
+        full_dialogue = full_script_data["full_script_text"]
+        voice_text = full_script_data["preview_voice_text"]
 
         # Step 3: Extract Master Audio & Separate Stems
         master_audio = await self.separator.extract_master_audio(input_video_path, staging_dir)
         separation_res = await self.separator.separate_stems(master_audio, staging_dir)
 
-        # Step 4: Synthesize Preview Voice
+        # Step 4: Synthesize Preview Voice for the entire video
         preview_audio = staging_dir / "preview_voice.wav"
         await self.tts.synthesize(
-            text=script_res.scenes[0]["dialogue"] if script_res.scenes else "Funny dubbing sample",
+            text=voice_text,
             output_path=str(preview_audio),
             is_commercial=False,
         )
@@ -113,6 +130,10 @@ class Mode01Dubbing:
             project_id=project_id,
             status="WAITING_FOR_VOICE_APPROVAL",
             audio_preview_url=str(preview_audio.resolve()),
+            script_text=full_dialogue,
+            duration_sec=video_duration,
+            formatted_duration=full_script_data["formatted_duration"],
+            notes=f"Full Length Script ({full_script_data['formatted_duration']}, {full_script_data['total_words']} words, {full_script_data['total_scenes']} scenes)"
         )
         set_project_approval_state(project_id, approval_state)
 
@@ -120,7 +141,10 @@ class Mode01Dubbing:
             "project_id": project_id,
             "status": "WAITING_FOR_VOICE_APPROVAL",
             "preview_audio": str(preview_audio),
-            "script": script_res.model_dump(),
+            "script": full_script_data,
+            "full_script_text": full_dialogue,
+            "duration_sec": video_duration,
+            "formatted_duration": full_script_data["formatted_duration"],
             "inpaint_engine": inpaint_res.engine_used,
         }
 

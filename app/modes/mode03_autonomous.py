@@ -98,17 +98,19 @@ class Mode03Autonomous:
         has_visual_engine = self.is_visual_engine_available()
         visual_status = "AVAILABLE" if has_visual_engine else "UNAVAILABLE"
 
-        # 3. Synthesize Preview Voice
+        # 3. Synthesize Preview Voice for full narrative
         preview_audio = staging_dir / f"autonomous_preview_{target_language}.wav"
-        preview_dialogue = script_res.scenes[0]["dialogue"] if script_res.scenes else "Autonomous content audio"
-        await self.tts.synthesize(preview_dialogue, str(preview_audio), is_commercial=False)
+        full_dialogue_text = " ".join([s["dialogue"] for s in script_res.scenes]) if script_res.scenes else "Autonomous content audio"
+        formatted_script = "\n\n".join([f"[{s.get('scene_id', idx+1)}] {s.get('dialogue', '')}" for idx, s in enumerate(script_res.scenes)]) if script_res.scenes else full_dialogue_text
+        await self.tts.synthesize(full_dialogue_text, str(preview_audio), is_commercial=False)
 
         # 4. Universal Voice Approval Gateway
         approval_state = ApprovalState(
             project_id=project_id,
             status="WAITING_FOR_VOICE_APPROVAL",
             audio_preview_url=str(preview_audio.resolve()),
-            notes=f"Visual Engine: {visual_status}. Topic: {clean_topic}",
+            script_text=formatted_script,
+            notes=f"Visual Engine: {visual_status}. Topic: {clean_topic} ({len(script_res.scenes)} scenes)",
         )
         set_project_approval_state(project_id, approval_state)
 
@@ -120,6 +122,7 @@ class Mode03Autonomous:
             "visual_engine_notice": None if has_visual_engine else VISUAL_ENGINE_NOTICE,
             "preview_audio": str(preview_audio),
             "script": script_res.model_dump(),
+            "script_text": formatted_script,
         }
 
     async def execute_final_render(

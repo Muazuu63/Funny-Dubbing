@@ -45,6 +45,8 @@ export const App: React.FC = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<OutputLanguageOption>('Bangla');
   const [selectedProfileName, setSelectedProfileName] = useState<string>('Dhallywood Classic Satire');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [trainingVideos, setTrainingVideos] = useState<any[]>([]);
+  const [showTrainingVideoPicker, setShowTrainingVideoPicker] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -170,6 +172,48 @@ export const App: React.FC = () => {
       if (reconnectTimer) clearTimeout(reconnectTimer);
     };
   }, []);
+
+  // Load training videos ledger so user can use ANY training video directly for dubbing
+  const fetchTrainingVideos = async () => {
+    try {
+      const res = await fetch('/api/v1/training/ledger');
+      if (res.ok) {
+        const data = await res.json();
+        if (data && data.records) {
+          setTrainingVideos(data.records);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to fetch training videos:', e);
+    }
+  };
+
+  useEffect(() => {
+    fetchTrainingVideos();
+  }, [activeTab]);
+
+  // Select any Training Video directly for dubbing
+  const handleSelectTrainingVideoForDubbing = (
+    chosenVideoPath: string,
+    filename: string,
+    sizeMb?: number,
+    durationSec?: number
+  ) => {
+    setVideoPath(chosenVideoPath);
+    const dur = durationSec || 58.8;
+    const mins = Math.floor(dur / 60);
+    const secs = Math.floor(dur % 60);
+    const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    setUploadedVideoInfo({
+      filename: filename,
+      sizeMb: sizeMb || 0,
+      durationSec: dur,
+      formattedDuration: formatted,
+    });
+    setVideoTitle(filename.replace(/\.[^/.]+$/, ''));
+    setActiveTab('production');
+    setShowTrainingVideoPicker(false);
+  };
 
   // Handle Video File Upload from File Picker
   const handleVideoFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -468,6 +512,7 @@ export const App: React.FC = () => {
               setActiveTab('production');
               alert(`Selected comedy profile: "${profile.name}". Ready for dubbing!`);
             }}
+            onSelectVideoForDubbing={handleSelectTrainingVideoForDubbing}
           />
         ) : (
           /* STUDIO PRODUCTION TAB VIEW */
@@ -536,6 +581,68 @@ export const App: React.FC = () => {
                     </p>
                     <p className="text-xs text-slate-500 mt-1">MP4, MKV, WebM, AVI (Local-First Privacy — No Cloud Upload)</p>
                   </div>
+
+                  {/* Select from Training Library Option */}
+                  {trainingVideos.length > 0 && (
+                    <div className="mt-2.5 pt-2 border-t border-slate-800/80 flex items-center justify-between text-xs">
+                      <span className="text-slate-400 text-[11px] flex items-center gap-1.5">
+                        <Brain className="w-3.5 h-3.5 text-purple-400" />
+                        <span>পূর্বে আপলোড করা ট্রেনিং ভিডিও দিয়ে সরাসরি ডাবিং করতে চান?</span>
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() => setShowTrainingVideoPicker(!showTrainingVideoPicker)}
+                        className="px-2.5 py-1 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg border border-purple-500/30 text-[11px] font-semibold transition flex items-center space-x-1 cursor-pointer"
+                      >
+                        <Film className="w-3 h-3 text-purple-400" />
+                        <span>📂 ট্রেনিং লাইব্রেরি থেকে ভিডিও নিন ({trainingVideos.length})</span>
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Training Videos Quick Selector Dropdown / Cards */}
+                  {showTrainingVideoPicker && trainingVideos.length > 0 && (
+                    <div className="mt-3 bg-slate-950 border border-purple-500/30 rounded-xl p-3 space-y-2 animate-in fade-in">
+                      <div className="flex items-center justify-between pb-1.5 border-b border-slate-800 text-[11px] font-bold text-purple-300">
+                        <span>ট্রেনিং ভিডিও তালিকা থেকে যেকোনো একটি সিলেক্ট করুন:</span>
+                        <button
+                          type="button"
+                          onClick={() => setShowTrainingVideoPicker(false)}
+                          className="text-slate-500 hover:text-slate-300"
+                        >
+                          <X className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 max-h-[180px] overflow-y-auto pr-1">
+                        {trainingVideos.map((tv, idx) => (
+                          <div
+                            key={idx}
+                            onClick={() => handleSelectTrainingVideoForDubbing(
+                              tv.video_path,
+                              tv.video_name,
+                              tv.video_size_mb,
+                              tv.video_specs?.duration_sec
+                            )}
+                            className="p-2 rounded-lg bg-slate-900 border border-slate-800 hover:border-purple-500 cursor-pointer transition flex items-center justify-between text-xs group"
+                          >
+                            <div className="min-w-0 flex-1">
+                              <p className="font-semibold text-slate-200 group-hover:text-purple-300 truncate" title={tv.video_name}>
+                                {tv.video_name}
+                              </p>
+                              <p className="text-[10px] text-slate-500 font-mono mt-0.5">
+                                {tv.video_size_mb} MB • {tv.video_specs?.duration_sec ? `${tv.video_specs.duration_sec}s` : '58.8s'}
+                              </p>
+                            </div>
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-purple-500/10 text-purple-300 border border-purple-500/20 shrink-0 font-medium ml-2">
+                              সিলেক্ট করুন
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
 
                   {uploadedVideoInfo && (
                     <div className="mt-3 bg-slate-950 border border-emerald-500/30 rounded-xl p-3 flex items-center justify-between text-xs gap-3">

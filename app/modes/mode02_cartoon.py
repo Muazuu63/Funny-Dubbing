@@ -91,22 +91,44 @@ class Mode02Cartoon:
         if not real_voice_cache.exists():
             shutil.copy(master_audio, real_voice_cache)
 
+        # Measure actual video duration
+        video_duration = 30.0
+        if input_video_path.exists():
+            try:
+                import cv2
+                cap = cv2.VideoCapture(str(input_video_path))
+                if cap.isOpened():
+                    fps = float(cap.get(cv2.CAP_PROP_FPS) or 25.0)
+                    frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+                    if fps > 0 and frames > 0:
+                        video_duration = round(frames / fps, 2)
+                    cap.release()
+            except Exception:
+                pass
+
         # 3. Transcribe / Meaning-preserving script adaptation
         trans_res = await self.transcriber.transcribe_audio(master_audio, manual_text=manual_script_text)
 
-        # 4. Synthesize AI Voice preview
+        # 4. Synthesize AI Voice preview covering full transcript
         ai_voice_preview = cache_dir / f"ai_voice_{target_language}.wav"
-        preview_text = trans_res.segments[0].text if trans_res.segments else "কার্টুন সংলাপ"
-        await self.tts.synthesize(preview_text, str(ai_voice_preview), is_commercial=False)
+        full_text = trans_res.full_text or (" ".join([s.text for s in trans_res.segments]) if trans_res.segments else "কার্টুন সম্পূর্ণ সংলাপ")
+        await self.tts.synthesize(full_text, str(ai_voice_preview), is_commercial=False)
 
         selected_preview_audio = ai_voice_preview if voice_type == VoiceType.AI_VOICE else real_voice_cache
 
-        # Set Voice Approval State
+        minutes = int(video_duration) // 60
+        seconds = int(video_duration) % 60
+        formatted_duration = f"{minutes:02d}:{seconds:02d}"
+
+        # Set Voice Approval State with full timeline
         approval_state = ApprovalState(
             project_id=project_id,
             status="WAITING_FOR_VOICE_APPROVAL",
             audio_preview_url=str(selected_preview_audio.resolve()),
-            notes=f"Selected Voice: {voice_type.value}",
+            script_text=full_text,
+            duration_sec=video_duration,
+            formatted_duration=formatted_duration,
+            notes=f"Selected Voice: {voice_type.value} ({formatted_duration}, {len(trans_res.segments)} segments)",
         )
         set_project_approval_state(project_id, approval_state)
 
@@ -115,7 +137,10 @@ class Mode02Cartoon:
             "status": "WAITING_FOR_VOICE_APPROVAL",
             "voice_type": voice_type.value,
             "preview_audio": str(selected_preview_audio),
-            "transcript_full": trans_res.full_text,
+            "transcript_full": full_text,
+            "script_text": full_text,
+            "duration_sec": video_duration,
+            "formatted_duration": formatted_duration,
             "segments_count": len(trans_res.segments),
             "cached_video": str(cached_video_stream),
         }
