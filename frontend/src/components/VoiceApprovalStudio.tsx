@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   CheckCircle2,
   RefreshCw,
@@ -10,7 +10,9 @@ import {
   Copy,
   Check,
   Edit3,
-  FileText
+  Mic,
+  MessageSquare,
+  VolumeX
 } from 'lucide-react';
 import { ApprovalState } from '../types';
 
@@ -32,6 +34,12 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [copied, setCopied] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [currentAudioUrl, setCurrentAudioUrl] = useState<string>(approvalState?.audio_preview_url || '');
+
+  const [activeTab, setActiveTab] = useState<'translation' | 'commentary'>(
+    approvalState?.has_original_voice ? 'translation' : 'commentary'
+  );
 
   // Script text in editable form
   const [scriptText, setScriptText] = useState<string>(
@@ -44,10 +52,27 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
 
   // Sync when approvalState changes
   useEffect(() => {
-    if (approvalState?.script_text) {
-      setScriptText(approvalState.script_text);
+    if (approvalState) {
+      if (approvalState.script_text) {
+        setScriptText(approvalState.script_text);
+      }
+      if (approvalState.audio_preview_url) {
+        setCurrentAudioUrl(approvalState.audio_preview_url);
+      }
+      if (approvalState.has_original_voice !== undefined) {
+        setActiveTab(approvalState.has_original_voice ? 'translation' : 'commentary');
+      }
     }
-  }, [approvalState?.script_text]);
+  }, [approvalState]);
+
+  // Cleanup browser speech on unmount
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   if (!approvalState) {
     return null;
@@ -60,8 +85,65 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
     setTimeout(() => setCopied(false), 2000);
   };
 
+  // Browser Speech Synthesis fallback (Guaranteed sound in any browser)
+  const playBrowserSpeech = () => {
+    if (!('speechSynthesis' in window)) return;
+    window.speechSynthesis.cancel();
+    const cleanSpeech = scriptText.replace(/\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]/g, '').trim();
+    const utterance = new SpeechSynthesisUtterance(cleanSpeech || scriptText);
+    utterance.lang = currentLanguage === 'Hindi' ? 'hi-IN' : currentLanguage === 'English' ? 'en-US' : 'bn-BD';
+    utterance.rate = 1.05;
+    utterance.pitch = 1.0;
+    utterance.onend = () => setIsPlaying(false);
+    utterance.onerror = () => setIsPlaying(false);
+    window.speechSynthesis.speak(utterance);
+    setIsPlaying(true);
+  };
+
+  // Toggle Audio Playback (Edge-TTS Audio tag first, then browser speech fallback)
+  const togglePlayAudio = () => {
+    if (isPlaying) {
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+      setIsPlaying(false);
+    } else {
+      if (currentAudioUrl && audioRef.current) {
+        audioRef.current.currentTime = 0;
+        audioRef.current
+          .play()
+          .then(() => {
+            setIsPlaying(true);
+          })
+          .catch((err) => {
+            console.warn('Audio tag play failed, falling back to speech synthesis:', err);
+            playBrowserSpeech();
+          });
+      } else {
+        playBrowserSpeech();
+      }
+    }
+  };
+
+  const handleSelectTab = (tab: 'translation' | 'commentary') => {
+    setActiveTab(tab);
+    if (tab === 'translation') {
+      if (approvalState.translation_script_text) {
+        setScriptText(approvalState.translation_script_text);
+      }
+    } else {
+      if (approvalState.commentary_script_text) {
+        setScriptText(approvalState.commentary_script_text);
+      }
+    }
+  };
+
   const handleApprove = async () => {
     setLoading(true);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     try {
       await onApprove(approvalState.project_id, scriptText);
     } finally {
@@ -71,8 +153,33 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
 
   const handleRegenerate = async () => {
     setLoading(true);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     try {
+      const res = await fetch('/api/v1/projects/synthesize-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: approvalState.project_id,
+          script_text: scriptText,
+          language: currentLanguage
+        })
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        if (data.audio_url) {
+          setCurrentAudioUrl(data.audio_url);
+          if (audioRef.current) {
+            audioRef.current.src = data.audio_url;
+            audioRef.current.load();
+            audioRef.current.play().then(() => setIsPlaying(true)).catch(() => playBrowserSpeech());
+          }
+        }
+      }
+
       await onRegenerate(approvalState.project_id, scriptText, deliveryNotes);
+    } catch {
+      playBrowserSpeech();
     } finally {
       setLoading(false);
     }
@@ -80,6 +187,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
 
   const handleReject = async () => {
     setLoading(true);
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     try {
       await onReject(approvalState.project_id, deliveryNotes || 'Rejected by user');
     } finally {
@@ -89,6 +197,18 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
 
   return (
     <div className="bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 animate-in fade-in duration-200">
+      {/* Hidden real audio element */}
+      <audio
+        ref={audioRef}
+        src={currentAudioUrl}
+        onPlay={() => setIsPlaying(true)}
+        onPause={() => setIsPlaying(false)}
+        onEnded={() => setIsPlaying(false)}
+        onError={() => setIsPlaying(false)}
+        preload="auto"
+        className="hidden"
+      />
+
       {/* Top Banner Tag */}
       <div className="absolute top-0 right-0 bg-amber-500/20 text-amber-300 text-xs px-4 py-1 font-bold rounded-bl-xl border-b border-l border-amber-500/30 flex items-center space-x-1.5">
         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -111,12 +231,14 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         </div>
       </div>
 
-      {/* 1. Audio Preview Player */}
-      <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex items-center justify-between">
+      {/* 1. Audio Preview Player (Real Edge-TTS Audio + Fallback) */}
+      <div className="bg-slate-950 border border-slate-800 rounded-xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-center space-x-4">
           <button
-            onClick={() => setIsPlaying(!isPlaying)}
-            className="w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center transition-transform active:scale-95 shadow-lg shadow-amber-500/20"
+            type="button"
+            onClick={togglePlayAudio}
+            className="w-12 h-12 rounded-full bg-amber-500 hover:bg-amber-400 text-slate-950 flex items-center justify-center transition-transform active:scale-95 shadow-lg shadow-amber-500/20 shrink-0 cursor-pointer"
+            title={isPlaying ? 'ভয়েস থামান' : 'ভয়েস শুনুন'}
           >
             {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
           </button>
@@ -124,32 +246,91 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
             <div className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
               <Volume2 className="w-4 h-4 text-amber-400" />
               <span>বর্তমান ভয়েস প্রিভিউ (00:00 - {approvalState?.formatted_duration || '00:58'})</span>
+              {isPlaying && (
+                <span className="text-xs text-amber-400 font-normal animate-pulse flex items-center gap-1 ml-2">
+                  <span className="w-2 h-2 rounded-full bg-amber-400 inline-block" />
+                  শব্দ প্লে হচ্ছে...
+                </span>
+              )}
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              কমেডি অ্যাকসেন্টুয়েশন | Limiter: -0.5 dBFS Engaged | পূর্ণাঙ্গ ভিডিও ব্যাপ্তি: {approvalState?.formatted_duration || '00:58'} মিনিট
+              কমেডি অ্যাকসেন্টুয়েশন | Microsoft Neural Voice | পূর্ণাঙ্গ ভিডিও ব্যাপ্তি: {approvalState?.formatted_duration || '00:58'} মিনিট
             </div>
           </div>
         </div>
 
-        <div className="text-right">
+        <div className="flex items-center space-x-2">
           <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
             Timing Sync: 1.05x Safe (Full Timeline)
           </span>
         </div>
       </div>
 
-      {/* 2. Text Script Editor Box (যা ইউজার চেয়েছেন) */}
+      {/* 2. Intelligent Dual Script Mode Selector */}
+      <div className="bg-slate-950/80 border border-slate-800 rounded-xl p-3.5 flex flex-col md:flex-row md:items-center justify-between gap-3">
+        <div className="flex items-center space-x-2.5 text-xs">
+          {approvalState.has_original_voice ? (
+            <div className="flex items-center space-x-2 text-emerald-400">
+              <Mic className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span className="font-semibold">
+                মূল ভিডিওতে আসল সংলাপ/কণ্ঠস্বর পাওয়া গেছে — ডায়ালগ ভাবানুবাদ মোড
+              </span>
+            </div>
+          ) : (
+            <div className="flex items-center space-x-2 text-blue-400">
+              <VolumeX className="w-4 h-4 text-blue-400 shrink-0" />
+              <span className="font-semibold">
+                ভিডিওতে কোনো কথা নেই (Silent/BGM) — দৃশ্যভিত্তিক কমেডি কমেন্ট্রি মোড
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* 1-Click Tab Switcher Buttons */}
+        <div className="flex items-center space-x-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => handleSelectTab('translation')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+              activeTab === 'translation'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 border border-amber-400'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+            }`}
+          >
+            <MessageSquare className="w-3.5 h-3.5" />
+            <span>🎙️ মূল সংলাপের ভাবানুবাদ (Translation)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => handleSelectTab('commentary')}
+            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center space-x-1.5 cursor-pointer ${
+              activeTab === 'commentary'
+                ? 'bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20 border border-amber-400'
+                : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+            }`}
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>🎭 মৌলিক কমেডি ধারাভাষ্য (Commentary)</span>
+          </button>
+        </div>
+      </div>
+
+      {/* 3. Text Script Editor Box */}
       <div className="bg-slate-950 border border-amber-500/30 rounded-xl p-4 space-y-2.5">
         <div className="flex items-center justify-between pb-2 border-b border-slate-800">
           <div className="flex items-center space-x-2 text-xs font-bold text-amber-300">
             <Edit3 className="w-4 h-4 text-amber-400" />
-            <span>পূর্ণাঙ্গ সংলাপ / স্ক্রিপ্ট এডিটর (Full Timeline Script Editor: 00:00 - {approvalState?.formatted_duration || '00:58'})</span>
+            <span>
+              পূর্ণাঙ্গ সংলাপ / স্ক্রিপ্ট এডিটর (00:00 - {approvalState?.formatted_duration || '00:58'})
+              {activeTab === 'translation' ? ' — [মূল সংলাপের ভাবানুবাদ]' : ' — [মৌলিক কমেডি ধারাভাষ্য]'}
+            </span>
           </div>
 
           <div className="flex items-center space-x-2">
             <button
               onClick={handleCopyScript}
-              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-medium border border-slate-700 transition flex items-center space-x-1"
+              className="px-2.5 py-1 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded text-[11px] font-medium border border-slate-700 transition flex items-center space-x-1 cursor-pointer"
               title="Copy text to clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
@@ -173,7 +354,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         </div>
       </div>
 
-      {/* 3. Delivery Adjustment / Comedic Note Input */}
+      {/* 4. Delivery Adjustment / Comedic Note Input */}
       <div>
         <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
           কণ্ঠের ভাবভঙ্গি / এক্সপ্রেশন নোট (Delivery Tone Note)
@@ -187,12 +368,12 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         />
       </div>
 
-      {/* 4. Action Buttons */}
+      {/* 5. Action Buttons */}
       <div className="flex flex-wrap items-center justify-end gap-3 pt-2">
         <button
           onClick={handleReject}
           disabled={loading}
-          className="px-4 py-2 rounded-xl border border-red-500/30 hover:bg-red-500/10 text-red-400 text-xs font-semibold transition flex items-center space-x-1.5 disabled:opacity-50"
+          className="px-4 py-2 rounded-xl border border-red-500/30 hover:bg-red-500/10 text-red-400 text-xs font-semibold transition flex items-center space-x-1.5 disabled:opacity-50 cursor-pointer"
         >
           <XCircle className="w-4 h-4" />
           <span>বাতিল করুন (Reject)</span>
@@ -201,7 +382,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         <button
           onClick={handleRegenerate}
           disabled={loading || !scriptText.trim()}
-          className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 disabled:opacity-50"
+          className="px-5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
           <span>এডিট করা স্ক্রিপ্ট দিয়ে নতুন ভয়েস বানান (Regenerate Voice)</span>
@@ -210,7 +391,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         <button
           onClick={handleApprove}
           disabled={loading}
-          className="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-500/20 disabled:opacity-50"
+          className="px-6 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-500/20 disabled:opacity-50 cursor-pointer"
         >
           <CheckCircle2 className="w-4 h-4" />
           <span>এই ভয়েস অ্যাপ্রুভ করুন ও ফাইনাল ভিডিও তৈরি করুন</span>

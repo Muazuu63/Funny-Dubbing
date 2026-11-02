@@ -101,14 +101,22 @@ class LocalScriptEngine:
         
         actual_step = duration / num_scenes
 
-        # Rich Bengali comedic dialogue beats covering complete timeline
-        bengali_beats = [
-            "আরে ভাই দেখো কারবার! এই দৃশ্যটা না দেখলে বিশ্বাসই করা যাইতো না! ধুর মিয়া কী যে শুরু করলো!",
-            "উস্তাদ দেখেন, কী কনফিডেন্স নিয়া কাজটা করতে গেছে! এইটা সাফল্য হইব না বিশাল ধরা খাইব কে জানে!",
-            "আরে থামেন থামেন! এইবার খেলা পুরা জমবে! এই কান্ড দেখার পর তো আমার হাসতে হাসতে পেটে খিল ধইরা যাইতাছে!",
-            "ওরে বাবারে বাবা! পরিস্থিতি তো পুরাই নিয়ন্ত্রণের বাইরে চইলা গেছে! এমন বিপদে মানুষ ক্যামনে পড়ে ভাই!",
-            "হায়রে আমার ভাগ্য! নিজেই নিজের ফান্দে পইড়া নাকানি-চুবানি খাইতাছে! এখন কে বাঁচাইবো তোমারে?",
-            "শেষমেশ কী হইলো দেখেন! পুরাই ইতিহাস সৃষ্টি কইরা ফেললো! এইবার দর্শক ভাইরা বলেন, এইটার বিচার কে করবে? ধুররর!"
+        # 1. Comedic Adaptation / Translation beats (when original video has voice/dialogue)
+        bengali_translation_beats = [
+            "কী রে ভাই, তুই এইখানে কী করতাছিস? তুই তো বলছিলি সকালে বাজারে যাবি!",
+            "আরে দোস্ত, আমি তো বের হইতে গেছিলাম, কিন্তু রাস্তায় যে কান্ড হইছে বিশ্বাস করবি না!",
+            "কী কান্ড হইছে আবার? সত্যি কইরা বল, আবার কোনো ঝামেলা পাকাইয়া আসছিস নাকি?",
+            "ঝামেলা মানে? পুরা এলাকা মাথায় তুইলা ফেলছে! এখন তো আমার মানসম্মান নিয়াই টানাটানি!",
+            "তোর মানসম্মান তো আগেই গেছিল ভাই, এখন শুধু অফিশিয়ালি প্রমাণ হইলো! চলো পালাই এবার!"
+        ]
+
+        # 2. Original Commentary beats (when video is silent, animal clip, or action without voice)
+        bengali_commentary_beats = [
+            "আরে ভাই দেখো কারবার! এই বিড়ালটা নাকি এখন স্পেশাল বিরিয়ানি রান্না করবে! ধুর মিয়া ফাইজলামি নাকি?",
+            "উস্তাদ দেখেন, কড়াইতে তেল না দিয়াই পেঁয়াজ কুচি ছাইড়া দিছে! এইটা বিরিয়ানি হইব না তেলের ড্রপ আউট হইব কে জানে!",
+            "আরে থামেন ভাই! বিড়ালটা তো আবার চামচ ধইরা টেস্ট করতাছে! জীবনে কত রাঁধুনি দেখলাম, কিন্তু বিড়ালের বিরিয়ানি শেফ এই প্রথম!",
+            "ওরে বাবারে বাবা! মসলা দিতে গিয়া নিজেই তো কড়াইতে পইড়া যাইব অবস্থা! হায়রে আমার ভাগ্য, কী দেখতে হইতাছে!",
+            "শেষমেশ কী বানাইলো দেখেন! বিরিয়ানি তো দূরের কথা, পুরাই এক্কেরে ছাইপাঁশ! এইবার কে খাইব এইটা? আপনি না আমি? ধুররর!"
         ]
 
         hindi_beats = [
@@ -127,15 +135,22 @@ class LocalScriptEngine:
             "And that's how you turn a simple moment into pure comedy gold! Who did this?!"
         ]
 
-        if "Hindi" in target_language:
+        is_hindi = "Hindi" in target_language
+        is_english = "English" in target_language
+
+        if is_hindi:
             pool = hindi_beats
-        elif "English" in target_language:
+            trans_pool = hindi_beats
+        elif is_english:
             pool = english_beats
+            trans_pool = english_beats
         else:
-            pool = bengali_beats
+            pool = bengali_commentary_beats
+            trans_pool = bengali_translation_beats
 
         scenes = []
         full_text_lines = []
+        trans_text_lines = []
 
         for i in range(num_scenes):
             start = round(i * actual_step, 1)
@@ -143,6 +158,7 @@ class LocalScriptEngine:
             start_lbl = f"{int(start)//60:02d}:{int(start)%60:02d}"
             end_lbl = f"{int(end)//60:02d}:{int(end)%60:02d}"
             dialogue = pool[i % len(pool)]
+            trans_dialogue = trans_pool[i % len(trans_pool)]
 
             scene_item = {
                 "scene_id": i + 1,
@@ -150,12 +166,15 @@ class LocalScriptEngine:
                 "end_time": end,
                 "timestamp_label": f"[{start_lbl} - {end_lbl}]",
                 "dialogue": dialogue,
+                "translated_dialogue": trans_dialogue,
                 "tone": "Comedic / Satirical"
             }
             scenes.append(scene_item)
             full_text_lines.append(f"[{start_lbl} - {end_lbl}] {dialogue}")
+            trans_text_lines.append(f"[{start_lbl} - {end_lbl}] {trans_dialogue}")
 
         full_script_text = "\n\n".join(full_text_lines)
+        translation_script_text = "\n\n".join(trans_text_lines)
         total_words = sum(len(s["dialogue"].split()) for s in scenes)
         minutes = int(duration) // 60
         seconds = int(duration) % 60
@@ -168,6 +187,7 @@ class LocalScriptEngine:
             "total_words": total_words,
             "scenes": scenes,
             "full_script_text": full_script_text,
+            "translation_script_text": translation_script_text,
             "preview_voice_text": " ".join(s["dialogue"] for s in scenes)
         }
 

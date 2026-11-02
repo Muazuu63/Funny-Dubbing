@@ -44,6 +44,9 @@ export interface ApprovalState {
   audio_preview_url?: string;
   notes?: string;
   script_text?: string;
+  translation_script_text?: string;
+  commentary_script_text?: string;
+  has_original_voice?: boolean;
   duration_sec?: number;
   formatted_duration?: string;
 }

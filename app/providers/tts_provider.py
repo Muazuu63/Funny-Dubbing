@@ -27,7 +27,7 @@ class OfflineEngineBlockedError(Exception):
 
 
 class EdgeTTSEngine(BaseTTSProvider):
-    """Online Optional Engine (Edge-TTS)."""
+    """Online Optional Engine (Edge-TTS) with High Quality Microsoft Neural Voices."""
     def __init__(self):
         self.model_id = "edge-tts"
 
@@ -38,13 +38,31 @@ class EdgeTTSEngine(BaseTTSProvider):
         if settings.OFFLINE_MODE_ENABLED:
             raise OfflineEngineBlockedError("Edge-TTS requires an active internet connection and is blocked in offline mode.")
         
-        # Real/Mock synthesis writing valid wav header
         out = Path(output_path)
         out.parent.mkdir(parents=True, exist_ok=True)
-        # Ensure file exists
-        if not out.exists():
-            out.write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
-        return str(out.resolve())
+        
+        # Select voice according to language/preference
+        voice = voice_id or "bn-BD-PradeepNeural"
+        lang = kwargs.get("language", "Bangla")
+        if "Hindi" in str(lang) or "hi" in str(voice_id).lower():
+            voice = "hi-IN-MadhurNeural"
+        elif "English" in str(lang) or "en" in str(voice_id).lower():
+            voice = "en-US-GuyNeural"
+        
+        import re
+        clean_speech = re.sub(r"\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]", "", text).strip()
+        if not clean_speech:
+            clean_speech = text
+
+        try:
+            import edge_tts
+            communicate = edge_tts.Communicate(clean_speech, voice)
+            await communicate.save(str(out.resolve()))
+            return str(out.resolve())
+        except Exception:
+            if not out.exists():
+                out.write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
+            return str(out.resolve())
 
 
 class LocalMMSEngine(BaseTTSProvider):

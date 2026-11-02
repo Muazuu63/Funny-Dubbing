@@ -357,9 +357,13 @@ export const App: React.FC = () => {
               project_id: project.id,
               status: 'WAITING_FOR_VOICE_APPROVAL',
               script_text: previewData.script_text,
+              translation_script_text: previewData.translation_script_text,
+              commentary_script_text: previewData.commentary_script_text,
+              has_original_voice: previewData.has_original_voice,
               duration_sec: previewData.duration_sec,
               formatted_duration: previewData.formatted_duration,
-              notes: `Comedy profile: ${selectedProfileName} (${previewData.formatted_duration}, ${previewData.total_words} words, ${previewData.scenes?.length || 5} scenes)`
+              audio_preview_url: previewData.audio_preview_url,
+              notes: `Mode: ${previewData.has_original_voice ? '🎙️ মূল কণ্ঠের কমেডি অনুবাদ' : '🎭 দৃশ্যভিত্তিক কমেডি কমেন্ট্রি'} (${previewData.formatted_duration}, ${previewData.total_words} শব্দ)`
             });
           } else {
             // Fallback preview

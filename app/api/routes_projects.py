@@ -47,12 +47,21 @@ async def create_project(payload: ProjectCreate):
 
 
 from pydantic import BaseModel, Field
+from fastapi.responses import FileResponse
+from datetime import datetime
 
 class GeneratePreviewRequest(BaseModel):
     project_id: str
     input_video_path: str
     target_language: str = "Bangla"
     comedy_profile: Optional[str] = None
+
+
+class SynthesizeScriptRequest(BaseModel):
+    project_id: str
+    script_text: str
+    language: str = "Bangla"
+    voice_gender: Optional[str] = "male"
 
 
 @router.post("/upload")
@@ -119,7 +128,23 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
             pass
 
     from app.providers.gemini_provider import LocalScriptEngine
+    from app.providers.tts_provider import TTSProvider
     from app.api.routes_approval import get_project_approval_state, set_project_approval_state
+
+    # Check whether the video has voice dialogue (e.g. speech clips vs silent/cat clips)
+    has_original_voice = False
+    if video_path.exists():
+        name_lower = video_path.name.lower()
+        if any(k in name_lower for k in ["speech", "dialogue", "talk", "scene", "dub", "voice", "clip"]):
+            has_original_voice = True
+        else:
+            try:
+                with open(video_path, "rb") as f:
+                    header = f.read(2 * 1024 * 1024)
+                    if b"soun" in header or b"mp4a" in header:
+                        has_original_voice = True
+            except Exception:
+                pass
 
     script_data = LocalScriptEngine.generate_full_length_script(
         duration_sec=duration_sec,
@@ -127,23 +152,84 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
         comedy_profile=payload.comedy_profile
     )
 
+    # If original voice is detected, default to translated humorous dialogue; otherwise commentary
+    default_script = script_data.get("translation_script_text") if has_original_voice else script_data["full_script_text"]
+    voice_speech_text = script_data.get("translation_script_text") if has_original_voice else script_data["preview_voice_text"]
+
+    # Synthesize real Edge-TTS preview voice
+    preview_filename = f"preview_voice_{payload.project_id}.mp3"
+    preview_filepath = settings.TEMP_DIR / "uploads" / preview_filename
+    audio_preview_url = None
+
+    try:
+        tts = TTSProvider()
+        await tts.synthesize(
+            text=voice_speech_text,
+            output_path=str(preview_filepath),
+            language=payload.target_language
+        )
+        audio_preview_url = f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"
+    except Exception as e:
+        audio_preview_url = None
+
     approval_state = get_project_approval_state(payload.project_id)
     approval_state.status = "WAITING_FOR_VOICE_APPROVAL"
-    approval_state.script_text = script_data["full_script_text"]
+    approval_state.script_text = default_script
+    approval_state.translation_script_text = script_data.get("translation_script_text")
+    approval_state.commentary_script_text = script_data["full_script_text"]
+    approval_state.has_original_voice = has_original_voice
     approval_state.duration_sec = script_data["duration_sec"]
     approval_state.formatted_duration = script_data["formatted_duration"]
-    approval_state.notes = f"Full length comedy script ({script_data['formatted_duration']}, {script_data['total_words']} words, {script_data['total_scenes']} scenes)"
+    approval_state.audio_preview_url = audio_preview_url
+    approval_state.notes = (
+        f"Mode: {'🎙️ মূল কণ্ঠের বাংলা কমেডি অনুবাদ' if has_original_voice else '🎭 দৃশ্যভিত্তিক কমেডি কমেন্ট্রি'} "
+        f"({script_data['formatted_duration']}, {script_data['total_words']} শব্দ)"
+    )
     set_project_approval_state(payload.project_id, approval_state)
 
     return {
         "status": "success",
         "project_id": payload.project_id,
+        "has_original_voice": has_original_voice,
         "duration_sec": script_data["duration_sec"],
         "formatted_duration": script_data["formatted_duration"],
-        "script_text": script_data["full_script_text"],
+        "script_text": default_script,
+        "translation_script_text": script_data.get("translation_script_text"),
+        "commentary_script_text": script_data["full_script_text"],
         "total_words": script_data["total_words"],
         "scenes": script_data["scenes"],
+        "audio_preview_url": audio_preview_url,
         "approval_state": approval_state.model_dump()
+    }
+
+
+@router.get("/audio/{filename}")
+async def serve_project_audio(filename: str):
+    """Serves synthesized preview MP3 audio directly to browser player."""
+    file_path = settings.TEMP_DIR / "uploads" / filename
+    if not file_path.exists():
+        raise HTTPException(status_code=404, detail="Audio file not found")
+    return FileResponse(path=str(file_path), media_type="audio/mpeg", filename=filename)
+
+
+@router.post("/synthesize-script")
+async def synthesize_script_audio(payload: SynthesizeScriptRequest):
+    """Synthesizes edited script text into real audio with Edge-TTS."""
+    from app.providers.tts_provider import TTSProvider
+    tts = TTSProvider()
+    preview_filename = f"preview_voice_{payload.project_id}.mp3"
+    preview_filepath = settings.TEMP_DIR / "uploads" / preview_filename
+    voice = "bn-BD-NabanitaNeural" if payload.voice_gender == "female" else "bn-BD-PradeepNeural"
+
+    await tts.synthesize(
+        text=payload.script_text,
+        output_path=str(preview_filepath),
+        voice_id=voice,
+        language=payload.language
+    )
+    return {
+        "status": "success",
+        "audio_url": f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"
     }
 
 
