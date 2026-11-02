@@ -1055,7 +1055,7 @@ export const App: React.FC = () => {
                 <div className="rounded-xl overflow-hidden bg-black border border-slate-800 flex justify-center items-center">
                   <video
                     controls
-                    autoPlay
+                    preload="metadata"
                     src={completedVideo.videoUrl}
                     className="w-full max-h-[460px] object-contain"
                   />
