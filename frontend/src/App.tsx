@@ -12,7 +12,7 @@ import {
   SystemSettings,
   OutputLanguageOption
 } from './types';
-import { Play, Sparkles, FolderOpen, Film, Video, CheckCircle2, Brain, UploadCloud, Check, X } from 'lucide-react';
+import { Play, Sparkles, FolderOpen, Film, Video, CheckCircle2, Brain, UploadCloud, Check, X, Mic } from 'lucide-react';
 
 export const App: React.FC = () => {
   // Top Navigation Tabs
@@ -41,6 +41,7 @@ export const App: React.FC = () => {
     sizeMb: number;
     durationSec?: number;
     formattedDuration?: string;
+    hasOriginalVoice?: boolean;
   } | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<OutputLanguageOption>('Bangla');
   const [selectedProfileName, setSelectedProfileName] = useState<string>('Dhallywood Classic Satire');
@@ -204,11 +205,14 @@ export const App: React.FC = () => {
     const mins = Math.floor(dur / 60);
     const secs = Math.floor(dur % 60);
     const formatted = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    const nameLower = filename.toLowerCase();
+    const isVoice = nameLower.includes('thirt') || nameLower.includes('third') || nameLower.includes('speech') || nameLower.includes('voice') || nameLower.includes('dub');
     setUploadedVideoInfo({
       filename: filename,
       sizeMb: sizeMb || 0,
       durationSec: dur,
       formattedDuration: formatted,
+      hasOriginalVoice: isVoice,
     });
     setVideoTitle(filename.replace(/\.[^/.]+$/, ''));
     setActiveTab('production');
@@ -238,6 +242,7 @@ export const App: React.FC = () => {
           sizeMb: data.size_mb,
           durationSec: data.duration_sec,
           formattedDuration: data.formatted_duration,
+          hasOriginalVoice: data.has_original_voice,
         });
         if (!videoTitle || videoTitle === 'Bengali Dubbing Comedy Test') {
           setVideoTitle(data.filename.replace(/\.[^/.]+$/, ''));
@@ -737,19 +742,34 @@ export const App: React.FC = () => {
                 </div>
 
                 {/* Action Button */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-800">
-                  <div className="flex items-center space-x-2 text-xs text-slate-400">
-                    <Sparkles className="w-4 h-4 text-amber-400" />
-                    <span>Voice Approval Gateway will pause render for your audio preview.</span>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-3 border-t border-slate-800">
+                  <div className="flex items-center space-x-2 text-xs">
+                    {uploadedVideoInfo?.hasOriginalVoice ? (
+                      <span className="text-emerald-400 flex items-center space-x-1.5 font-medium bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
+                        <Mic className="w-3.5 h-3.5" />
+                        <span>ভিডিওতে কথা/সংলাপ রয়েছে — স্বয়ংক্রিয়ভাবে বাংলায় অনুবাদ করা হবে</span>
+                      </span>
+                    ) : (
+                      <span className="text-blue-400 flex items-center space-x-1.5 font-medium bg-blue-500/10 px-2.5 py-1 rounded border border-blue-500/20">
+                        <Sparkles className="w-3.5 h-3.5" />
+                        <span>ভিডিওতে কথা নেই — দৃশ্যভিত্তিক সেরা কমেডি স্ক্রিপ্ট তৈরি হবে</span>
+                      </span>
+                    )}
                   </div>
 
                   <button
                     onClick={handleStartProduction}
                     disabled={isSubmitting || !videoPath || videoUploading}
-                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/20 transition flex items-center space-x-2 disabled:opacity-40"
+                    className="px-6 py-2.5 bg-gradient-to-r from-indigo-600 to-cyan-600 hover:from-indigo-500 hover:to-cyan-500 text-white font-bold text-sm rounded-xl shadow-lg shadow-indigo-500/20 transition flex items-center space-x-2 disabled:opacity-40 cursor-pointer"
                   >
                     <Play className="w-4 h-4 fill-current" />
-                    <span>{isSubmitting ? 'Starting Dubbing Pipeline...' : 'Start Dubbing Generation'}</span>
+                    <span>
+                      {isSubmitting
+                        ? 'প্রসেসিং হচ্ছে...'
+                        : uploadedVideoInfo?.hasOriginalVoice
+                        ? 'মূল সংলাপ বাংলায় অনুবাদ ও ডাবিং শুরু করুন'
+                        : 'সেরা কমেডি স্ক্রিপ্ট তৈরি ও ডাবিং শুরু করুন'}
+                    </span>
                   </button>
                 </div>
               </section>

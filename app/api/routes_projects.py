@@ -95,6 +95,19 @@ async def upload_project_video(file: UploadFile = File(...)):
     seconds = int(duration_sec) % 60
     formatted_duration = f"{minutes:02d}:{seconds:02d}"
 
+    has_original_voice = False
+    name_lower = target_path.name.lower()
+    if any(k in name_lower for k in ["speech", "dialogue", "talk", "scene", "dub", "voice", "clip", "third", "thirt"]):
+        has_original_voice = True
+    else:
+        try:
+            with open(target_path, "rb") as f:
+                header = f.read(2 * 1024 * 1024)
+                if b"soun" in header or b"mp4a" in header:
+                    has_original_voice = True
+        except Exception:
+            pass
+
     return {
         "status": "success",
         "filename": file.filename,
@@ -102,6 +115,7 @@ async def upload_project_video(file: UploadFile = File(...)):
         "size_mb": size_mb,
         "duration_sec": duration_sec,
         "formatted_duration": formatted_duration,
+        "has_original_voice": has_original_voice,
     }
 
 
@@ -162,9 +176,11 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
     audio_preview_url = None
 
     try:
+        import re
+        clean_voice_text = re.sub(r'\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}\s*\|?', '', voice_speech_text).strip()
         tts = TTSProvider()
         await tts.synthesize(
-            text=voice_speech_text,
+            text=clean_voice_text,
             output_path=str(preview_filepath),
             language=payload.target_language
         )
