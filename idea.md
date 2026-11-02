@@ -165,22 +165,33 @@ Visual Style           →  Subtitle Style, Synchronization Method
 ✔ Story Context & Comedy Opportunity
 ```
 
-### Script Generation
+### Script Generation & Dual-Mode Dubbing Policy (সংলাপ অনুবাদ বনাম মৌলিক কমেডি)
+
+> [!IMPORTANT]
+> **Mode 01-এ আপলোড করা ভিডিওর ধরন অনুযায়ী এআই স্বয়ংক্রিয়ভাবে দুটি স্ক্রিপ্ট ব্রাঞ্চ তৈরি করে:**
+> 1. **ভিডিওতে মূল কণ্ঠস্বর / ডায়ালগ থাকলে (If Original Voice/Speech Exists):**
+>    - ভিডিওর মূল কথোপকথন ট্রান্সক্রাইব ও বিশ্লেষণ করা হবে।
+>    - মূল কথার মূলভাব ও প্রেক্ষাপট অক্ষুণ্ণ রেখে অত্যন্ত আকর্ষণীয় ও হাসির **বাংলা ভাবানুবাদ (Translated Humorous Bengali Dialogue)** তৈরি করা হবে, যা মূল চরিত্রের কথা বলার টাইমিংয়ের সাথে নিখুঁতভাবে সিঙ্ক হবে।
+> 2. **ভিডিওতে কোনো কথা না থাকলে (If Video is Silent / Animal / Action / BGM Only):**
+>    - ভিডিওর সম্পূর্ণ সময়কাল (যেমন: পুরো Timeline 00:00 - 00:58) জুড়ে ঘটনা ও দৃশ্য দেখে আকর্ষণীয় **মৌলিক কমেডি ধারাভাষ্য (Creative Scene Commentary Script)** তৈরি করা হবে।
+> 
+> **উভয় স্ক্রিপ্টই প্রস্তুত থাকবে এবং ব্যবহারকারী চাইলে যেকোনো সময় ১-ক্লিকেই অদলবদল (Switch) করতে পারবেন।**
 
 প্রতিটি Script-এ থাকবে:
 
 | উপাদান | বিবরণ |
 |---|---|
 | Script Title | Script-এর নাম |
-| Scene Number & Timestamp | কোন দৃশ্যে কখন |
+| Scene Number & Timestamp | কোন দৃশ্যে কখন (00:00 - End পর্যন্ত সম্পূর্ণ টাইমলাইন) |
+| Mode Branch | মূল সংলাপের ভাবানুবাদ নাকি দৃশ্যভিত্তিক কমেডি ধারাভাষ্য |
 | Character Name & Emotion | কে কীভাবে বলছে |
-| Character Dialogue | কী বলছে |
-| Voice Delivery Style | Delivery Instruction |
-| Comedy Timing & Punchline | কখন Punch আসবে |
+| Character Dialogue | কী বলছে (বাংলা ভাবানুবাদ বা কমেডি ধারাভাষ্য) |
+| Voice Delivery Style | Delivery Instruction ও এক্সপ্রেশন নোট |
+| Comedy Timing & Punchline | কখন Punch আসবে ও নাটকীয় বিরতি |
 | Suggested Sound Effects | কোন Sound Effect দরকার |
 
-> [!IMPORTANT]
-> AI নিজেই Best Script নির্বাচন করবে — User-এর কাছ থেকে Script Approval নেওয়া হবে না।
+> [!NOTE]
+> এআই ডিফল্টভাবে সেরা স্ক্রিপ্ট নির্বাচন করে প্রিভিউ ভয়েস তৈরি করবে, তবে ব্যবহারকারীকে স্ক্রিপ্ট দেখা, এডিট করা ও চূড়ান্ত অনুমতি (Permission / Approval) দেওয়ার পূর্ণ নিয়ন্ত্রণ দেওয়া হবে।
 
 ### Character-wise Different Voice System
 
@@ -192,18 +203,22 @@ Character 3  →  Voice C
 
 Voice Personality: Male/Female, Young/Old, Deep/High Pitch, Funny/Cartoon/Expressive
 
-### Primary Voice Review & Approval (বাধ্যতামূলক — Default: Bangla)
-
-```
-▶ Play / Pause                  📥 Download Audio
-🔊 Full Voice Preview           🔄 Regenerate Voice
-🎙 Individual Dialogue Preview  ↕ Change Pitch / Speed
-👤 Character-wise Preview       😄 Change Emotion
-✏️ Edit Individual Dialogue     🔁 Change Voice
-```
+### Universal Voice Approval & Permission Gateway (বাধ্যতামূলক অনুমোদন)
 
 > [!CAUTION]
-> ব্যবহারকারীর নির্বাচিত Primary Language (ডিফল্ট: Bangla) Voice Approve না হওয়া পর্যন্ত Final Video Production শুরু হবে না। ইউজার চাইলে প্রিভিউতে ভাষা পরিবর্তন করতে পারবেন।
+> ব্যবহারকারীর স্পষ্ট অনুমতি ও অনুমোদন (`APPROVE`) ছাড়া কোনো অবস্থাতেই ফাইনাল ভিডিও রেন্ডারিং ও এক্সপোর্ট শুরু হবে না।
+> সিস্টেম ভয়েস প্রিভিউ ও স্ক্রিপ্ট এডিটর গেটওয়েতে প্রসেস সাময়িকভাবে হোল্ড করে রাখবে।
+
+```
+▶ Play / Pause (বাস্তব সাউন্ড প্রিভিউ)   🎙️ মূল সংলাপের ভাবানুবাদ (1-Click Switch)
+🔊 Full Voice Preview (Edge-TTS)        🎭 মৌলিক কমেডি ধারাভাষ্য (1-Click Switch)
+✏️ Full Timeline Script Editor          🔄 Regenerate Voice (এডিট করা স্ক্রিপ্ট অনুযায়ী)
+📝 Comedic Delivery Tone Note           ✅ Approve Voice & Render Final Video
+```
+
+1. **রিয়েল অডিও প্লেব্যাক:** মাইক্রোসফট এজ-টিটিএস নিউরাল ভয়েস এবং ব্রাউজার স্পিচ এপিআই দিয়ে সরাসরি স্পিকারে অডিও শোনানো হবে।
+2. **১-ক্লিক স্ক্রিপ্ট মোড সোয়াপ:** ব্যবহারকারী চাইলে অনুবাদের জায়গায় কমেন্ট্রি অথবা কমেন্ট্রির জায়গায় অনুবাদ এক ক্লিকে লোড করতে পারবেন।
+3. **অনুমোদন সাপেক্ষে রেন্ডার:** ব্যবহারকারী ভয়েস শুনে সন্তুষ্ট হয়ে `Approve` বাটনে চাপলে তবেই ফাইনাল ভিডিও রেন্ডারিং চালু হবে।
 
 ### Adaptive Visual Synchronization
 

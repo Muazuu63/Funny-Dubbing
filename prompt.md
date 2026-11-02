@@ -445,8 +445,11 @@
 ৩. Scope: `app/modes/mode01_dubbing.py` (পার্ট ২), `app/api/routes_approval.py`, `tests/test_mode01_pipeline.py`।
 ৪. Required Files: `app/modes/mode01_dubbing.py`, `app/api/routes_approval.py`, `tests/test_mode01_pipeline.py`।
 ৫. Technical Requirements:
-   - সার্বজনীন ভয়েস অ্যাপ্রুভাল পলিসি (Unified Voice Approval Policy):
-     - AI Voice অথবা Real Voice — উভয় ক্ষেত্রেই ফাইনাল ভিডিও এক্সপোর্টের পূর্বে অডিও প্লেব্যাক প্রিভিউ ও ব্যবহারকারীর সুস্পষ্ট অনুমোদন (Approval) বাধ্যতামূলক।
+   - সার্বজনীন ভয়েস অ্যাপ্রুভাল পলিসি (Unified Voice Approval Policy) ও ডুয়াল-স্ক্রিপ্ট নীতি:
+     - আপলোড করা ভিডিওতে কথা/সংলাপ থাকলে তা বিশ্লেষণ করে হাসির বাংলা ভাবানুবাদ (`translation_script_text`) তৈরি করা হবে যা চরিত্রের কথা বলার টাইমিংয়ের সাথে মিলে যাবে।
+     - ভিডিওতে কথা না থাকলে (সাইলেন্ট/এনিম্যাল/মিউজিক) পুরো ব্যাপ্তির ওপর ভিত্তি করে মৌলিক কমেডি ধারাভাষ্য (`commentary_script_text`) তৈরি করা হবে।
+     - উভয় স্ক্রিপ্টই প্রস্তুত থাকবে এবং গেটওয়েতে ১-ক্লিক সোয়াপ বাটনের মাধ্যমে অদলবদল করা যাবে।
+     - AI Voice অথবা Real Voice — উভয় ক্ষেত্রেই ফাইনাল ভিডিও এক্সপোর্টের পূর্বে বাস্তব অডিও প্লেব্যাক প্রিভিউ ও ব্যবহারকারীর সুস্পষ্ট অনুমোদন (Approval / Permission) বাধ্যতামূলক।
      - অনুমোদন ছাড়া ফাইনাল রেন্ডার কোনো অবস্থাতেই শুরু হবে না (`WAITING_FOR_VOICE_APPROVAL` স্ট্যাটাস)।
      - ব্যবহারকারী চাইলে Regenerate, ডায়ালগ Edit, অথবা Re-Preview করতে পারবেন।
      - Approval Status ডাটাবেজ ও টাস্ক স্টেটে সংরক্ষিত থাকবে।

@@ -135,10 +135,14 @@ funny-videos/
 ### 🚀 ফেজ ৩: Mode 01 (Funny Video Dubbing Studio) ইমপ্লিমেন্টেশন
 1. **Video Inpainting:** লোগো বা পুরানো টেক্সট মুছে ক্লিন মাস্টার ভিডিও তৈরি।
 2. **Demucs Stem Separation & Master Audio Preservation:** ভোকাল রিমুভ করে ব্যাকগ্রাউন্ড অ্যাকমপ্যানিমেন্ট অডিও সেভ করা। একই সাথে মূল ভিডিওর আসল অডিও মাস্টার কপি হিসেবে সংরক্ষণ করা এবং ম্যানুয়াল ব্যালেন্সিং অপশন রাখা।
-3. **Video Context Analysis & Multi-Script Generation:** কনফিগার করা জেমিনি ফ্রি মডেল দিয়ে ৩-৫টি স্ক্রিপ্ট তৈরি ও অটোমেটিক সেরা স্ক্রিপ্ট নির্বাচন।
-4. **Edge-TTS Character Voice Casting:** বিভিন্ন চরিত্রের জন্য আলাদা পিচ/টোনসহ নিউরাল ভয়েস তৈরি।
-5. **Interactive Voice Approval UI:** 
-   * ব্রাউজারে অডিও প্লেয়ার; ইউজার বাংলায় ডায়ালগ শুনবেন, ডায়ালগ এডিট করতে পারবেন এবং "Approve" বাটনে ক্লিক করবেন।
+3. **Video Voice Presence Analysis & Dual-Script Generation:** 
+   * ভিডিওতে আসল সংলাপ থাকলে তা হাসির বাংলা ভাবানুবাদে (`translation_script_text`) রূপান্তর করা।
+   * ভিডিওতে কোনো কথা না থাকলে পুরো সময়কালের ওপর ভিত্তি করে দৃশ্যভিত্তিক মৌলিক কমেডি ধারাভাষ্য (`commentary_script_text`) তৈরি করা।
+4. **Edge-TTS Neural Voice Casting:** Microsoft Neural Bengali Voice (`bn-BD-PradeepNeural` / `bn-BD-NabanitaNeural`) দিয়ে প্রিভিউ অডিও জেনারেশন।
+5. **Interactive Voice Approval & Script Gateway:** 
+   * ব্রাউজারে রিয়েল অডিও প্লেয়ার ও Web Speech API ব্যাকআপ।
+   * ১-ক্লিক সোয়াপ বাটন দিয়ে ভাবানুবাদ ও ধারাভাষ্যের মধ্যে যেকোনো সময় সুইচ এবং সরাসরি টেক্সট এডিট সুবিধা।
+   * ইউজার প্লে করে ভয়েস শুনবেন এবং "Approve" বাটনে ক্লিক করে ফাইনাল ভিডিও তৈরির অনুমতি দেবেন।
 6. **Audio Speed Stretch & Sync:** অরিজিনাল ভিডিওর টাইমিং অনুযায়ী অডিওর কথা বলার গতি নিখুঁতভাবে স্ট্রেচ/কম্প্রেস করা।
 7. **FFmpeg Final Render:** নির্বাচিত ভাষাগুলোর জন্য আলাদা আলাদা হাই-কোয়ালিটি MP4 এক্সপোর্ট।
 
