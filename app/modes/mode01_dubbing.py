@@ -241,7 +241,13 @@ class Mode01Dubbing:
             return output_wav
 
         for idx, item in enumerate(parsed):
-            text = item["clean_text"]
+            text = (
+                item["clean_text"]
+                .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
+                .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
+                .replace("বিল্লাডা", "বিল্লাটা")
+                .replace("বিল্লা ডা", "বিল্লা টা")
+            )
             start_sec = max(0.0, float(item["start_sec"] or 0.0))
             next_start = parsed[idx + 1]["start_sec"] if idx + 1 < len(parsed) else total_duration
             available_dur = max(1.2, float(next_start) - start_sec - 0.1)

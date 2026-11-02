@@ -88,7 +88,11 @@ def generate_ai_voice_translation_script(video_path: Path, target_language: str 
             f"Listen to this audio from a funny short video. "
             f"Translate the dialogue into hilarious comedic Bangladeshi {target_language} dubbing dialogue with timestamps [MM:SS – MM:SS] "
             f"and character names (e.g. চরিত্র ১ (ভারী কণ্ঠ): ..., চরিত্র ২ (চিল কণ্ঠ): ...). "
-            f"Format it line by line strictly with [MM:SS – MM:SS] timestamps for each dialogue line. Do not output markdown headers or commentary."
+            f"Format it line by line strictly with [MM:SS – MM:SS] timestamps for each dialogue line. Do not output markdown headers or commentary. "
+            f"CRITICAL VOCABULARY & PRONUNCIATION RULES: "
+            f"1) Do NOT use 'শাপলাগ্রস্ত'; use 'অভিশপ্ত' instead. "
+            f"2) Do NOT use 'বিল্লাডা'; use 'বিল্লাটা' (e.g. 'বগড় বিল্লাটা') instead. "
+            f"Ensure clear, accurate, and humorous pronunciation suited for viral Bangladeshi video dubbing."
         )
 
         payload = {
@@ -109,6 +113,14 @@ def generate_ai_voice_translation_script(video_path: Path, target_language: str 
         if res.status_code == 200:
             data = res.json()
             raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            # Apply user-trained vocabulary & pronunciation corrections
+            raw_text = (
+                raw_text
+                .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
+                .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
+                .replace("বিল্লাডা", "বিল্লাটা")
+                .replace("বিল্লা ডা", "বিল্লা টা")
+            )
             lines = [l for l in raw_text.splitlines() if re.search(r'\d{2}:\d{2}', l) and ":" in l]
             return "\n\n".join(lines) if lines else raw_text
     except Exception:
@@ -250,6 +262,24 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
     # If original voice is detected, default to translated humorous dialogue; otherwise commentary
     default_script = translation_text if has_original_voice else script_data["full_script_text"]
     voice_speech_text = translation_text if has_original_voice else script_data["preview_voice_text"]
+
+    # User-trained vocabulary corrections
+    if default_script:
+        default_script = (
+            default_script
+            .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
+            .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
+            .replace("বিল্লাডা", "বিল্লাটা")
+            .replace("বিল্লা ডা", "বিল্লা টা")
+        )
+    if voice_speech_text:
+        voice_speech_text = (
+            voice_speech_text
+            .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
+            .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
+            .replace("বিল্লাডা", "বিল্লাটা")
+            .replace("বিল্লা ডা", "বিল্লা টা")
+        )
 
     # Synthesize real Edge-TTS preview voice
     preview_filename = f"preview_voice_{payload.project_id}.mp3"

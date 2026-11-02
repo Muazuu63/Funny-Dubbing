@@ -86,6 +86,18 @@ async def submit_voice_approval(project_id: str, payload: ApprovalRequest):
     return state
 
 
+def normalize_script_vocabulary(script: Optional[str]) -> Optional[str]:
+    if not script:
+        return script
+    return (
+        script
+        .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
+        .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
+        .replace("বিল্লাডা", "বিল্লাটা")
+        .replace("বিল্লা ডা", "বিল্লা টা")
+    )
+
+
 class ApproveRequestBody(BaseModel):
     final_script: Optional[str] = None
 
@@ -97,7 +109,9 @@ async def approve_project_voice(project_id: str, payload: Optional[ApproveReques
     state.status = "APPROVED"
     state.approved_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
     if payload and payload.final_script:
-        state.script_text = payload.final_script
+        state.script_text = normalize_script_vocabulary(payload.final_script)
+    else:
+        state.script_text = normalize_script_vocabulary(state.script_text)
     set_project_approval_state(project_id, state)
     return state
 
@@ -108,7 +122,7 @@ async def regenerate_project_voice(project_id: str, payload: RegenerateRequest):
     state.status = "REGENERATION_REQUESTED"
     state.notes = payload.notes
     if payload.edited_script:
-        state.script_text = payload.edited_script
+        state.script_text = normalize_script_vocabulary(payload.edited_script)
     set_project_approval_state(project_id, state)
     return state
 
