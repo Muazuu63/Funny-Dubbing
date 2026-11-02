@@ -232,6 +232,12 @@ async def serve_project_audio(filename: str):
 async def synthesize_script_audio(payload: SynthesizeScriptRequest):
     """Synthesizes edited script text into real audio with Edge-TTS."""
     from app.providers.tts_provider import TTSProvider
+    from app.api.routes_approval import get_project_approval_state
+    
+    # Keep approval state updated with edited script
+    state = get_project_approval_state(payload.project_id)
+    state.script_text = payload.script_text
+    
     tts = TTSProvider()
     preview_filename = f"preview_voice_{payload.project_id}.mp3"
     preview_filepath = settings.TEMP_DIR / "uploads" / preview_filename
@@ -241,7 +247,8 @@ async def synthesize_script_audio(payload: SynthesizeScriptRequest):
         text=payload.script_text,
         output_path=str(preview_filepath),
         voice_id=voice,
-        language=payload.language
+        language=payload.language,
+        rate="+20%"
     )
     return {
         "status": "success",

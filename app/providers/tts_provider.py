@@ -49,14 +49,31 @@ class EdgeTTSEngine(BaseTTSProvider):
         elif "English" in str(lang) or "en" in str(voice_id).lower():
             voice = "en-US-GuyNeural"
         
+        rate = kwargs.get("rate", "+20%")
+        
         import re
-        clean_speech = re.sub(r"\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]", "", text).strip()
+        # Comprehensive dialogue cleaner: strips timestamps, character names, and stage directions
+        clean_lines = []
+        for line in text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            line = re.sub(r'^\s*\[?\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}\]?\s*\|?\s*', '', line)
+            line = re.sub(r'^[^:\n]*?\([^)]*\)\s*:\s*', '', line)
+            line = re.sub(r'^[^:\n]{1,30}:\s*', '', line)
+            line = re.sub(r'\([^)]*\)', '', line)
+            line = line.strip(' -–—:|\'\"')
+            if line:
+                clean_lines.append(line)
+        clean_speech = " ".join(clean_lines).strip()
         if not clean_speech:
-            clean_speech = text
+            clean_speech = re.sub(r'\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]', '', text).strip()
+        if not clean_speech:
+            clean_speech = text.strip()
 
         try:
             import edge_tts
-            communicate = edge_tts.Communicate(clean_speech, voice)
+            communicate = edge_tts.Communicate(clean_speech, voice, rate=rate)
             await communicate.save(str(out.resolve()))
             return str(out.resolve())
         except Exception:

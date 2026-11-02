@@ -70,7 +70,12 @@ async def save_gemini_api_key(payload: GeminiKeyRequest):
     if not key:
         raise HTTPException(status_code=400, detail="API key cannot be empty.")
 
-    store_secure_credential("gemini", key)
+    try:
+        store_secure_credential("gemini", key)
+        settings.GEMINI_API_KEY = key
+    except Exception as e:
+        settings.GEMINI_API_KEY = key
+
     fingerprint = compute_key_fingerprint(key)
     masked = mask_api_key(key)
     return {

@@ -77,6 +77,7 @@ class Settings(BaseSettings):
     # Server Binding
     HOST: str = "127.0.0.1"
     PORT: int = 8000
+    GEMINI_API_KEY: str = ""
     
     @property
     def BASE_URL(self) -> str:

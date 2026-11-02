@@ -604,12 +604,12 @@ export const App: React.FC = () => {
                       <Film className="w-5 h-5" />
                     </div>
                     <div>
-                      <h3 className="text-base font-bold text-slate-100">01. Funny Video Dubbing Studio Workspace</h3>
-                      <p className="text-xs text-slate-400">Demucs stem isolation, watermark removal, comedic pacing & multi-language dubbing</p>
+                      <h3 className="text-base font-bold text-slate-100">০১. ফানি ভিডিও ডাবিং স্টুডিও (Funny Video Dubbing Studio)</h3>
+                      <p className="text-xs text-slate-400">ডিমুক্স অডিও সেপারেশন, ভয়েস ট্র্যাক রূপান্তর ও মাল্টি-ল্যাঙ্গুয়েজ কমেডি ডাবিং</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <span className="text-xs text-slate-400">Dubbing Language:</span>
+                    <span className="text-xs text-slate-400">ডাবিং ভাষা (Dubbing Language):</span>
                     <select
                       value={selectedLanguage}
                       onChange={(e) => setSelectedLanguage(e.target.value as OutputLanguageOption)}
@@ -627,7 +627,7 @@ export const App: React.FC = () => {
                 {/* Video Upload Drop Area */}
                 <div>
                   <label className="block text-xs font-semibold text-slate-400 mb-2 uppercase tracking-wider">
-                    Upload Source Video to Dub
+                    ডাবিং করার জন্য মূল ভিডিও আপলোড করুন (Upload Source Video)
                   </label>
                   
                   <input
@@ -644,9 +644,9 @@ export const App: React.FC = () => {
                   >
                     <UploadCloud className="w-10 h-10 text-slate-500 group-hover:text-indigo-400 mb-2 transition" />
                     <p className="text-sm font-semibold text-slate-300">
-                      {videoUploading ? 'Uploading Video to Local Storage...' : 'Click to Browse Video File or Drag and Drop Here'}
+                      {videoUploading ? 'ভিডিও আপলোড হচ্ছে...' : 'ভিডিও ফাইল নির্বাচন করতে ক্লিক করুন অথবা টেনে এনে ছেড়ে দিন'}
                     </p>
-                    <p className="text-xs text-slate-500 mt-1">MP4, MKV, WebM, AVI (Local-First Privacy — No Cloud Upload)</p>
+                    <p className="text-xs text-slate-500 mt-1">MP4, MKV, WebM, AVI (সম্পূর্ণ প্রাইভেট ও লোকাল প্রসেসিং — নো ক্লাউড আপলোড)</p>
                   </div>
 
                   {uploadedVideoInfo && (
@@ -663,7 +663,7 @@ export const App: React.FC = () => {
 
                       <div className="flex items-center space-x-2 shrink-0">
                         <span className="text-emerald-400 font-mono text-[11px] bg-emerald-500/10 px-2.5 py-0.5 rounded border border-emerald-500/20 whitespace-nowrap">
-                          ✓ Ready to Dub
+                          ✓ ডাবিংয়ের জন্য প্রস্তুত
                         </span>
 
                         <button
@@ -673,7 +673,7 @@ export const App: React.FC = () => {
                           title="ভিডিও বাতিল বা রিমুভ করুন"
                         >
                           <X className="w-3.5 h-3.5" />
-                          <span>Cancel / Remove</span>
+                          <span>ভিডিও মুছুন (Remove)</span>
                         </button>
                       </div>
                     </div>
@@ -684,7 +684,7 @@ export const App: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
-                      Project Title
+                      প্রজেক্টের নাম (Project Title)
                     </label>
                     <input
                       type="text"
@@ -697,7 +697,7 @@ export const App: React.FC = () => {
 
                   <div>
                     <label className="block text-xs font-semibold text-slate-400 mb-1.5 uppercase tracking-wider">
-                      Learned Comedy Style Profile
+                      কমেডি স্টাইল প্রোফাইল (Comedy Style Profile)
                     </label>
                     <div className="flex items-center space-x-2">
                       <input
@@ -709,9 +709,9 @@ export const App: React.FC = () => {
                       <button
                         type="button"
                         onClick={() => setActiveTab('training')}
-                        className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg border border-purple-500/30 text-xs font-semibold whitespace-nowrap"
+                        className="px-3 py-2 bg-purple-600/20 hover:bg-purple-600/30 text-purple-300 rounded-lg border border-purple-500/30 text-xs font-semibold whitespace-nowrap cursor-pointer"
                       >
-                        Change in Training Hub
+                        ট্রেনিং হাব থেকে পরিবর্তন করুন
                       </button>
                     </div>
                   </div>

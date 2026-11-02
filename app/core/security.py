@@ -57,25 +57,75 @@ def mask_api_key(api_key: str) -> str:
 
 
 def store_secure_credential(service: str, secret: str) -> None:
-    """Stores credential securely in OS-level Credential Manager (Windows Credential Manager)."""
-    keyring.set_password(KEYRING_SERVICE_NAME, service, secret)
+    """Stores credential securely in OS-level Credential Manager with local fallback."""
+    stored = False
+    try:
+        keyring.set_password(KEYRING_SERVICE_NAME, service, secret)
+        stored = True
+    except Exception:
+        pass
+
+    try:
+        keys_dir = Path("data/.keys")
+        keys_dir.mkdir(parents=True, exist_ok=True)
+        key_file = keys_dir / f"{service}.key"
+        key_file.write_text(secret.strip(), encoding="utf-8")
+        stored = True
+    except Exception:
+        pass
+
+    if not stored:
+        # Memory fallback in settings
+        if service == "gemini":
+            settings.GEMINI_API_KEY = secret.strip()
 
 
 def retrieve_secure_credential(service: str) -> Optional[str]:
-    """Retrieves credential securely from OS-level Credential Manager."""
+    """Retrieves credential securely from OS-level Credential Manager or fallback."""
     try:
-        return keyring.get_password(KEYRING_SERVICE_NAME, service)
+        val = keyring.get_password(KEYRING_SERVICE_NAME, service)
+        if val and val.strip():
+            return val.strip()
     except Exception:
-        return None
+        pass
+
+    try:
+        key_file = Path("data/.keys") / f"{service}.key"
+        if key_file.exists():
+            content = key_file.read_text(encoding="utf-8").strip()
+            if content:
+                return content
+    except Exception:
+        pass
+
+    if service == "gemini" and getattr(settings, "GEMINI_API_KEY", None):
+        return settings.GEMINI_API_KEY.strip()
+
+    return None
 
 
 def delete_secure_credential(service: str) -> bool:
-    """Deletes credential from OS-level Credential Manager."""
+    """Deletes credential from OS-level Credential Manager and local storage."""
+    deleted = False
     try:
         keyring.delete_password(KEYRING_SERVICE_NAME, service)
-        return True
+        deleted = True
     except Exception:
-        return False
+        pass
+
+    try:
+        key_file = Path("data/.keys") / f"{service}.key"
+        if key_file.exists():
+            key_file.unlink()
+            deleted = True
+    except Exception:
+        pass
+
+    if service == "gemini":
+        settings.GEMINI_API_KEY = ""
+        deleted = True
+
+    return deleted
 
 
 # ==========================================
