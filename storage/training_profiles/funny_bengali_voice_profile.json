@@ -1,0 +1,14 @@
+{
+  "profile_id": "funny_bengali_voice_profile",
+  "name": "Sarcastic Bengali Narrator",
+  "category": "voice_profile",
+  "description": "Witty and playful pitch profile suited for funny commentary.",
+  "parameters": {
+    "pitch_shift": "+2Hz",
+    "rate_adjustment": "+10%",
+    "voice_engine": "edge-tts"
+  },
+  "reference_media_path": null,
+  "created_at": "2026-11-01T18:41:00.123425+00:00",
+  "updated_at": "2026-11-01T18:41:00.146782+00:00"
+}

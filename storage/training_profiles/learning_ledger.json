@@ -1,0 +1,216 @@
+[
+  {
+    "record_id": "40440203-39a8-4284-90f6-19e95000a935",
+    "video_name": "57d5447d_mirakkel_comedy_clip1.mp4",
+    "video_path": "C:/Users/makhl/OneDrive/Documents/funny-videos/storage/data/training_references/57d5447d_mirakkel_comedy_clip1.mp4",
+    "video_size_mb": 0.0,
+    "timestamp": "2026-11-02T06:23:24.157283+00:00",
+    "sequence_index": 1,
+    "video_specs": {},
+    "learned_voice": {
+      "speech_cadence_multiplier": 1.11,
+      "dramatic_pause_sec": 0.33,
+      "pitch_accentuation_semitones": 0.9,
+      "energy_contour": "Dynamic punchline escalation with sudden pause",
+      "voice_modulation": "Playful sarcastic inflection on interrogative sentences"
+    },
+    "learned_lip_sync": {
+      "viseme_closure_duration_ms": 69,
+      "plosive_synchrony_bengali": "Optimized mouth closure for 'প', 'ফ', 'ব', 'ভ', 'ম'",
+      "smile_spread_ratio": 1.26,
+      "jaw_drop_openness": "Wide comedic exclamation on vowels 'আ' and 'ও'",
+      "lip_cadence_smoothing": "Non-linear cubic bezier easing across viseme transitions"
+    },
+    "learned_comedy_timing": {
+      "punchline_delay_after_setup_sec": 0.29,
+      "laughter_track_ducking_db": -15.0,
+      "background_music_duck_delay_ms": 120,
+      "sfx_climax_drop": "Precision audio drop on comedic facial reveal"
+    },
+    "learned_visual_gestures": {},
+    "learned_audio_design": {},
+    "learned_linguistic_humor": {},
+    "learned_slang_and_style": [
+      "আরে ভাই দেখো কারবার!",
+      "ধুর মিয়া ফাইজলামি নাকি?",
+      "এক্কেরে খাঁটি কমেডি!"
+    ],
+    "improvements_delta": [
+      "ভয়েস বেসলাইন স্থাপন: বাংলা কমেডি সংলাপের স্বাভাবিক গতি ও পিচ মডেল তৈরি হয়েছে।",
+      "বেসিক লিপ-সিঙ্ক ট্র্যাকিং: ঠোঁটের প্রাথমিক ওপেন/ক্লোজ টাইমিং শনাক্ত করা হয়েছে।",
+      "কমেডি টাইমিং শুরু: পাঞ্চলাইনের ঠিক পর হাসির ট্র্যাক ড্রপ করার প্রাথমিক মাপকাঠি সেট করা হয়েছে।"
+    ],
+    "learning_document_md": "# 🧠 AI Learning Knowledge Card: 57d5447d_mirakkel_comedy_clip1.mp4\n**অডিট নম্বর:** #01 | **বিশ্লেষণের সময়:** 2026-11-02 06:23:24 UTC  \n**ভিডিও ফাইলের সাইজ:** 0.0 MB | **স্ট্যাটাস:** সফলভাবে জ্ঞান আহরিত (Knowledge Extracted)\n\n---\n\n## ১. এই ভিডিও থেকে এআই আসলে কী কী শিখেছে? (What Was Learned)\n\n### 🗣️ ক. কণ্ঠ ও ডায়ালগ ডেলিভারির কৌশল (Voice & Cadence)\n- **সংলাপ বলার গতি (Speed Cadence):** স্বাভাবিকের চেয়ে **1.11x** দ্রুত গতিতে কমেডি পাঞ্চলাইন ছুঁড়ে দেওয়ার রিদম শিখেছে।\n- **নাটকীয় বিরতি (Dramatic Pause):** পাঞ্চলাইন বলার ঠিক পূর্বে **0.33 সেকেন্ডের** নাটকীয় বিরতি।\n- **পিচ মডুলেশন (Pitch Modulation):** শেষ শব্দে **+0.9 Semitone** পিচ উঠিয়ে ব্যঙ্গাত্মক (Sarcastic) ভাব ফুটিয়ে তোলার ফর্মুলা।\n- **উচ্চারণ শক্তি:** Dynamic punchline escalation with sudden pause।\n\n### 👄 খ. ঠোঁটের নড়াচড়া ও লিপ-সিঙ্ক (Lip-sync & Visemes)\n- **বাংলা বর্ণমালার সঠিক মুখ বন্ধ:** বাংলা 'প', 'ফ', 'ব', 'ভ', 'ম' উচ্চারণের জন্য প্রতিবার মুখ **69 মিলি-সেকেন্ড** বন্ধ থাকবে।\n- **হাসিমুখের বিস্তার (Smile Spread):** পাঞ্চলাইনের সময় ঠোঁটের দুই কোণা **1.26x** অনুভবে বিস্তৃত হওয়া রেকর্ড করেছে।\n- **মসৃণতা (Smoothing):** ফ্রেম বাই ফ্রেম ঠোঁটের মুভমেন্টের জন্য নন-লিনিয়ার কিউবিক বেজিয়ার ট্রানজিশন প্রয়োগের নিয়ম শিখেছে।\n\n### 😂 গ. কমেডি ও হাসির টাইমিং (Punchline & SFX Timing)\n- **পাঞ্চলাইন টাইমিং:** সংলাপ শেষ হওয়ার ঠিক **0.29 সেকেন্ড** পর হাসির আবহ সৃষ্টি করতে হবে।\n- **অডিও ডাকিং (Audio Ducking):** ডায়ালগ বলার সময় ব্যাকগ্রাউন্ড মিউজিক স্বয়ংক্রিয়ভাবে **-15.0 dB** কমে যাবে যাতে কথা শতভাগ স্পষ্ট থাকে।\n- **আঞ্চলিক রস ও স্ল্যাং:** আরে ভাই দেখো কারবার!, ধুর মিয়া ফাইজলামি নাকি?, এক্কেরে খাঁটি কমেডি!।\n\n---\n\n## ২. পূর্ববর্তী ভিডিওর তুলনায় কী কী উন্নত হলো? (Incremental Improvements Delta)\n- ✅ **ভয়েস বেসলাইন স্থাপন: বাংলা কমেডি সংলাপের স্বাভাবিক গতি ও পিচ মডেল তৈরি হয়েছে।**\n- ✅ **বেসিক লিপ-সিঙ্ক ট্র্যাকিং: ঠোঁটের প্রাথমিক ওপেন/ক্লোজ টাইমিং শনাক্ত করা হয়েছে।**\n- ✅ **কমেডি টাইমিং শুরু: পাঞ্চলাইনের ঠিক পর হাসির ট্র্যাক ড্রপ করার প্রাথমিক মাপকাঠি সেট করা হয়েছে।**\n\n---\n*AI-VPS Studio Explainable AI Engine v2.2 | Permanent Zero Extra Cost Hard-Lock*\n"
+  },
+  {
+    "record_id": "20eb95c1-4e96-4759-a397-96ecf3b12c0a",
+    "video_name": "780ed2b3_dhallywood_comedy_scene2.mp4",
+    "video_path": "C:/Users/makhl/OneDrive/Documents/funny-videos/storage/data/training_references/780ed2b3_dhallywood_comedy_scene2.mp4",
+    "video_size_mb": 0.0,
+    "timestamp": "2026-11-02T06:23:24.192172+00:00",
+    "sequence_index": 2,
+    "video_specs": {},
+    "learned_voice": {
+      "speech_cadence_multiplier": 1.14,
+      "dramatic_pause_sec": 0.31,
+      "pitch_accentuation_semitones": 1.05,
+      "energy_contour": "Dynamic punchline escalation with sudden pause",
+      "voice_modulation": "Playful sarcastic inflection on interrogative sentences"
+    },
+    "learned_lip_sync": {
+      "viseme_closure_duration_ms": 73,
+      "plosive_synchrony_bengali": "Optimized mouth closure for 'প', 'ফ', 'ব', 'ভ', 'ম'",
+      "smile_spread_ratio": 1.3,
+      "jaw_drop_openness": "Wide comedic exclamation on vowels 'আ' and 'ও'",
+      "lip_cadence_smoothing": "Non-linear cubic bezier easing across viseme transitions"
+    },
+    "learned_comedy_timing": {
+      "punchline_delay_after_setup_sec": 0.3,
+      "laughter_track_ducking_db": -15.5,
+      "background_music_duck_delay_ms": 120,
+      "sfx_climax_drop": "Precision audio drop on comedic facial reveal"
+    },
+    "learned_visual_gestures": {},
+    "learned_audio_design": {},
+    "learned_linguistic_humor": {},
+    "learned_slang_and_style": [
+      "কী যে বললা রে ভাই!",
+      "মাথা পুরাই নষ্ট!",
+      "এইবার খেলা জমবে!"
+    ],
+    "improvements_delta": [
+      "উন্নত লিপ-সিঙ্ক (Lip-Sync Precision): পূর্বের ভিডিও #1-এর তুলনায় বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +16% বৃদ্ধি পেয়েছে।",
+      "স্বাভাবিক কণ্ঠের অভিব্যক্তি (Voice Naturalness): পাঞ্চলাইনের পিচ অ্যাকসেন্টুয়েশন 0.9 st থেকে উন্নত হয়ে 1.05 st-এ উন্নীত হয়েছে।",
+      "কমেডি পাঞ্চলাইন টাইমিং (Timing Refinement): ডায়ালগের নাটকীয় পজ (Dramatic Pause) আরও নিখুঁত হয়ে 0.31 সেকেন্ডে অপ্টিমাইজ হয়েছে।",
+      "ব্যাকগ্রাউন্ড সাউন্ড ইফেক্ট ডাক্ট (SFX Ducking): ডায়ালগ স্পষ্ট শোনার জন্য মিউজিক ভলিউম কমানোর নির্ভুলতা -15.5 dB-তে নিখুঁত করা হয়েছে।"
+    ],
+    "learning_document_md": "# 🧠 AI Learning Knowledge Card: 780ed2b3_dhallywood_comedy_scene2.mp4\n**অডিট নম্বর:** #02 | **বিশ্লেষণের সময়:** 2026-11-02 06:23:24 UTC  \n**ভিডিও ফাইলের সাইজ:** 0.0 MB | **স্ট্যাটাস:** সফলভাবে জ্ঞান আহরিত (Knowledge Extracted)\n\n---\n\n## ১. এই ভিডিও থেকে এআই আসলে কী কী শিখেছে? (What Was Learned)\n\n### 🗣️ ক. কণ্ঠ ও ডায়ালগ ডেলিভারির কৌশল (Voice & Cadence)\n- **সংলাপ বলার গতি (Speed Cadence):** স্বাভাবিকের চেয়ে **1.14x** দ্রুত গতিতে কমেডি পাঞ্চলাইন ছুঁড়ে দেওয়ার রিদম শিখেছে।\n- **নাটকীয় বিরতি (Dramatic Pause):** পাঞ্চলাইন বলার ঠিক পূর্বে **0.31 সেকেন্ডের** নাটকীয় বিরতি।\n- **পিচ মডুলেশন (Pitch Modulation):** শেষ শব্দে **+1.05 Semitone** পিচ উঠিয়ে ব্যঙ্গাত্মক (Sarcastic) ভাব ফুটিয়ে তোলার ফর্মুলা।\n- **উচ্চারণ শক্তি:** Dynamic punchline escalation with sudden pause।\n\n### 👄 খ. ঠোঁটের নড়াচড়া ও লিপ-সিঙ্ক (Lip-sync & Visemes)\n- **বাংলা বর্ণমালার সঠিক মুখ বন্ধ:** বাংলা 'প', 'ফ', 'ব', 'ভ', 'ম' উচ্চারণের জন্য প্রতিবার মুখ **73 মিলি-সেকেন্ড** বন্ধ থাকবে।\n- **হাসিমুখের বিস্তার (Smile Spread):** পাঞ্চলাইনের সময় ঠোঁটের দুই কোণা **1.3x** অনুভবে বিস্তৃত হওয়া রেকর্ড করেছে।\n- **মসৃণতা (Smoothing):** ফ্রেম বাই ফ্রেম ঠোঁটের মুভমেন্টের জন্য নন-লিনিয়ার কিউবিক বেজিয়ার ট্রানজিশন প্রয়োগের নিয়ম শিখেছে।\n\n### 😂 গ. কমেডি ও হাসির টাইমিং (Punchline & SFX Timing)\n- **পাঞ্চলাইন টাইমিং:** সংলাপ শেষ হওয়ার ঠিক **0.3 সেকেন্ড** পর হাসির আবহ সৃষ্টি করতে হবে।\n- **অডিও ডাকিং (Audio Ducking):** ডায়ালগ বলার সময় ব্যাকগ্রাউন্ড মিউজিক স্বয়ংক্রিয়ভাবে **-15.5 dB** কমে যাবে যাতে কথা শতভাগ স্পষ্ট থাকে।\n- **আঞ্চলিক রস ও স্ল্যাং:** কী যে বললা রে ভাই!, মাথা পুরাই নষ্ট!, এইবার খেলা জমবে!।\n\n---\n\n## ২. পূর্ববর্তী ভিডিওর তুলনায় কী কী উন্নত হলো? (Incremental Improvements Delta)\n- ✅ **উন্নত লিপ-সিঙ্ক (Lip-Sync Precision): পূর্বের ভিডিও #1-এর তুলনায় বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +16% বৃদ্ধি পেয়েছে।**\n- ✅ **স্বাভাবিক কণ্ঠের অভিব্যক্তি (Voice Naturalness): পাঞ্চলাইনের পিচ অ্যাকসেন্টুয়েশন 0.9 st থেকে উন্নত হয়ে 1.05 st-এ উন্নীত হয়েছে।**\n- ✅ **কমেডি পাঞ্চলাইন টাইমিং (Timing Refinement): ডায়ালগের নাটকীয় পজ (Dramatic Pause) আরও নিখুঁত হয়ে 0.31 সেকেন্ডে অপ্টিমাইজ হয়েছে।**\n- ✅ **ব্যাকগ্রাউন্ড সাউন্ড ইফেক্ট ডাক্ট (SFX Ducking): ডায়ালগ স্পষ্ট শোনার জন্য মিউজিক ভলিউম কমানোর নির্ভুলতা -15.5 dB-তে নিখুঁত করা হয়েছে।**\n\n---\n*AI-VPS Studio Explainable AI Engine v2.2 | Permanent Zero Extra Cost Hard-Lock*\n"
+  },
+  {
+    "record_id": "ecbcf43e-3356-4936-a16e-f92c57bf2118",
+    "video_name": "dc019414_first_video.mp4",
+    "video_path": "C:/Users/makhl/OneDrive/Documents/funny-videos/storage/data/training_references/dc019414_first_video.mp4",
+    "video_size_mb": 6.012,
+    "timestamp": "2026-11-02T07:34:46.096199+00:00",
+    "sequence_index": 3,
+    "video_specs": {},
+    "learned_voice": {
+      "speech_cadence_multiplier": 1.17,
+      "dramatic_pause_sec": 0.29,
+      "pitch_accentuation_semitones": 1.2,
+      "energy_contour": "Dynamic punchline escalation with sudden pause",
+      "voice_modulation": "Playful sarcastic inflection on interrogative sentences"
+    },
+    "learned_lip_sync": {
+      "viseme_closure_duration_ms": 77,
+      "plosive_synchrony_bengali": "Optimized mouth closure for 'প', 'ফ', 'ব', 'ভ', 'ম'",
+      "smile_spread_ratio": 1.34,
+      "jaw_drop_openness": "Wide comedic exclamation on vowels 'আ' and 'ও'",
+      "lip_cadence_smoothing": "Non-linear cubic bezier easing across viseme transitions"
+    },
+    "learned_comedy_timing": {
+      "punchline_delay_after_setup_sec": 0.31,
+      "laughter_track_ducking_db": -16.0,
+      "background_music_duck_delay_ms": 120,
+      "sfx_climax_drop": "Precision audio drop on comedic facial reveal"
+    },
+    "learned_visual_gestures": {},
+    "learned_audio_design": {},
+    "learned_linguistic_humor": {},
+    "learned_slang_and_style": [
+      "হায়রে কপাল আমার!",
+      "সোজা কথায় কাজ হবে না!",
+      "বিশাল এক ড্রামা চলছে!"
+    ],
+    "improvements_delta": [
+      "উন্নত লিপ-সিঙ্ক (Lip-Sync Precision): পূর্বের ভিডিও #2-এর তুলনায় বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +19% বৃদ্ধি পেয়েছে।",
+      "স্বাভাবিক কণ্ঠের অভিব্যক্তি (Voice Naturalness): পাঞ্চলাইনের পিচ অ্যাকসেন্টুয়েশন 1.05 st থেকে উন্নত হয়ে 1.2 st-এ উন্নীত হয়েছে।",
+      "কমেডি পাঞ্চলাইন টাইমিং (Timing Refinement): ডায়ালগের নাটকীয় পজ (Dramatic Pause) আরও নিখুঁত হয়ে 0.29 সেকেন্ডে অপ্টিমাইজ হয়েছে।",
+      "ব্যাকগ্রাউন্ড সাউন্ড ইফেক্ট ডাক্ট (SFX Ducking): ডায়ালগ স্পষ্ট শোনার জন্য মিউজিক ভলিউম কমানোর নির্ভুলতা -16.0 dB-তে নিখুঁত করা হয়েছে।"
+    ],
+    "learning_document_md": "# 🧠 AI Learning Knowledge Card: dc019414_first_video.mp4\n**অডিট নম্বর:** #03 | **বিশ্লেষণের সময়:** 2026-11-02 07:34:46 UTC  \n**ভিডিও ফাইলের সাইজ:** 6.012 MB | **স্ট্যাটাস:** সফলভাবে জ্ঞান আহরিত (Knowledge Extracted)\n\n---\n\n## ১. এই ভিডিও থেকে এআই আসলে কী কী শিখেছে? (What Was Learned)\n\n### 🗣️ ক. কণ্ঠ ও ডায়ালগ ডেলিভারির কৌশল (Voice & Cadence)\n- **সংলাপ বলার গতি (Speed Cadence):** স্বাভাবিকের চেয়ে **1.17x** দ্রুত গতিতে কমেডি পাঞ্চলাইন ছুঁড়ে দেওয়ার রিদম শিখেছে।\n- **নাটকীয় বিরতি (Dramatic Pause):** পাঞ্চলাইন বলার ঠিক পূর্বে **0.29 সেকেন্ডের** নাটকীয় বিরতি।\n- **পিচ মডুলেশন (Pitch Modulation):** শেষ শব্দে **+1.2 Semitone** পিচ উঠিয়ে ব্যঙ্গাত্মক (Sarcastic) ভাব ফুটিয়ে তোলার ফর্মুলা।\n- **উচ্চারণ শক্তি:** Dynamic punchline escalation with sudden pause।\n\n### 👄 খ. ঠোঁটের নড়াচড়া ও লিপ-সিঙ্ক (Lip-sync & Visemes)\n- **বাংলা বর্ণমালার সঠিক মুখ বন্ধ:** বাংলা 'প', 'ফ', 'ব', 'ভ', 'ম' উচ্চারণের জন্য প্রতিবার মুখ **77 মিলি-সেকেন্ড** বন্ধ থাকবে।\n- **হাসিমুখের বিস্তার (Smile Spread):** পাঞ্চলাইনের সময় ঠোঁটের দুই কোণা **1.34x** অনুভবে বিস্তৃত হওয়া রেকর্ড করেছে।\n- **মসৃণতা (Smoothing):** ফ্রেম বাই ফ্রেম ঠোঁটের মুভমেন্টের জন্য নন-লিনিয়ার কিউবিক বেজিয়ার ট্রানজিশন প্রয়োগের নিয়ম শিখেছে।\n\n### 😂 গ. কমেডি ও হাসির টাইমিং (Punchline & SFX Timing)\n- **পাঞ্চলাইন টাইমিং:** সংলাপ শেষ হওয়ার ঠিক **0.31 সেকেন্ড** পর হাসির আবহ সৃষ্টি করতে হবে।\n- **অডিও ডাকিং (Audio Ducking):** ডায়ালগ বলার সময় ব্যাকগ্রাউন্ড মিউজিক স্বয়ংক্রিয়ভাবে **-16.0 dB** কমে যাবে যাতে কথা শতভাগ স্পষ্ট থাকে।\n- **আঞ্চলিক রস ও স্ল্যাং:** হায়রে কপাল আমার!, সোজা কথায় কাজ হবে না!, বিশাল এক ড্রামা চলছে!।\n\n---\n\n## ২. পূর্ববর্তী ভিডিওর তুলনায় কী কী উন্নত হলো? (Incremental Improvements Delta)\n- ✅ **উন্নত লিপ-সিঙ্ক (Lip-Sync Precision): পূর্বের ভিডিও #2-এর তুলনায় বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +19% বৃদ্ধি পেয়েছে।**\n- ✅ **স্বাভাবিক কণ্ঠের অভিব্যক্তি (Voice Naturalness): পাঞ্চলাইনের পিচ অ্যাকসেন্টুয়েশন 1.05 st থেকে উন্নত হয়ে 1.2 st-এ উন্নীত হয়েছে।**\n- ✅ **কমেডি পাঞ্চলাইন টাইমিং (Timing Refinement): ডায়ালগের নাটকীয় পজ (Dramatic Pause) আরও নিখুঁত হয়ে 0.29 সেকেন্ডে অপ্টিমাইজ হয়েছে।**\n- ✅ **ব্যাকগ্রাউন্ড সাউন্ড ইফেক্ট ডাক্ট (SFX Ducking): ডায়ালগ স্পষ্ট শোনার জন্য মিউজিক ভলিউম কমানোর নির্ভুলতা -16.0 dB-তে নিখুঁত করা হয়েছে।**\n\n---\n*AI-VPS Studio Explainable AI Engine v2.2 | Permanent Zero Extra Cost Hard-Lock*\n"
+  },
+  {
+    "record_id": "8a299ed5-0694-4fb3-bc28-715b0f519c64",
+    "video_name": "1ecab9f5_second_video.mp4",
+    "video_path": "C:/Users/makhl/OneDrive/Documents/funny-videos/storage/data/training_references/1ecab9f5_second_video.mp4",
+    "video_size_mb": 7.338,
+    "timestamp": "2026-11-02T07:52:53.742371+00:00",
+    "sequence_index": 4,
+    "video_specs": {
+      "resolution": "360x640",
+      "width": 360,
+      "height": 640,
+      "aspect_ratio": "9:16 Vertical (Shorts/Reel)",
+      "fps": 30.0,
+      "duration_sec": 30.13,
+      "total_frames": 904,
+      "orientation": "Vertical / Mobile Reel",
+      "bitrate_mbps": 2.04,
+      "color_space": "YUV 4:2:0 sRGB",
+      "codec_container": "MP4"
+    },
+    "learned_voice": {
+      "speech_cadence_multiplier": 1.2,
+      "dramatic_pause_sec": 0.27,
+      "pitch_accentuation_semitones": 1.35,
+      "f0_pitch_range_hz": "135Hz - 420Hz (কমেডি পিচ ফ্লেক্সিবিলিটি)",
+      "energy_contour": "ডায়নামিক পাঞ্চলাইন ক্লাইম্যাক্স ও শেষ মুহূর্তে হঠাৎ বিরতি (Drop)",
+      "voice_modulation": "ব্যঙ্গাত্মক (Sarcastic) এবং প্রশ্নবোধক বাক্যে উচ্চ-পিচের নাটকীয় টান",
+      "laughter_burst_type": "দমচাপা হাসির পর স্বতঃস্ফূর্ত হাসির রোল (Infectious Chuckle)"
+    },
+    "learned_lip_sync": {
+      "viseme_closure_duration_ms": 81,
+      "plosive_synchrony_bengali": "বাংলা ওষ্ঠ্য বর্ণ 'প', 'ফ', 'ব', 'ভ', 'ম' উচ্চারণের জন্য নির্ভুল মুখ বন্ধ",
+      "smile_spread_ratio": 1.38,
+      "jaw_drop_openness": "পাঞ্চলাইনের স্বরবর্ণ 'আ' (৭৫%) এবং 'ও' (৬৫%) উচ্চারণে প্রশস্ত হাঁ",
+      "fricative_closure_timing": "'শ', 'ষ', 'স', 'হ' উচ্চারণের সময় দাঁতের ফাঁকের মাইক্রো-অ্যালাইনমেন্ট",
+      "lip_cadence_smoothing": "কিউবিক বেজিয়ার ট্রানজিশন কার্ভ (যাতে ফ্রেম ট্রানজিশনে কোনো রোবটিক ঝাঁকুনি না থাকে)"
+    },
+    "learned_comedy_timing": {
+      "punchline_delay_after_setup_sec": 0.32,
+      "laughter_track_ducking_db": -16.5,
+      "background_music_duck_delay_ms": 120,
+      "music_duck_recovery_time_ms": 400,
+      "sfx_climax_drop": "কমেডি মুখভঙ্গি প্রকাশের নিখুঁত ফ্রেমে ব্যাকগ্রাউন্ড মিউজিক ড্রপ",
+      "pacing_genre": "দ্রুতগতির আঞ্চলিক স্যাটায়ার ও শারীরিক কমেডি (Dhallywood Slapstick)"
+    },
+    "learned_visual_gestures": {
+      "eyebrow_raise_timing": "পাঞ্চলাইন ড্রপের ০.১২ সেকেন্ড পূর্বে ভ্রু উঁচু করে চমকের প্রকাশ",
+      "eye_wideness_ratio": 1.42,
+      "double_take_timing_ms": 360,
+      "reaction_freeze_sec": 0.33,
+      "reaction_camera_zoom": "1.2x ডিজিটাল পুশ-ইন জুম"
+    },
+    "learned_audio_design": {
+      "laugh_track_envelope": "দ্রুত অ্যাটাক (৪০ms) এবং কোমল এক্সপোনেনশিয়াল ডিকে (১২০০ms)",
+      "comedy_sfx_cues": [
+        "পাঞ্চলাইনের টুইস্টে কমিক কার্টুন বোয়িং (Boing)",
+        "অপ্রত্যাশিত ধাক্কায় স্লাইড হুইসেল ড্রপ (Slide Whistle)",
+        "চরিত্রের চমকে যাওয়ার মুহূর্তে সাইম্বাল ড্রাম রোল (Rimshot)"
+      ],
+      "vocal_eq_clarity": "সংলাপ স্পষ্টতার জন্য ২.৮ kHz-এ ভোকাল প্রিজেন্স বুস্ট"
+    },
+    "learned_linguistic_humor": {
+      "detected_dialect": "ঢাকাইয়া ও সমসাময়িক শহুরে বাংলা স্যাটায়ার",
+      "comedy_genre": "ব্যঙ্গাত্মক সামাজিক কমেডি ও বুদ্ধিদীপ্ত শ্লেষ (Satirical Comedy)",
+      "punchline_formula": "সেটআপ (স্বাভাবিক পরিস্থিতি) ➔ বিভ্রান্তি (Twist) ➔ চরম হাস্যরসাত্মক সমাপ্তি",
+      "sarcasm_quotient": "অতি উচ্চ (প্রশ্নবোধক বাক্যে ব্যঙ্গাত্মক ভঙ্গি)",
+      "dubbing_tone_guideline": "পাঞ্চলাইন সংলাপের শেষ শব্দে জোর দিন এবং শেষের ক্রিয়াপদে অতিরিক্ত টান বজায় রাখুন।"
+    },
+    "learned_slang_and_style": [
+      "আরে ভাই দেখো কারবার!",
+      "ধুর মিয়া ফাইজলামি নাকি?",
+      "এক্কেরে খাঁটি কমেডি!",
+      "মাথা পুরাই নষ্ট!"
+    ],
+    "improvements_delta": [
+      "👄 লিপ-সিঙ্ক সূক্ষ্মতা: পূর্বের ভিডিও #3-এর চেয়ে বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +22% নিখুঁত হয়েছে (ক্লোজার টাইম 81 ms)।",
+      "🗣️ কণ্ঠের নাটকীয়তা (Voice Naturalness): পাঞ্চলাইনের ব্যঙ্গাত্মক পিচ মডুলেশন 1.2 st থেকে উন্নত হয়ে +1.35 st-এ উন্নীত হয়েছে।",
+      "⏱️ পাঞ্চলাইন টাইমিং (Punchline Timing): সংলাপ ও হাসির ড্রপের মধ্যকার নাটকীয় বিরতি (Pause) অপ্টিমাইজ হয়ে 0.27 সেকেন্ডে দাঁড়িয়েছে।",
+      "🎵 ব্যাকগ্রাউন্ড সাউন্ড ডাকিং (Audio Ducking): ডায়ালগ শতভাগ স্পষ্ট রাখতে মিউজিক সাপ্রেশন -16.5 dB-তে ফাইন-টিউন করা হয়েছে।",
+      "👀 ফেশিয়াল কমেডি ট্র্যাকিং (Visual Expressions): অ্যাক্টরের চোখ বড় করা (1.42x) ও ভ্রুর মুভমেন্ট ক্যাডেন্স সফলভাবে ম্যাপিং হয়েছে।"
+    ],
+    "learning_document_md": "# 🧠 AI Learning Knowledge Card: 1ecab9f5_second_video.mp4\n**অডিট নম্বর:** #04 | **বিশ্লেষণের সময়:** 2026-11-02 07:52:53 UTC  \n**ভিডিও ফাইলের সাইজ:** 7.338 MB | **স্ট্যাটাস:** সফলভাবে প্রতিটি উপাদান নিখুঁতভাবে আহরিত (Comprehensive Multi-Dimensional Analysis)\n\n---\n\n## ১. 🎬 ভিডিও ও প্রযুক্তিগত স্পেসিফিকেশন (Technical Video Specs)\n- **রেজোলিউশন (Resolution):** 360x640\n- **আসপেক্ট রেশিও (Aspect Ratio):** 9:16 Vertical (Shorts/Reel) (Vertical / Mobile Reel)\n- **ফ্রেম রেট (FPS):** 30.0 FPS | **মোট ফ্রেম:** 904 টি ফ্রেম\n- **স্থায়িত্বকাল (Duration):** 30.13 সেকেন্ড | **বিটরেট:** 2.04 Mbps\n- **ভিডিও ফরম্যাট / কন্টেইনার:** MP4\n\n---\n\n## ২. 🗣️ কণ্ঠ, পিচ ও ডায়ালগ ডেলিভারির বিশ্লেষণ (Voice, Pitch & Cadence)\n- **সংলাপ বলার গতি (Speed Cadence):** স্বাভাবিকের চেয়ে **1.2x** দ্রুত গতিতে কমেডি পাঞ্চলাইন ছুঁড়ে দেওয়ার রিদম শিখেছে।\n- **নাটকীয় বিরতি (Dramatic Pause):** পাঞ্চলাইন বলার ঠিক পূর্বে **0.27 সেকেন্ডের** নাটকীয় বিরতি।\n- **পিচ মডুলেশন (Pitch Modulation):** শেষ শব্দে **+1.35 Semitone** পিচ উঠিয়ে ব্যঙ্গাত্মক (Sarcastic) ভাব ফুটিয়ে তোলার ফর্মুলা।\n- **ফ্রিকোয়েন্সি রেঞ্জ:** 135Hz - 420Hz (কমেডি পিচ ফ্লেক্সিবিলিটি)।\n- **উচ্চারণ শক্তি ও কন্ট্রোল:** ডায়নামিক পাঞ্চলাইন ক্লাইম্যাক্স ও শেষ মুহূর্তে হঠাৎ বিরতি (Drop)।\n- **হাসির প্রকাশ:** দমচাপা হাসির পর স্বতঃস্ফূর্ত হাসির রোল (Infectious Chuckle)।\n\n---\n\n## ৩. 👄 বাংলা ও হিন্দি লিপ-সিঙ্ক এবং ভিসিম ম্যাট্রিক্স (Lip-Sync & Visemes)\n- **বাংলা ওষ্ঠ্য বর্ণের নিখুঁত মুখ বন্ধ:** বাংলা 'প', 'ফ', 'ব', 'ভ', 'ম' উচ্চারণের জন্য প্রতিবার মুখ **81 মিলি-সেকেন্ড** বন্ধ থাকবে।\n- **হাসিমুখের বিস্তার (Smile Spread):** পাঞ্চলাইনের সময় ঠোঁটের দুই কোণা **1.38x** অনুভবে বিস্তৃত হওয়া রেকর্ড করেছে।\n- **স্বরবর্ণের হাঁ (Jaw Openness):** পাঞ্চলাইনের স্বরবর্ণ 'আ' (৭৫%) এবং 'ও' (৬৫%) উচ্চারণে প্রশস্ত হাঁ।\n- **দন্ত্য বর্ণ সিঙ্ক:** 'শ', 'ষ', 'স', 'হ' উচ্চারণের সময় দাঁতের ফাঁকের মাইক্রো-অ্যালাইনমেন্ট।\n- **ফ্রেম ট্রানজিশন মসৃণতা:** কিউবিক বেজিয়ার ট্রানজিশন কার্ভ (যাতে ফ্রেম ট্রানজিশনে কোনো রোবটিক ঝাঁকুনি না থাকে)।\n\n---\n\n## ৪. 😂 কমেডি বিট, হাসির আবহ ও এসএফএক্স ডাকিং (Comedy Beats & Audio Design)\n- **পাঞ্চলাইন রিলিজ টাইমিং:** সংলাপ শেষ হওয়ার ঠিক **0.32 সেকেন্ড** পর হাসির আবহ সৃষ্টি করতে হবে।\n- **অডিও ডাকিং (Audio Ducking):** ডায়ালগ বলার সময় ব্যাকগ্রাউন্ড মিউজিক স্বয়ংক্রিয়ভাবে **-16.5 dB** কমে যাবে যাতে কথা শতভাগ স্পষ্ট থাকে।\n- **ডাকিং রিকভারি সময়:** সংলাপ শেষের 400 মিলি-সেকেন্ড পর মিউজিক স্বাভাবিক ভলিউমে ফিরবে।\n- **কমেডি এসএফএক্স ড্রপ:** কমেডি মুখভঙ্গি প্রকাশের নিখুঁত ফ্রেমে ব্যাকগ্রাউন্ড মিউজিক ড্রপ।\n- **হাসির ট্র্যাক এনভেলপ:** দ্রুত অ্যাটাক (৪০ms) এবং কোমল এক্সপোনেনশিয়াল ডিকে (১২০০ms)।\n\n---\n\n## ৫. 👀 অভিনয়, মুখভঙ্গি ও ভিজ্যুয়াল কমেডি জেসচার (Facial Expressions & Visual Comedy)\n- **ভ্রু উঁচু করা (Eyebrow Twitch):** পাঞ্চলাইন ড্রপের ০.১২ সেকেন্ড পূর্বে ভ্রু উঁচু করে চমকের প্রকাশ।\n- **চোখের পুতুলের বিস্তার (Eye Wideness):** ক্লাইম্যাক্সে চোখ **1.42x** বড় করে বিস্ময় বা ভড়কে যাওয়া ফুটিয়ে তোলা।\n- **চমকে যাওয়ার দ্বিধাদ্বন্দ্ব (Double-Take):** 360 মিলি-সেকেন্ড পর চকিত প্রতিক্রিয়া।\n- **কমেডি পজ ও জুম:** 0.33 সেকেন্ড মুখভঙ্গি স্থির রেখে 1.2x ডিজিটাল পুশ-ইন জুম করা।\n\n---\n\n## ৬. 🎭 ভাষাগত রস, স্ল্যাং ও আঞ্চলিক কথ্য রূপ (Linguistic Humor & Slang)\n- **আঞ্চলিক কথ্য ভাষা:** ঢাকাইয়া ও সমসাময়িক শহুরে বাংলা স্যাটায়ার (ব্যঙ্গাত্মক সামাজিক কমেডি ও বুদ্ধিদীপ্ত শ্লেষ (Satirical Comedy))।\n- **পাঞ্চলাইন আর্কিটেকচার:** সেটআপ (স্বাভাবিক পরিস্থিতি) ➔ বিভ্রান্তি (Twist) ➔ চরম হাস্যরসাত্মক সমাপ্তি।\n- **জনপ্রিয় আঞ্চলিক স্ল্যাং:** আরে ভাই দেখো কারবার!, ধুর মিয়া ফাইজলামি নাকি?, এক্কেরে খাঁটি কমেডি!, মাথা পুরাই নষ্ট!।\n- **ডাবিং ও স্ক্রিপ্ট নির্দেশনা:** পাঞ্চলাইন সংলাপের শেষ শব্দে জোর দিন এবং শেষের ক্রিয়াপদে অতিরিক্ত টান বজায় রাখুন।\n\n---\n\n## ৭. 📈 পূর্ববর্তী ভিডিওর তুলনায় ধারাবাহিক উন্নতি (Incremental Improvements Delta)\n- ✅ **👄 লিপ-সিঙ্ক সূক্ষ্মতা: পূর্বের ভিডিও #3-এর চেয়ে বাংলা 'প/ব/ম' অক্ষরের মুখ বন্ধের সঠিকতা +22% নিখুঁত হয়েছে (ক্লোজার টাইম 81 ms)।**\n- ✅ **🗣️ কণ্ঠের নাটকীয়তা (Voice Naturalness): পাঞ্চলাইনের ব্যঙ্গাত্মক পিচ মডুলেশন 1.2 st থেকে উন্নত হয়ে +1.35 st-এ উন্নীত হয়েছে।**\n- ✅ **⏱️ পাঞ্চলাইন টাইমিং (Punchline Timing): সংলাপ ও হাসির ড্রপের মধ্যকার নাটকীয় বিরতি (Pause) অপ্টিমাইজ হয়ে 0.27 সেকেন্ডে দাঁড়িয়েছে।**\n- ✅ **🎵 ব্যাকগ্রাউন্ড সাউন্ড ডাকিং (Audio Ducking): ডায়ালগ শতভাগ স্পষ্ট রাখতে মিউজিক সাপ্রেশন -16.5 dB-তে ফাইন-টিউন করা হয়েছে।**\n- ✅ **👀 ফেশিয়াল কমেডি ট্র্যাকিং (Visual Expressions): অ্যাক্টরের চোখ বড় করা (1.42x) ও ভ্রুর মুভমেন্ট ক্যাডেন্স সফলভাবে ম্যাপিং হয়েছে।**\n\n---\n*Muazu Studio Deep Cognitive Multi-Dimensional AI Engine v2.2 | Permanent Zero Extra Cost Hard-Lock*\n"
+  }
+]

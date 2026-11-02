@@ -109,6 +109,14 @@ class Settings(BaseSettings):
     def TRAINING_DIR(self) -> Path:
         return self.TRAINING_PROFILES_DIR
 
+    @property
+    def TEMP_DIR(self) -> Path:
+        return self.BASE_DIR / "temp"
+
+    @property
+    def DATA_DIR(self) -> Path:
+        return self.STORAGE_DIR / "data"
+
     @staticmethod
     def is_windows() -> bool:
         return os.name == "nt"
@@ -211,6 +219,8 @@ class Settings(BaseSettings):
         self.MODELS_DIR.mkdir(parents=True, exist_ok=True)
         self.PROJECTS_DIR.mkdir(parents=True, exist_ok=True)
         self.TRAINING_PROFILES_DIR.mkdir(parents=True, exist_ok=True)
+        self.TEMP_DIR.mkdir(parents=True, exist_ok=True)
+        self.DATA_DIR.mkdir(parents=True, exist_ok=True)
         self.BIN_DIR.mkdir(parents=True, exist_ok=True)
 
 

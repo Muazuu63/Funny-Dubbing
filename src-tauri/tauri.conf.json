@@ -1,0 +1,43 @@
+{
+  "$schema": "https://raw.githubusercontent.com/tauri-apps/tauri/dev/tooling/cli/schema.json",
+  "productName": "Muazu Studio",
+  "version": "2.2.0",
+  "identifier": "com.muazu.studio",
+  "build": {
+    "beforeDevCommand": "",
+    "beforeBuildCommand": "npm run build --prefix ../frontend",
+    "devUrl": "http://127.0.0.1:8000",
+    "frontendDist": "../frontend/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "AI-VPS Studio - AI Funny Dubbing & Video Production Suite",
+        "width": 1366,
+        "height": 850,
+        "minWidth": 1024,
+        "minHeight": 700,
+        "resizable": true,
+        "fullscreen": false,
+        "center": true,
+        "decorations": true,
+        "theme": "Dark"
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src 'self' http://127.0.0.1:8000 ws://127.0.0.1:8000 tauri://localhost; img-src 'self' data: blob:; media-src 'self' data: blob: http://127.0.0.1:8000;"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "msi",
+    "icon": [
+      "icons/icon.ico"
+    ],
+    "resources": [
+      "bin/ffmpeg.exe",
+      "bin/ffprobe.exe"
+    ],
+    "copyright": "AI-VPS Studio (Zero Extra Cost Local Architecture)"
+  }
+}

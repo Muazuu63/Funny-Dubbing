@@ -1,0 +1,14 @@
+{
+  "profile_id": "cartoon_expressive_cadence",
+  "name": "Classic Cartoon Cadence",
+  "category": "punchline_timing",
+  "description": "Exaggerated emotional pauses for 2D animation and animal dubbing.",
+  "parameters": {
+    "pacing_multiplier": 1.0,
+    "punchline_pause_sec": 0.8,
+    "speed_stretch_safe": true
+  },
+  "reference_media_path": null,
+  "created_at": "2026-11-01T18:41:00.123425+00:00",
+  "updated_at": "2026-11-01T18:41:00.145782+00:00"
+}

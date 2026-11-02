@@ -40,13 +40,23 @@ htmlcov/
 *.sqlite
 *.sqlite3
 
-# AI-VPS Storage (keep directory structure via .gitkeep)
+# Muazu Studio Storage
 storage/models/*
 !storage/models/.gitkeep
 storage/projects/*
 !storage/projects/.gitkeep
-storage/training_profiles/*
-!storage/training_profiles/.gitkeep
+
+# Ignore heavy raw uploaded video binaries, but PERMANENTLY KEEP all learned knowledge:
+storage/data/training_references/*
+!storage/data/training_references/.gitkeep
+temp/*
+!temp/.gitkeep
+
+# Permanent AI Knowledge & Learning Ledger (ALWAYS tracked in Git):
+!storage/training_profiles/*.json
+!storage/training_profiles/learning_ledger.json
+!storage/training_profiles/reports/
+!storage/training_profiles/reports/*.md
 
 # Executable binaries
 bin/*
@@ -55,6 +65,5 @@ bin/*
 
 # Frontend / Node
 node_modules/
-frontend/dist/
 frontend/node_modules/
 .npm

@@ -1,0 +1,19 @@
+{
+  "profile_id": "dhaka_slapstick_style",
+  "name": "Dhaka Slapstick Comedy",
+  "category": "comedy_style",
+  "description": "High-energy humorous style with rapid punchlines and local comedic slang.",
+  "parameters": {
+    "pacing_multiplier": 1.15,
+    "punchline_pause_sec": 0.4,
+    "target_cadence": "fast",
+    "slang_lexicon": [
+      "ধুর মিয়া",
+      "আরে ভাই",
+      "দেখো কারবার!"
+    ]
+  },
+  "reference_media_path": null,
+  "created_at": "2026-11-01T18:41:00.123425+00:00",
+  "updated_at": "2026-11-01T18:41:00.124424+00:00"
+}
