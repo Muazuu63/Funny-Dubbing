@@ -394,7 +394,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
           className="px-5 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs transition flex items-center space-x-1.5 shadow-lg shadow-amber-500/20 disabled:opacity-50 cursor-pointer"
         >
           <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-          <span>এডিট করা স্ক্রিপ্ট দিয়ে নতুন ভয়েস বানান (Regenerate Voice)</span>
+          <span>নতুন স্ক্রিপ্ট অ্যাপ্রুভ করে ভয়েস জেনারেট করে দাও</span>
         </button>
 
         <button
@@ -403,7 +403,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
           className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-500/20 disabled:opacity-50 cursor-pointer"
         >
           <CheckCircle2 className="w-4 h-4" />
-          <span>এই স্ক্রিপ্ট অ্যাপ্রুভ করে ফাইনাল ভিডিও তৈরি করুন</span>
+          <span>ভয়েস অ্যাপ্রুভ করে ফাইনাল ভিডিও জেনারেট করুন</span>
         </button>
       </div>
 
@@ -476,7 +476,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
                 className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
               >
                 <CheckCircle2 className="w-4 h-4" />
-                <span>🚀 রেন্ডার শুরু করুন ({finalOutputLanguage})</span>
+                <span>🚀 ভয়েস অ্যাপ্রুভড — ফাইনাল ভিডিও জেনারেট করুন ({finalOutputLanguage})</span>
               </button>
             </div>
           </div>
