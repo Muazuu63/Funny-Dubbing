@@ -18,7 +18,7 @@ import { ApprovalState } from '../types';
 
 interface VoiceApprovalStudioProps {
   approvalState: ApprovalState | null;
-  onApprove: (projectId: string, finalScript?: string) => Promise<void>;
+  onApprove: (projectId: string, finalScript?: string, outputLanguage?: string) => Promise<void>;
   onRegenerate: (projectId: string, editedScript: string, notes: string) => Promise<void>;
   onReject: (projectId: string, reason: string) => Promise<void>;
   currentLanguage?: string;
@@ -36,6 +36,9 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
   const [loading, setLoading] = useState<boolean>(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [currentAudioUrl, setCurrentAudioUrl] = useState<string>(approvalState?.audio_preview_url || '');
+
+  const [showLanguageModal, setShowLanguageModal] = useState<boolean>(false);
+  const [finalOutputLanguage, setFinalOutputLanguage] = useState<string>('Bangla');
 
   const [activeTab, setActiveTab] = useState<'translation' | 'commentary'>(
     approvalState?.has_original_voice ? 'translation' : 'commentary'
@@ -141,11 +144,17 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
     }
   };
 
-  const handleApprove = async () => {
+  const handleApprove = () => {
+    // Open language selection dialog before final render
+    setShowLanguageModal(true);
+  };
+
+  const handleConfirmApproval = async () => {
+    setShowLanguageModal(false);
     setLoading(true);
     if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     try {
-      await onApprove(approvalState.project_id, scriptText);
+      await onApprove(approvalState.project_id, scriptText, finalOutputLanguage);
     } finally {
       setLoading(false);
     }
@@ -397,6 +406,82 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
           <span>নতুন স্ক্রিপ্ট অ্যাপ্রুভ করে ভয়েস জেনারেট করে দাও</span>
         </button>
       </div>
+
+      {/* Language Selection Modal (Triggered when user clicks Approve) */}
+      {showLanguageModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/85 backdrop-blur-md animate-in fade-in duration-150">
+          <div className="bg-slate-900 border-2 border-emerald-500/50 rounded-2xl w-full max-w-lg shadow-2xl p-6 space-y-5 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center space-x-2.5">
+                <Sparkles className="w-5 h-5 text-emerald-400" />
+                <h3 className="text-base font-bold text-white">ফাইনাল ভিডিও আউটপুট ভাষা নির্বাচন করুন</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowLanguageModal(false)}
+                className="text-slate-400 hover:text-slate-200 text-sm p-1 rounded-lg hover:bg-slate-800 transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            <p className="text-xs text-slate-300 leading-relaxed">
+              ডিফল্ট বাংলায় প্রিভিউ ভয়েস ও স্ক্রিপ্ট অনুমোদন সম্পন্ন হয়েছে। এখন আপনার এই অনুমোদিত স্ক্রিপ্ট দিয়ে কোন কোন ভাষায় ফাইনাল ডাবিং ভিডিও আউটপুট পেতে চান?
+            </p>
+
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
+                ডাবিং আউটপুট ভাষা (Dubbing Output Language):
+              </label>
+              <select
+                value={finalOutputLanguage}
+                onChange={(e) => setFinalOutputLanguage(e.target.value)}
+                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-sky-300 font-semibold focus:outline-none focus:border-emerald-500 cursor-pointer shadow-inner"
+              >
+                <option value="Bangla">Bangla (বাঙালি) — ১টি বাংলা ভিডিও</option>
+                <option value="Hindi">Hindi (हिन्दी) — ১টি হিন্দি ভিডিও</option>
+                <option value="English">English — ১টি ইংরেজি ভিডিও</option>
+                <option value="Bangla + Hindi">Bilingual: Bangla + Hindi — ২টি আলাদা ভিডিও</option>
+                <option value="Bangla + Hindi + English">Trilingual: Bangla + Hindi + English — ৩টি আলাদা ভিডিও</option>
+              </select>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs text-emerald-300 flex items-center space-x-2.5">
+              <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+              <span>
+                {finalOutputLanguage === 'Bangla'
+                  ? 'শুধু ১টি ফুল বাংলা ডাবিং ভিডিও তৈরি হবে।'
+                  : finalOutputLanguage === 'Hindi'
+                  ? 'শুধু ১টি হিন্দি ডাবিং ভিডিও তৈরি হবে।'
+                  : finalOutputLanguage === 'English'
+                  ? 'শুধু ১টি ইংরেজি ডাবিং ভিডিও তৈরি হবে।'
+                  : finalOutputLanguage === 'Bangla + Hindi'
+                  ? 'বাংলা ও হিন্দি মিলিয়ে ২টি আলাদা ফুল ভিডিও তৈরি হবে।'
+                  : 'বাংলা, হিন্দি ও ইংরেজি মিলিয়ে ৩টি আলাদা ফুল ভিডিও তৈরি হবে।'}
+              </span>
+            </div>
+
+            <div className="flex items-center justify-end space-x-3 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowLanguageModal(false)}
+                className="px-4 py-2 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 text-xs font-semibold transition cursor-pointer"
+              >
+                বাতিল করুন
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmApproval}
+                disabled={loading}
+                className="px-6 py-2.5 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold text-xs transition flex items-center space-x-2 shadow-lg shadow-emerald-500/20 cursor-pointer"
+              >
+                <CheckCircle2 className="w-4 h-4" />
+                <span>🚀 রেন্ডার শুরু করুন ({finalOutputLanguage})</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

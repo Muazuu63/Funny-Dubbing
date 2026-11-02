@@ -252,10 +252,14 @@ async def get_project_details(project_id: str):
         }
 
 
+class RenderProjectRequest(BaseModel):
+    language_matrix: Optional[str] = "Bangla"
+
+
 @router.post("/{project_id}/render")
-async def render_project_final_video(project_id: str):
+async def render_project_final_video(project_id: str, payload: Optional[RenderProjectRequest] = None):
     """
-    Renders final dubbed video after voice approval.
+    Renders final dubbed video after voice approval in user-selected language(s).
     """
     from app.modes.mode01_dubbing import Mode01Dubbing
     from app.api.routes_approval import get_project_approval_state
@@ -281,11 +285,13 @@ async def render_project_final_video(project_id: str):
         proj_dir = settings.PROJECTS_DIR / project_id
         proj_dir.mkdir(parents=True, exist_ok=True)
         
+        chosen_lang = (payload.language_matrix if payload and payload.language_matrix else "Bangla")
+        
         output_files = await mode01.execute_final_render(
             project_id=project_id,
             input_video_path=input_video,
             project_dir=proj_dir,
-            language_matrix_choice="Bangla"
+            language_matrix_choice=chosen_lang
         )
         
         final_video = output_files[0] if output_files else (proj_dir / "output_Bangla.mp4")
@@ -296,9 +302,10 @@ async def render_project_final_video(project_id: str):
         return {
             "status": "COMPLETED",
             "project_id": project_id,
+            "language_matrix": chosen_lang,
             "final_video_path": str(final_video).replace("\\", "/"),
             "download_url": f"/api/v1/projects/{project_id}/download",
-            "message": "Final video rendering completed successfully!"
+            "message": f"Final video rendering for [{chosen_lang}] completed successfully!"
         }
 
 
