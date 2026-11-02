@@ -80,6 +80,97 @@ class LocalScriptEngine:
             scenes=scenes,
         )
 
+    @classmethod
+    def generate_full_length_script(
+        cls,
+        duration_sec: float = 58.8,
+        target_language: str = "Bangla",
+        comedy_profile: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Generates a full-length, timeline-synchronized comedic commentary script
+        covering every second of the video duration without leaving any gaps.
+        """
+        duration = max(5.0, round(float(duration_sec), 1))
+        
+        # Segment video duration into ~10-12s scenes
+        scene_length = 11.5
+        num_scenes = max(1, int(round(duration / scene_length)))
+        if num_scenes == 0:
+            num_scenes = 1
+        
+        actual_step = duration / num_scenes
+
+        # Rich Bengali comedic dialogue beats covering complete timeline
+        bengali_beats = [
+            "আরে ভাই দেখো কারবার! এই দৃশ্যটা না দেখলে বিশ্বাসই করা যাইতো না! ধুর মিয়া কী যে শুরু করলো!",
+            "উস্তাদ দেখেন, কী কনফিডেন্স নিয়া কাজটা করতে গেছে! এইটা সাফল্য হইব না বিশাল ধরা খাইব কে জানে!",
+            "আরে থামেন থামেন! এইবার খেলা পুরা জমবে! এই কান্ড দেখার পর তো আমার হাসতে হাসতে পেটে খিল ধইরা যাইতাছে!",
+            "ওরে বাবারে বাবা! পরিস্থিতি তো পুরাই নিয়ন্ত্রণের বাইরে চইলা গেছে! এমন বিপদে মানুষ ক্যামনে পড়ে ভাই!",
+            "হায়রে আমার ভাগ্য! নিজেই নিজের ফান্দে পইড়া নাকানি-চুবানি খাইতাছে! এখন কে বাঁচাইবো তোমারে?",
+            "শেষমেশ কী হইলো দেখেন! পুরাই ইতিহাস সৃষ্টি কইরা ফেললো! এইবার দর্শক ভাইরা বলেন, এইটার বিচার কে করবে? ধুররর!"
+        ]
+
+        hindi_beats = [
+            "अरे भाई देखो ये क्या हो रहा है! ऐसा नज़ारा ज़िंदगी में कभी नहीं देखा होगा!",
+            "उस्ताद ज़रा ध्यान से देखो! इतनी ओवर-एक्टिंग करके खुद ही मुसीबत मोल ले ली!",
+            "अरे रुको रुको भाई! अब असली मज़ा आने वाला है! ये तो पूरा का पूरा ड्रामा निकला!",
+            "बाप रे बाप! अब तो बात हाथ से निकल गई! अब कौन बचाएगा भाई तुम्हें?",
+            "आखिर में नतीजा देखो! पूरी की पूरी पोल खुल गई! अब बताओ कौन सही कौन गलत!"
+        ]
+
+        english_beats = [
+            "Oh boy, look at this absolute madness! You won't believe what's happening right here!",
+            "Watch this masterclass in hilarious disaster! The sheer confidence is beyond belief!",
+            "Wait for it, hold your breath! This is where the absolute chaos peaks!",
+            "Unbelievable! Caught red-handed in the funniest catastrophe ever seen!",
+            "And that's how you turn a simple moment into pure comedy gold! Who did this?!"
+        ]
+
+        if "Hindi" in target_language:
+            pool = hindi_beats
+        elif "English" in target_language:
+            pool = english_beats
+        else:
+            pool = bengali_beats
+
+        scenes = []
+        full_text_lines = []
+
+        for i in range(num_scenes):
+            start = round(i * actual_step, 1)
+            end = round(duration if i == num_scenes - 1 else (i + 1) * actual_step, 1)
+            start_lbl = f"{int(start)//60:02d}:{int(start)%60:02d}"
+            end_lbl = f"{int(end)//60:02d}:{int(end)%60:02d}"
+            dialogue = pool[i % len(pool)]
+
+            scene_item = {
+                "scene_id": i + 1,
+                "start_time": start,
+                "end_time": end,
+                "timestamp_label": f"[{start_lbl} - {end_lbl}]",
+                "dialogue": dialogue,
+                "tone": "Comedic / Satirical"
+            }
+            scenes.append(scene_item)
+            full_text_lines.append(f"[{start_lbl} - {end_lbl}] {dialogue}")
+
+        full_script_text = "\n\n".join(full_text_lines)
+        total_words = sum(len(s["dialogue"].split()) for s in scenes)
+        minutes = int(duration) // 60
+        seconds = int(duration) % 60
+        formatted_duration = f"{minutes:02d}:{seconds:02d}"
+
+        return {
+            "duration_sec": duration,
+            "formatted_duration": formatted_duration,
+            "total_scenes": len(scenes),
+            "total_words": total_words,
+            "scenes": scenes,
+            "full_script_text": full_script_text,
+            "preview_voice_text": " ".join(s["dialogue"] for s in scenes)
+        }
+
 
 class GeminiProvider(BaseLLMProvider):
     def __init__(self, api_key: Optional[str] = None):

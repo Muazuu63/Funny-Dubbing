@@ -46,9 +46,18 @@ async def create_project(payload: ProjectCreate):
         return created
 
 
+from pydantic import BaseModel, Field
+
+class GeneratePreviewRequest(BaseModel):
+    project_id: str
+    input_video_path: str
+    target_language: str = "Bangla"
+    comedy_profile: Optional[str] = None
+
+
 @router.post("/upload")
 async def upload_project_video(file: UploadFile = File(...)):
-    """Uploads a source video to temp/uploads and returns the local file path."""
+    """Uploads a source video to temp/uploads and returns the local file path with duration."""
     upload_dir = settings.TEMP_DIR / "uploads"
     upload_dir.mkdir(parents=True, exist_ok=True)
 
@@ -59,11 +68,82 @@ async def upload_project_video(file: UploadFile = File(...)):
         shutil.copyfileobj(file.file, buffer)
 
     size_mb = round(target_path.stat().st_size / (1024 * 1024), 2)
+    duration_sec = 0.0
+
+    try:
+        import cv2
+        cap = cv2.VideoCapture(str(target_path))
+        if cap.isOpened():
+            fps = float(cap.get(cv2.CAP_PROP_FPS) or 25.0)
+            frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+            if fps > 0 and frames > 0:
+                duration_sec = round(frames / fps, 2)
+            cap.release()
+    except Exception:
+        pass
+
+    minutes = int(duration_sec) // 60
+    seconds = int(duration_sec) % 60
+    formatted_duration = f"{minutes:02d}:{seconds:02d}"
+
     return {
         "status": "success",
         "filename": file.filename,
         "saved_path": str(target_path).replace("\\", "/"),
         "size_mb": size_mb,
+        "duration_sec": duration_sec,
+        "formatted_duration": formatted_duration,
+    }
+
+
+@router.post("/generate-preview")
+async def generate_project_preview(payload: GeneratePreviewRequest):
+    """
+    Analyzes the uploaded video's actual duration and creates a full-length,
+    timeline-synchronized comedic script and voice preview covering every second.
+    """
+    video_path = Path(payload.input_video_path)
+    duration_sec = 30.0
+
+    if video_path.exists():
+        try:
+            import cv2
+            cap = cv2.VideoCapture(str(video_path))
+            if cap.isOpened():
+                fps = float(cap.get(cv2.CAP_PROP_FPS) or 25.0)
+                frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+                if fps > 0 and frames > 0:
+                    duration_sec = round(frames / fps, 2)
+                cap.release()
+        except Exception:
+            pass
+
+    from app.providers.gemini_provider import LocalScriptEngine
+    from app.api.routes_approval import get_project_approval_state, set_project_approval_state
+
+    script_data = LocalScriptEngine.generate_full_length_script(
+        duration_sec=duration_sec,
+        target_language=payload.target_language,
+        comedy_profile=payload.comedy_profile
+    )
+
+    approval_state = get_project_approval_state(payload.project_id)
+    approval_state.status = "WAITING_FOR_VOICE_APPROVAL"
+    approval_state.script_text = script_data["full_script_text"]
+    approval_state.duration_sec = script_data["duration_sec"]
+    approval_state.formatted_duration = script_data["formatted_duration"]
+    approval_state.notes = f"Full length comedy script ({script_data['formatted_duration']}, {script_data['total_words']} words, {script_data['total_scenes']} scenes)"
+    set_project_approval_state(payload.project_id, approval_state)
+
+    return {
+        "status": "success",
+        "project_id": payload.project_id,
+        "duration_sec": script_data["duration_sec"],
+        "formatted_duration": script_data["formatted_duration"],
+        "script_text": script_data["full_script_text"],
+        "total_words": script_data["total_words"],
+        "scenes": script_data["scenes"],
+        "approval_state": approval_state.model_dump()
     }
 
 

@@ -123,17 +123,17 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
           <div>
             <div className="text-sm font-semibold text-slate-200 flex items-center space-x-2">
               <Volume2 className="w-4 h-4 text-amber-400" />
-              <span>বর্তমান ভয়েস প্রিভিউ (00:00 - 00:08)</span>
+              <span>বর্তমান ভয়েস প্রিভিউ (00:00 - {approvalState?.formatted_duration || '00:58'})</span>
             </div>
             <div className="text-xs text-slate-500 mt-0.5">
-              কমেডি অ্যাকসেন্টুয়েশন | Limiter: -0.5 dBFS Engaged
+              কমেডি অ্যাকসেন্টুয়েশন | Limiter: -0.5 dBFS Engaged | পূর্ণাঙ্গ ভিডিও ব্যাপ্তি: {approvalState?.formatted_duration || '00:58'} মিনিট
             </div>
           </div>
         </div>
 
         <div className="text-right">
           <span className="text-xs font-mono text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded border border-emerald-500/20">
-            Timing Sync: 1.05x Safe
+            Timing Sync: 1.05x Safe (Full Timeline)
           </span>
         </div>
       </div>
@@ -143,7 +143,7 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
         <div className="flex items-center justify-between pb-2 border-b border-slate-800">
           <div className="flex items-center space-x-2 text-xs font-bold text-amber-300">
             <Edit3 className="w-4 h-4 text-amber-400" />
-            <span>সংলাপ / স্ক্রিপ্ট এডিটর (Edit or Paste Your Script Here)</span>
+            <span>পূর্ণাঙ্গ সংলাপ / স্ক্রিপ্ট এডিটর (Full Timeline Script Editor: 00:00 - {approvalState?.formatted_duration || '00:58'})</span>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -153,18 +153,18 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
               title="Copy text to clipboard"
             >
               {copied ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
-              <span>{copied ? 'কপি হয়েছে!' : 'স্ক্রিপ্ট কপি করুন'}</span>
+              <span>{copied ? 'কপি হয়েছে!' : 'সম্পূর্ণ স্ক্রিপ্ট কপি করুন'}</span>
             </button>
           </div>
         </div>
 
-        {/* Textarea for Script */}
+        {/* Textarea for Full Length Script */}
         <textarea
-          rows={3}
+          rows={6}
           value={scriptText}
           onChange={(e) => setScriptText(e.target.value)}
-          placeholder="এখানে আপনার পরিবর্তিত সংলাপ লিখুন বা পেস্ট করুন..."
-          className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed font-sans"
+          placeholder="এখানে সম্পূর্ণ ভিডিওর সংলাপ দৃশ্য অনুযায়ী লিখুন বা পেস্ট করুন..."
+          className="w-full bg-slate-900 border border-slate-800 rounded-lg p-3 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-amber-500 leading-relaxed font-sans font-mono"
         />
 
         <div className="flex items-center justify-between text-[11px] text-slate-500">

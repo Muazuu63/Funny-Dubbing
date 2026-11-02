@@ -34,6 +34,8 @@ class ApprovalState(BaseModel):
     audio_preview_url: Optional[str] = None
     notes: Optional[str] = None
     script_text: Optional[str] = None
+    duration_sec: Optional[float] = None
+    formatted_duration: Optional[str] = None
     approved_at: Optional[str] = None
 
 

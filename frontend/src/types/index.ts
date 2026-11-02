@@ -44,6 +44,8 @@ export interface ApprovalState {
   audio_preview_url?: string;
   notes?: string;
   script_text?: string;
+  duration_sec?: number;
+  formatted_duration?: string;
 }
 
 export interface SystemSettings {

@@ -36,7 +36,12 @@ export const App: React.FC = () => {
   const [videoTitle, setVideoTitle] = useState<string>('Bengali Dubbing Comedy Test');
   const [videoPath, setVideoPath] = useState<string>('');
   const [videoUploading, setVideoUploading] = useState<boolean>(false);
-  const [uploadedVideoInfo, setUploadedVideoInfo] = useState<{ filename: string; sizeMb: number } | null>(null);
+  const [uploadedVideoInfo, setUploadedVideoInfo] = useState<{
+    filename: string;
+    sizeMb: number;
+    durationSec?: number;
+    formattedDuration?: string;
+  } | null>(null);
   const [selectedLanguage, setSelectedLanguage] = useState<OutputLanguageOption>('Bangla');
   const [selectedProfileName, setSelectedProfileName] = useState<string>('Dhallywood Classic Satire');
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
@@ -184,7 +189,12 @@ export const App: React.FC = () => {
       if (res.ok) {
         const data = await res.json();
         setVideoPath(data.saved_path);
-        setUploadedVideoInfo({ filename: data.filename, sizeMb: data.size_mb });
+        setUploadedVideoInfo({
+          filename: data.filename,
+          sizeMb: data.size_mb,
+          durationSec: data.duration_sec,
+          formattedDuration: data.formatted_duration,
+        });
         if (!videoTitle || videoTitle === 'Bengali Dubbing Comedy Test') {
           setVideoTitle(data.filename.replace(/\.[^/.]+$/, ''));
         }
@@ -278,24 +288,54 @@ export const App: React.FC = () => {
         const project = await res.json();
         setActiveTaskId(project.id);
         setActiveProjectTitle(project.title);
-        setCurrentStep('Separating Stems with Demucs (Preserving Master)...');
-        setProgressPercent(15);
+        setCurrentStep('Separating Stems with Demucs (Preserving Master Audio)...');
+        setProgressPercent(20);
 
-        // Trigger simulation of progress for user feedback
-        setTimeout(() => {
-          setCurrentStep('Transcribing Dialogue & Timing Analysis...');
-          setProgressPercent(40);
-        }, 1500);
+        // Step 2: Request Full-Length Timeline Script & Voice Preview
+        try {
+          const previewRes = await fetch('/api/v1/projects/generate-preview', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              project_id: project.id,
+              input_video_path: videoPath,
+              target_language: selectedLanguage,
+              comedy_profile: selectedProfileName
+            })
+          });
 
-        setTimeout(() => {
-          setCurrentStep('Synthesizing Comedic Pacing Voice (Gemini/Edge-TTS)...');
-          setProgressPercent(70);
+          if (previewRes.ok) {
+            const previewData = await previewRes.json();
+            setCurrentStep(`Synthesizing Comedic Pacing Voice (Full Timeline 00:00 - ${previewData.formatted_duration})...`);
+            setProgressPercent(80);
+
+            setApprovalState({
+              project_id: project.id,
+              status: 'WAITING_FOR_VOICE_APPROVAL',
+              script_text: previewData.script_text,
+              duration_sec: previewData.duration_sec,
+              formatted_duration: previewData.formatted_duration,
+              notes: `Comedy profile: ${selectedProfileName} (${previewData.formatted_duration}, ${previewData.total_words} words, ${previewData.scenes?.length || 5} scenes)`
+            });
+          } else {
+            // Fallback preview
+            setApprovalState({
+              project_id: project.id,
+              status: 'WAITING_FOR_VOICE_APPROVAL',
+              duration_sec: uploadedVideoInfo?.durationSec || 58.8,
+              formatted_duration: uploadedVideoInfo?.formattedDuration || '00:58',
+              notes: `Comedy profile: ${selectedProfileName} (${selectedLanguage})`
+            });
+          }
+        } catch {
           setApprovalState({
             project_id: project.id,
             status: 'WAITING_FOR_VOICE_APPROVAL',
+            duration_sec: uploadedVideoInfo?.durationSec || 58.8,
+            formatted_duration: uploadedVideoInfo?.formattedDuration || '00:58',
             notes: `Comedy profile: ${selectedProfileName} (${selectedLanguage})`
           });
-        }, 3000);
+        }
       }
     } catch (err) {
       console.error('Failed to start project:', err);
@@ -504,7 +544,9 @@ export const App: React.FC = () => {
                         <span className="font-semibold text-slate-200 truncate" title={uploadedVideoInfo.filename}>
                           {uploadedVideoInfo.filename}
                         </span>
-                        <span className="text-slate-500 font-mono shrink-0">({uploadedVideoInfo.sizeMb} MB)</span>
+                        <span className="text-slate-500 font-mono shrink-0">
+                          ({uploadedVideoInfo.sizeMb} MB{uploadedVideoInfo.formattedDuration ? ` • ${uploadedVideoInfo.formattedDuration} মিনিট` : ''})
+                        </span>
                       </div>
 
                       <div className="flex items-center space-x-2 shrink-0">
@@ -642,7 +684,9 @@ export const App: React.FC = () => {
                         <span className="font-semibold text-slate-200 truncate" title={uploadedVideoInfo.filename}>
                           {uploadedVideoInfo.filename}
                         </span>
-                        <span className="text-slate-500 font-mono shrink-0">({uploadedVideoInfo.sizeMb} MB)</span>
+                        <span className="text-slate-500 font-mono shrink-0">
+                          ({uploadedVideoInfo.sizeMb} MB{uploadedVideoInfo.formattedDuration ? ` • ${uploadedVideoInfo.formattedDuration} মিনিট` : ''})
+                        </span>
                       </div>
 
                       <div className="flex items-center space-x-2 shrink-0">
