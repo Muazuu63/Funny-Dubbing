@@ -21,6 +21,100 @@ from app.db.models import Project, ProjectCreate
 from app.core.reconciliation import ReconciliationEngine
 from app.config import settings
 
+def check_video_has_audio_track(video_path: Path) -> bool:
+    """Accurately detects whether a video file contains an active audio track using FFmpeg."""
+    if not video_path.exists():
+        return False
+    try:
+        import subprocess
+        ffmpeg_bin = str(settings.resolve_ffmpeg_binary())
+        res = subprocess.run(
+            [ffmpeg_bin, "-i", str(video_path.resolve())],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            encoding="utf-8",
+            errors="ignore"
+        )
+        if "Audio:" in res.stdout:
+            return True
+    except Exception:
+        pass
+    try:
+        size = video_path.stat().st_size
+        with open(video_path, "rb") as f:
+            head = f.read(512 * 1024)
+            if b"soun" in head or b"mp4a" in head or b"samr" in head:
+                return True
+            if size > 512 * 1024:
+                f.seek(max(0, size - 3 * 1024 * 1024))
+                tail = f.read()
+                if b"soun" in tail or b"mp4a" in tail or b"samr" in tail:
+                    return True
+    except Exception:
+        pass
+    return False
+
+
+def generate_ai_voice_translation_script(video_path: Path, target_language: str = "Bangla") -> Optional[str]:
+    """Uses Google Gemini multimodal audio model to transcribe speech from video and translate into funny comedy dialogue with timestamps."""
+    from app.core.security import retrieve_secure_credential
+    key = retrieve_secure_credential("gemini")
+    if not key or not video_path.exists():
+        return None
+
+    try:
+        import subprocess
+        import requests
+        import base64
+        import re
+
+        ffmpeg_bin = str(settings.resolve_ffmpeg_binary())
+        temp_wav = settings.TEMP_DIR / f"gemini_tmp_{int(datetime.now().timestamp())}.wav"
+
+        cmd = [ffmpeg_bin, "-y", "-i", str(video_path), "-t", "60", "-ar", "16000", "-ac", "1", str(temp_wav)]
+        subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+
+        if not temp_wav.exists() or temp_wav.stat().st_size < 1000:
+            return None
+
+        audio_b64 = base64.b64encode(temp_wav.read_bytes()).decode("utf-8")
+        temp_wav.unlink(missing_ok=True)
+
+        endpoint = "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-flash-lite:generateContent"
+        headers = {"Content-Type": "application/json", "x-goog-api-key": key}
+
+        prompt = (
+            f"Listen to this audio from a funny short video. "
+            f"Translate the dialogue into hilarious comedic Bangladeshi {target_language} dubbing dialogue with timestamps [MM:SS – MM:SS] "
+            f"and character names (e.g. চরিত্র ১ (ভারী কণ্ঠ): ..., চরিত্র ২ (চিল কণ্ঠ): ...). "
+            f"Format it line by line strictly with [MM:SS – MM:SS] timestamps for each dialogue line. Do not output markdown headers or commentary."
+        )
+
+        payload = {
+            "contents": [{
+                "parts": [
+                    {"text": prompt},
+                    {
+                        "inline_data": {
+                            "mime_type": "audio/wav",
+                            "data": audio_b64
+                        }
+                    }
+                ]
+            }]
+        }
+
+        res = requests.post(endpoint, headers=headers, json=payload, timeout=25)
+        if res.status_code == 200:
+            data = res.json()
+            raw_text = data["candidates"][0]["content"]["parts"][0]["text"].strip()
+            lines = [l for l in raw_text.splitlines() if re.search(r'\d{2}:\d{2}', l) and ":" in l]
+            return "\n\n".join(lines) if lines else raw_text
+    except Exception:
+        pass
+    return None
+
 router = APIRouter(prefix="/api/v1/projects", tags=["Projects"])
 
 
@@ -95,18 +189,7 @@ async def upload_project_video(file: UploadFile = File(...)):
     seconds = int(duration_sec) % 60
     formatted_duration = f"{minutes:02d}:{seconds:02d}"
 
-    has_original_voice = False
-    name_lower = target_path.name.lower()
-    if any(k in name_lower for k in ["speech", "dialogue", "talk", "scene", "dub", "voice", "clip", "third", "thirt"]):
-        has_original_voice = True
-    else:
-        try:
-            with open(target_path, "rb") as f:
-                header = f.read(2 * 1024 * 1024)
-                if b"soun" in header or b"mp4a" in header:
-                    has_original_voice = True
-        except Exception:
-            pass
+    has_original_voice = check_video_has_audio_track(target_path)
 
     return {
         "status": "success",
@@ -145,20 +228,13 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
     from app.providers.tts_provider import TTSProvider
     from app.api.routes_approval import get_project_approval_state, set_project_approval_state
 
-    # Check whether the video has voice dialogue (e.g. speech clips vs silent/cat clips)
-    has_original_voice = False
-    if video_path.exists():
-        name_lower = video_path.name.lower()
-        if any(k in name_lower for k in ["speech", "dialogue", "talk", "scene", "dub", "voice", "clip"]):
-            has_original_voice = True
-        else:
-            try:
-                with open(video_path, "rb") as f:
-                    header = f.read(2 * 1024 * 1024)
-                    if b"soun" in header or b"mp4a" in header:
-                        has_original_voice = True
-            except Exception:
-                pass
+    # Check whether the video has voice dialogue (using FFmpeg probe)
+    has_original_voice = check_video_has_audio_track(video_path)
+
+    # If original voice exists, transcribe & translate with Gemini if configured
+    ai_translation = None
+    if has_original_voice:
+        ai_translation = generate_ai_voice_translation_script(video_path, payload.target_language)
 
     script_data = LocalScriptEngine.generate_full_length_script(
         duration_sec=duration_sec,
@@ -166,9 +242,14 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
         comedy_profile=payload.comedy_profile
     )
 
+    if ai_translation:
+        translation_text = ai_translation
+    else:
+        translation_text = script_data.get("translation_script_text")
+
     # If original voice is detected, default to translated humorous dialogue; otherwise commentary
-    default_script = script_data.get("translation_script_text") if has_original_voice else script_data["full_script_text"]
-    voice_speech_text = script_data.get("translation_script_text") if has_original_voice else script_data["preview_voice_text"]
+    default_script = translation_text if has_original_voice else script_data["full_script_text"]
+    voice_speech_text = translation_text if has_original_voice else script_data["preview_voice_text"]
 
     # Synthesize real Edge-TTS preview voice
     preview_filename = f"preview_voice_{payload.project_id}.mp3"
