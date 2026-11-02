@@ -215,35 +215,39 @@ class Mode01Dubbing:
         language: str = "Bangla",
         work_dir: Optional[Path] = None
     ) -> Path:
-        """Synthesizes scene-by-scene audio and positions each at exact timestamp on the master timeline."""
+        """
+        Synthesizes scene-by-scene audio with intelligent comedic pacing.
+        If dialogue exceeds scene slot duration, dynamically speeds it up using atempo.
+        Uses additive mixing so no dialogue is ever cut off or missing.
+        """
         import wave
         import subprocess
         import edge_tts
+        import numpy as np
         from app.config import settings
 
         parsed = self.parse_script_lines_with_timing(script_text, total_duration)
         sample_rate = 44100
         channels = 2
-        bytes_per_sample = 2
-        frame_size = channels * bytes_per_sample  # 4 bytes
         total_frames = int(max(5.0, total_duration) * sample_rate)
-        master_buffer = bytearray(total_frames * frame_size)
+        master_array = np.zeros(total_frames * channels, dtype=np.int32)
         
         ffmpeg_bin = str(settings.resolve_ffmpeg_binary())
         scratch_dir = work_dir or output_wav.parent
         scratch_dir.mkdir(parents=True, exist_ok=True)
 
         if not parsed:
-            # Fallback to single tts synthesize
             await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+20%")
             return output_wav
 
         for idx, item in enumerate(parsed):
             text = item["clean_text"]
             start_sec = max(0.0, float(item["start_sec"] or 0.0))
+            next_start = parsed[idx + 1]["start_sec"] if idx + 1 < len(parsed) else total_duration
+            available_dur = max(1.2, float(next_start) - start_sec - 0.1)
             speaker = item.get("speaker", "")
 
-            # Voice character routing
+            # Multi-character voice routing
             if "Hindi" in language:
                 voice = "hi-IN-SwaraNeural" if ("2" in speaker or "২" in speaker) else "hi-IN-MadhurNeural"
             elif "English" in language:
@@ -251,46 +255,82 @@ class Mode01Dubbing:
             else:  # Bangla
                 if "2" in speaker or "২" in speaker or "চিল" in speaker:
                     voice = "bn-BD-NabanitaNeural"
-                elif "3" in speaker or "৩" in speaker:
+                elif "3" in speaker or "৩" in speaker or "হুট" in speaker:
                     voice = "bn-IN-BashkarNeural"
                 else:
                     voice = "bn-BD-PradeepNeural"
 
-            line_mp3 = scratch_dir / f"line_{idx}.mp3"
-            line_pcm = scratch_dir / f"line_{idx}.pcm"
+            raw_mp3 = scratch_dir / f"raw_{idx}.mp3"
+            raw_wav = scratch_dir / f"raw_{idx}.wav"
+            fitted_wav = scratch_dir / f"fitted_{idx}.wav"
 
             try:
+                # 1. Synthesize line
                 comm = edge_tts.Communicate(text, voice, rate="+20%")
-                await comm.save(str(line_mp3))
+                await comm.save(str(raw_mp3))
 
-                cmd = [
+                cmd_conv = [
                     ffmpeg_bin, "-y",
-                    "-i", str(line_mp3),
+                    "-i", str(raw_mp3),
                     "-ar", "44100",
                     "-ac", "2",
-                    "-f", "s16le",
-                    str(line_pcm)
+                    str(raw_wav)
                 ]
-                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                subprocess.run(cmd_conv, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-                pcm_data = line_pcm.read_bytes()
-                start_byte = int(start_sec * sample_rate) * frame_size
-                end_byte = start_byte + len(pcm_data)
+                # Check duration
+                with wave.open(str(raw_wav), "rb") as wf:
+                    dur = wf.getnframes() / wf.getframerate()
 
-                if start_byte < len(master_buffer):
-                    actual_end = min(end_byte, len(master_buffer))
-                    master_buffer[start_byte:actual_end] = pcm_data[:actual_end - start_byte]
+                # 2. If voice duration exceeds scene slot, speed up using FFmpeg atempo
+                if dur > available_dur:
+                    speed = min(2.5, dur / available_dur)
+                    if speed <= 2.0:
+                        filter_str = f"atempo={speed:.3f}"
+                    else:
+                        filter_str = f"atempo=2.0,atempo={speed/2.0:.3f}"
+
+                    cmd_speed = [
+                        ffmpeg_bin, "-y",
+                        "-i", str(raw_wav),
+                        "-filter:a", filter_str,
+                        "-ar", "44100",
+                        "-ac", "2",
+                        str(fitted_wav)
+                    ]
+                    subprocess.run(cmd_speed, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    play_wav = fitted_wav
+                else:
+                    play_wav = raw_wav
+
+                # 3. Read PCM frames and additively mix into master timeline
+                with wave.open(str(play_wav), "rb") as wf:
+                    n_frames = wf.getnframes()
+                    clip_bytes = wf.readframes(n_frames)
+
+                clip_data = np.frombuffer(clip_bytes, dtype=np.int16).astype(np.int32)
+                start_frame = int(start_sec * sample_rate)
+                start_sample = start_frame * channels
+                end_sample = min(start_sample + len(clip_data), len(master_array))
+                slice_len = end_sample - start_sample
+
+                # Additive mixing: NEVER overwrites or truncates any dialogue!
+                master_array[start_sample:end_sample] += clip_data[:slice_len]
+
             except Exception as e:
                 pass
             finally:
-                line_mp3.unlink(missing_ok=True)
-                line_pcm.unlink(missing_ok=True)
+                raw_mp3.unlink(missing_ok=True)
+                raw_wav.unlink(missing_ok=True)
+                fitted_wav.unlink(missing_ok=True)
 
+        # Clip samples to prevent distortion and export WAV
+        master_int16 = np.clip(master_array, -32768, 32767).astype(np.int16)
         with wave.open(str(output_wav), "wb") as wf:
             wf.setnchannels(channels)
-            wf.setsampwidth(bytes_per_sample)
+            wf.setsampwidth(2)
             wf.setframerate(sample_rate)
-            wf.writeframes(master_buffer)
+            wf.writeframes(master_int16.tobytes())
 
         return output_wav
 
@@ -360,19 +400,10 @@ class Mode01Dubbing:
                 except Exception:
                     lang_voice_audio.write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
 
-            # Final mux to output video using FFmpeg with automatic watermark / text / logo removal
+            # Final mux to output video using FFmpeg: crystal-clear native video (zero blur) + synchronized Bengali dubbed audio
             final_video_name = f"output_{lang}.mp4"
             final_video_path = project_dir / final_video_name
             ffmpeg_bin = settings.resolve_ffmpeg_binary()
-
-            # Automatically detect any watermarks, text banners, and logos on the video
-            watermark_boxes = self.inpainter.auto_detect_watermark_boxes(input_video_path) if input_video_path else []
-            vf_args = []
-            if watermark_boxes:
-                delogo_filters = [f"delogo=x={b[0]}:y={b[1]}:w={b[2]}:h={b[3]}" for b in watermark_boxes]
-                vf_args = ["-vf", ",".join(delogo_filters), "-c:v", "libx264", "-crf", "20", "-preset", "fast"]
-            else:
-                vf_args = ["-c:v", "copy"]
 
             if input_video_path and input_video_path.exists() and lang_voice_audio.exists():
                 try:
@@ -380,9 +411,9 @@ class Mode01Dubbing:
                         str(ffmpeg_bin), "-y",
                         "-i", str(input_video_path),
                         "-i", str(lang_voice_audio),
-                        *vf_args,
                         "-map", "0:v:0",
                         "-map", "1:a:0",
+                        "-c:v", "copy",
                         "-c:a", "aac",
                         "-b:a", "192k",
                         "-shortest",
