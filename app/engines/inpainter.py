@@ -148,7 +148,8 @@ class InpainterEngine:
                 mask_coverage_percent=0.0,
             )
 
-        boxes = [watermark_box] if watermark_box else self.auto_detect_watermark_boxes(input_video_path)
+        # Do not blur videos automatically; preserve 100% crystal-clear native quality unless explicit box is specified
+        boxes = [watermark_box] if watermark_box else []
 
         if not boxes:
             import shutil

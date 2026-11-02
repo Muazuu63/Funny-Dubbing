@@ -1022,6 +1022,17 @@ export const App: React.FC = () => {
               </section>
             )}
 
+            {/* Voice Approval Gateway Component (AI Voice Preview & Script Editor) */}
+            <section>
+              <VoiceApprovalStudio
+                approvalState={approvalState}
+                onApprove={handleApproveVoice}
+                onRegenerate={handleRegenerateVoice}
+                onReject={handleRejectVoice}
+                currentLanguage={selectedLanguage}
+              />
+            </section>
+
             {/* Completed Final Dubbed Video Player Card */}
             {completedVideo && (
               <section className="bg-slate-900 border-2 border-emerald-500 rounded-2xl p-6 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
@@ -1072,17 +1083,6 @@ export const App: React.FC = () => {
                 </div>
               </section>
             )}
-
-            {/* Voice Approval Gateway Component */}
-            <section>
-              <VoiceApprovalStudio
-                approvalState={approvalState}
-                onApprove={handleApproveVoice}
-                onRegenerate={handleRegenerateVoice}
-                onReject={handleRejectVoice}
-                currentLanguage={selectedLanguage}
-              />
-            </section>
 
             {/* 4-Track Audio Mixer */}
             <section>
