@@ -86,12 +86,18 @@ async def submit_voice_approval(project_id: str, payload: ApprovalRequest):
     return state
 
 
+class ApproveRequestBody(BaseModel):
+    final_script: Optional[str] = None
+
+
 @router.post("/{project_id}/approve", response_model=ApprovalState)
-async def approve_project_voice(project_id: str):
+async def approve_project_voice(project_id: str, payload: Optional[ApproveRequestBody] = None):
     import datetime
     state = get_project_approval_state(project_id)
     state.status = "APPROVED"
     state.approved_at = datetime.datetime.now(datetime.timezone.utc).isoformat()
+    if payload and payload.final_script:
+        state.script_text = payload.final_script
     set_project_approval_state(project_id, state)
     return state
 

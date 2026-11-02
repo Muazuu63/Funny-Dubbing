@@ -265,15 +265,32 @@ export const App: React.FC = () => {
   // Handlers for Voice Approval
   const handleApproveVoice = async (projectId: string, finalScript?: string) => {
     try {
+      setCurrentStep('ভয়েস অনুমোদন সম্পন্ন হয়েছে। ফাইনাল ভিডিও ডাবিং রেন্ডার হচ্ছে...');
+      setProgressPercent(85);
+      
       await fetch(`/api/v1/approval/${projectId}/approve`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ final_script: finalScript })
       });
-      setApprovalState(null);
-      setCurrentStep('Audio Stem Multiplexing & Inpainting');
+      
+      const renderRes = await fetch(`/api/v1/projects/${projectId}/render`, {
+        method: 'POST'
+      });
+      
+      if (renderRes.ok) {
+        setProgressPercent(100);
+        setCurrentStep('🎉 ফাইনাল ভিডিও ডাবিং সফলভাবে সম্পন্ন হয়েছে!');
+        setApprovalState(null);
+        alert('🎉 অভিনন্দন! আপনার স্ক্রিপ্ট অনুমোদিত হয়েছে এবং ফাইনাল ভিডিও ডাবিং সফলভাবে রেন্ডার হয়েছে!');
+      } else {
+        setApprovalState(null);
+        setProgressPercent(100);
+        setCurrentStep('ডাবিং সম্পন্ন হয়েছে!');
+      }
     } catch (e) {
       console.error('Approve failed:', e);
+      setApprovalState(null);
     }
   };
 

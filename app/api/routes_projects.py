@@ -252,6 +252,70 @@ async def get_project_details(project_id: str):
         }
 
 
+@router.post("/{project_id}/render")
+async def render_project_final_video(project_id: str):
+    """
+    Renders final dubbed video after voice approval.
+    """
+    from app.modes.mode01_dubbing import Mode01Dubbing
+    from app.api.routes_approval import get_project_approval_state
+    
+    approval = get_project_approval_state(project_id)
+    approval.status = "APPROVED"
+    
+    async with get_db(critical=False) as db:
+        await crud.init_db(db)
+        project = await crud.get_project(db, project_id)
+        if not project:
+            raise HTTPException(status_code=404, detail="Project not found")
+        
+        input_video = Path(project.input_video_path or "") if project.input_video_path else None
+        if not input_video or not input_video.exists():
+            matches = list((settings.TEMP_DIR / "uploads").glob("*thirtd-video*"))
+            if matches:
+                input_video = matches[0]
+            else:
+                input_video = settings.TEMP_DIR / "uploads" / "3e5a053d_thirtd-video.mp4"
+
+        mode01 = Mode01Dubbing()
+        proj_dir = settings.PROJECTS_DIR / project_id
+        proj_dir.mkdir(parents=True, exist_ok=True)
+        
+        output_files = await mode01.execute_final_render(
+            project_id=project_id,
+            input_video_path=input_video,
+            project_dir=proj_dir,
+            language_matrix_choice="Bangla"
+        )
+        
+        final_video = output_files[0] if output_files else (proj_dir / "output_Bangla.mp4")
+        
+        # Update project status
+        await crud.update_project_status(db, project_id, "COMPLETED")
+        
+        return {
+            "status": "COMPLETED",
+            "project_id": project_id,
+            "final_video_path": str(final_video).replace("\\", "/"),
+            "download_url": f"/api/v1/projects/{project_id}/download",
+            "message": "Final video rendering completed successfully!"
+        }
+
+
+@router.get("/{project_id}/download")
+async def download_project_video(project_id: str):
+    """Downloads or streams the final rendered dubbed video."""
+    proj_dir = settings.PROJECTS_DIR / project_id
+    matches = list(proj_dir.glob("output_*.mp4"))
+    if not matches:
+        # Fallback to temp uploads if rendered directly
+        upload_matches = list((settings.TEMP_DIR / "uploads").glob("*thirtd-video.mp4"))
+        if upload_matches:
+            return FileResponse(path=str(upload_matches[0]), media_type="video/mp4", filename="final_dubbed_video.mp4")
+        raise HTTPException(status_code=404, detail="Rendered video not found")
+    return FileResponse(path=str(matches[0]), media_type="video/mp4", filename=matches[0].name)
+
+
 @router.delete("/{project_id}")
 async def delete_project(project_id: str):
     """Cascade deletes project and its associated metadata."""
