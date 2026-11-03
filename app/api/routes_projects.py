@@ -346,14 +346,8 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
                 default_script = "\n\n".join(chunks)
 
         lines = [l.strip() for l in default_script.splitlines() if l.strip()]
-        if lines and not any(re.search(r'\d{1,2}:\d{2}', l) for l in lines):
-            step = duration_sec / len(lines)
-            formatted = []
-            for i, l in enumerate(lines):
-                s_sec = i * step
-                e_sec = min(duration_sec, (i + 1) * step)
-                formatted.append(f"[{int(s_sec)//60:02d}:{int(s_sec)%60:02d} - {int(e_sec)//60:02d}:{int(e_sec)%60:02d}] {l}")
-            default_script = "\n\n".join(formatted)
+        if lines:
+            default_script = "\n\n".join(lines)
 
     # Synthesize synchronized Edge-TTS preview voice matching exact duration
     preview_filename = f"preview_voice_{payload.project_id}.mp3"
