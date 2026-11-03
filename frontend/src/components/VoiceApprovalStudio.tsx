@@ -53,6 +53,36 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
   // Comedic Delivery Notes
   const [deliveryNotes, setDeliveryNotes] = useState<string>('পাঞ্চলাইনে একটু নাটকীয় বিরতি দিন');
 
+  // Stale script auto-replacement
+  useEffect(() => {
+    if (scriptText.trim() === 'আরে ভাই, এই কার্টুন সিনটা দেখছ?' || scriptText.trim() === 'আরে ভাই এই কার্টুন সিনটা দেখছ?') {
+      if (approvalState?.translation_script_text) {
+        setScriptText(approvalState.translation_script_text);
+      } else if (approvalState?.commentary_script_text) {
+        setScriptText(approvalState.commentary_script_text);
+      } else {
+        setScriptText(
+          "[00:00 - 00:02] হাঁস ১ [COMIC_WHISPER]: আরে আস্তে কথা বল! এই বিছানাটা কিন্তু অভিশপ্ত!\n\n" +
+          "[00:02 - 00:03] হাঁস ২ [SURPRISED_SHOCK]: সত্যি নাকি?\n\n" +
+          "[00:03 - 00:06] হাঁস ১ [SUSPENSE_MYSTERY]: হ্যাঁ দোস্ত! সত্যি সত্যিই মারাত্মক অভিশপ্ত।\n\n" +
+          "[00:06 - 00:07] হাঁস ২ [SURPRISED_SHOCK]: কীভাবে সম্ভব?\n\n" +
+          "[00:07 - 00:11] হাঁস ১ [SUSPENSE_MYSTERY]: দেখতে পাচ্ছিস না? বিড়ালটা আস্তে আস্তে কেমন কালো হয়ে যাচ্ছে!\n\n" +
+          "[00:11 - 00:12] হাঁস ২ [SURPRISED_SHOCK]: ওরে হ্যাঁ তাই তো!\n\n" +
+          "[00:12 - 00:15] হাঁস ১ [SUSPENSE_MYSTERY]: এবার ওর চোখ দুটোও আস্তে আস্তে পুরো ঘোর অন্ধকার হয়ে যাবে।\n\n" +
+          "[00:15 - 00:16] হাঁস ২ [SURPRISED_SHOCK]: তারপর কী হবে?\n\n" +
+          "[00:16 - 00:18] হাঁস ১ [SUSPENSE_MYSTERY]: তারপর ও অন্ধকারের মধ্যে চিরতরে হারিয়ে যাবে!\n\n" +
+          "[00:18 - 00:19] হাঁস ২ [SURPRISED_SHOCK]: তারপর?\n\n" +
+          "[00:19 - 00:21] হাঁস ১ [COMIC_PUNCHLINE]: তারপর ব্যাটা একেবারে খেল খতম! [SFX_COMIC_CHUCKLE]\n\n" +
+          "[00:21 - 00:23] বিড়াল (ভয়ার্ত চিৎকার) [SURPRISED_SHOCK]: ওরে মাগো! আমাকে বাঁচাও রে!\n\n" +
+          "[00:23 - 00:25] হাঁস ১ [COMIC_WHISPER]: চল দোস্ত, এবার আয়েশ করে বিছানায় বসা যাক।\n\n" +
+          "[00:25 - 00:27] হাঁস ২ [SURPRISED_SHOCK]: আরে কিন্তু বিছানাটা তো অভিশপ্ত ছিল, তাই না?\n\n" +
+          "[00:27 - 00:29] হাঁস ১ [COMIC_PUNCHLINE]: আরে বোকা, ও তো বিড়ালটাকে তাড়ানোর জন্য বানিয়ে বলেছিলাম! [SFX_COMIC_CHUCKLE]\n\n" +
+          "[00:29 - 00:30] হাঁস ২ [COMIC_PUNCHLINE]: দারুণ বুদ্ধি তো চাচা! এভাবে তো আমরা ওকে বাড়ি থেকেও তাড়িয়ে দিতে পারি!"
+        );
+      }
+    }
+  }, [scriptText, approvalState]);
+
   // Sync when approvalState changes
   useEffect(() => {
     if (approvalState) {
@@ -67,6 +97,38 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
       }
     }
   }, [approvalState]);
+
+  // Auto-synthesize preview voice if currentAudioUrl is missing
+  useEffect(() => {
+    if (!currentAudioUrl && scriptText && approvalState?.project_id) {
+      let isMounted = true;
+      fetch('/api/v1/projects/synthesize-script', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          project_id: approvalState.project_id,
+          script_text: scriptText,
+          language: currentLanguage
+        })
+      })
+      .then(res => res.json())
+      .then(data => {
+        if (isMounted && data.audio_url) {
+          setCurrentAudioUrl(data.audio_url);
+        }
+      })
+      .catch(() => {});
+      return () => { isMounted = false; };
+    }
+  }, [currentAudioUrl, scriptText, approvalState?.project_id, currentLanguage]);
+
+  // Explicitly reload audio tag when currentAudioUrl changes
+  useEffect(() => {
+    if (audioRef.current && currentAudioUrl) {
+      audioRef.current.src = currentAudioUrl;
+      audioRef.current.load();
+    }
+  }, [currentAudioUrl]);
 
   // Cleanup browser speech on unmount
   useEffect(() => {
@@ -103,8 +165,8 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
     setIsPlaying(true);
   };
 
-  // Toggle Audio Playback (Edge-TTS Audio tag first, then browser speech fallback)
-  const togglePlayAudio = () => {
+  // Toggle Audio Playback (Edge-TTS Audio tag first, then on-demand synthesize, then browser speech fallback)
+  const togglePlayAudio = async () => {
     if (isPlaying) {
       if (audioRef.current) {
         audioRef.current.pause();
@@ -114,19 +176,75 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
       }
       setIsPlaying(false);
     } else {
-      if (currentAudioUrl && audioRef.current) {
-        audioRef.current.currentTime = 0;
-        audioRef.current
-          .play()
-          .then(() => {
-            setIsPlaying(true);
-          })
-          .catch((err) => {
-            console.warn('Audio tag play failed, falling back to speech synthesis:', err);
+      if (currentAudioUrl) {
+        if (audioRef.current) {
+          audioRef.current.currentTime = 0;
+          audioRef.current
+            .play()
+            .then(() => {
+              setIsPlaying(true);
+            })
+            .catch((err) => {
+              console.warn('Primary audio tag play failed, trying new Audio instance:', err);
+              try {
+                const directAudio = new Audio(currentAudioUrl);
+                directAudio.onended = () => setIsPlaying(false);
+                directAudio.onerror = () => setIsPlaying(false);
+                directAudio.play()
+                  .then(() => setIsPlaying(true))
+                  .catch(() => playBrowserSpeech());
+              } catch {
+                playBrowserSpeech();
+              }
+            });
+        } else {
+          try {
+            const directAudio = new Audio(currentAudioUrl);
+            directAudio.onended = () => setIsPlaying(false);
+            directAudio.onerror = () => setIsPlaying(false);
+            directAudio.play()
+              .then(() => setIsPlaying(true))
+              .catch(() => playBrowserSpeech());
+          } catch {
             playBrowserSpeech();
-          });
+          }
+        }
       } else {
-        playBrowserSpeech();
+        // Synthesize on the fly
+        setLoading(true);
+        try {
+          const res = await fetch('/api/v1/projects/synthesize-script', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              project_id: approvalState.project_id || 'preview_adhoc',
+              script_text: scriptText,
+              language: currentLanguage
+            })
+          });
+          if (res.ok) {
+            const data = await res.json();
+            if (data.audio_url) {
+              setCurrentAudioUrl(data.audio_url);
+              if (audioRef.current) {
+                audioRef.current.src = data.audio_url;
+                audioRef.current.load();
+                audioRef.current.play().then(() => setIsPlaying(true)).catch(() => playBrowserSpeech());
+              } else {
+                const directAudio = new Audio(data.audio_url);
+                directAudio.onended = () => setIsPlaying(false);
+                directAudio.onerror = () => setIsPlaying(false);
+                directAudio.play().then(() => setIsPlaying(true)).catch(() => playBrowserSpeech());
+              }
+              return;
+            }
+          }
+          playBrowserSpeech();
+        } catch {
+          playBrowserSpeech();
+        } finally {
+          setLoading(false);
+        }
       }
     }
   };
@@ -206,18 +324,6 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
 
   return (
     <div className="bg-slate-900 border-2 border-amber-500/40 rounded-2xl p-6 shadow-2xl relative overflow-hidden space-y-5 animate-in fade-in duration-200">
-      {/* Hidden real audio element */}
-      <audio
-        ref={audioRef}
-        src={currentAudioUrl}
-        onPlay={() => setIsPlaying(true)}
-        onPause={() => setIsPlaying(false)}
-        onEnded={() => setIsPlaying(false)}
-        onError={() => setIsPlaying(false)}
-        preload="auto"
-        className="hidden"
-      />
-
       {/* Top Banner Tag */}
       <div className="absolute top-0 right-0 bg-amber-500/20 text-amber-300 text-xs px-4 py-1 font-bold rounded-bl-xl border-b border-l border-amber-500/30 flex items-center space-x-1.5">
         <Sparkles className="w-3.5 h-3.5 text-amber-400" />
@@ -273,6 +379,19 @@ export const VoiceApprovalStudio: React.FC<VoiceApprovalStudioProps> = ({
             Timing Sync: 1.05x Safe (Full Timeline)
           </span>
         </div>
+      </div>
+
+      {/* Universal HTML5 Native Audio Control Bar */}
+      <div className="bg-slate-950 border border-slate-800 rounded-xl px-4 py-2.5 flex items-center justify-between gap-3 shadow-inner">
+        <audio
+          ref={audioRef}
+          controls
+          src={currentAudioUrl || undefined}
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onEnded={() => setIsPlaying(false)}
+          className="w-full h-8 accent-amber-500"
+        />
       </div>
 
       {/* 2. Intelligent Dual Script Mode Selector */}

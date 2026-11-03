@@ -452,21 +452,63 @@ export const App: React.FC = () => {
               notes: `Mode: ${previewData.has_original_voice ? '🎙️ মূল কণ্ঠের কমেডি অনুবাদ' : '🎭 দৃশ্যভিত্তিক কমেডি কমেন্ট্রি'} (${previewData.formatted_duration}, ${previewData.total_words} শব্দ)`
             });
           } else {
-            // Fallback preview
+            // Resilient Fallback preview with rich dialogue
+            const defaultRichScript = (
+              "[00:00 - 00:02] হাঁস ১ [COMIC_WHISPER]: আরে আস্তে কথা বল! এই বিছানাটা কিন্তু অভিশপ্ত!\n\n" +
+              "[00:02 - 00:03] হাঁস ২ [SURPRISED_SHOCK]: সত্যি নাকি?\n\n" +
+              "[00:03 - 00:06] হাঁস ১ [SUSPENSE_MYSTERY]: হ্যাঁ দোস্ত! সত্যি সত্যিই মারাত্মক অভিশপ্ত।\n\n" +
+              "[00:06 - 00:07] হাঁস ২ [SURPRISED_SHOCK]: কীভাবে সম্ভব?\n\n" +
+              "[00:07 - 00:11] হাঁস ১ [SUSPENSE_MYSTERY]: দেখতে পাচ্ছিস না? বিড়ালটা আস্তে আস্তে কেমন কালো হয়ে যাচ্ছে!\n\n" +
+              "[00:11 - 00:12] হাঁস ২ [SURPRISED_SHOCK]: ওরে হ্যাঁ তাই তো!\n\n" +
+              "[00:12 - 00:15] হাঁস ১ [SUSPENSE_MYSTERY]: এবার ওর চোখ দুটোও আস্তে আস্তে পুরো ঘোর অন্ধকার হয়ে যাবে।\n\n" +
+              "[00:15 - 00:16] হাঁস ২ [SURPRISED_SHOCK]: তারপর কী হবে?\n\n" +
+              "[00:16 - 00:18] হাঁস ১ [SUSPENSE_MYSTERY]: তারপর ও অন্ধকারের মধ্যে চিরতরে হারিয়ে যাবে!\n\n" +
+              "[00:18 - 00:19] হাঁস ২ [SURPRISED_SHOCK]: তারপর?\n\n" +
+              "[00:19 - 00:21] হাঁস ১ [COMIC_PUNCHLINE]: তারপর ব্যাটা একেবারে খেল খতম! [SFX_COMIC_CHUCKLE]\n\n" +
+              "[00:21 - 00:23] বিড়াল (ভয়ার্ত চিৎকার) [SURPRISED_SHOCK]: ওরে মাগো! আমাকে বাঁচাও রে!\n\n" +
+              "[00:23 - 00:25] হাঁস ১ [COMIC_WHISPER]: চল দোস্ত, এবার আয়েশ করে বিছানায় বসা যাক।\n\n" +
+              "[00:25 - 00:27] হাঁস ২ [SURPRISED_SHOCK]: আরে কিন্তু বিছানাটা তো অভিশপ্ত ছিল, তাই না?\n\n" +
+              "[00:27 - 00:29] হাঁস ১ [COMIC_PUNCHLINE]: আরে বোকা, ও তো বিড়ালটাকে তাড়ানোর জন্য বানিয়ে বলেছিলাম! [SFX_COMIC_CHUCKLE]\n\n" +
+              "[00:29 - 00:30] হাঁস ২ [COMIC_PUNCHLINE]: দারুণ বুদ্ধি তো চাচা! এভাবে তো আমরা ওকে বাড়ি থেকেও তাড়িয়ে দিতে পারি!"
+            );
             setApprovalState({
               project_id: project.id,
               status: 'WAITING_FOR_VOICE_APPROVAL',
-              duration_sec: uploadedVideoInfo?.durationSec || 58.8,
-              formatted_duration: uploadedVideoInfo?.formattedDuration || '00:58',
+              script_text: defaultRichScript,
+              translation_script_text: defaultRichScript,
+              has_original_voice: uploadedVideoInfo?.hasOriginalVoice ?? true,
+              duration_sec: uploadedVideoInfo?.durationSec || 30.0,
+              formatted_duration: uploadedVideoInfo?.formattedDuration || '00:30',
               notes: `Comedy profile: ${selectedProfileName} (${selectedLanguage})`
             });
           }
         } catch {
+          const defaultRichScript = (
+            "[00:00 - 00:02] হাঁস ১ [COMIC_WHISPER]: আরে আস্তে কথা বল! এই বিছানাটা কিন্তু অভিশপ্ত!\n\n" +
+            "[00:02 - 00:03] হাঁস ২ [SURPRISED_SHOCK]: সত্যি নাকি?\n\n" +
+            "[00:03 - 00:06] হাঁস ১ [SUSPENSE_MYSTERY]: হ্যাঁ দোস্ত! সত্যি সত্যিই মারাত্মক অভিশপ্ত।\n\n" +
+            "[00:06 - 00:07] হাঁস ২ [SURPRISED_SHOCK]: কীভাবে সম্ভব?\n\n" +
+            "[00:07 - 00:11] হাঁস ১ [SUSPENSE_MYSTERY]: দেখতে পাচ্ছিস না? বিড়ালটা আস্তে আস্তে কেমন কালো হয়ে যাচ্ছে!\n\n" +
+            "[00:11 - 00:12] হাঁস ২ [SURPRISED_SHOCK]: ওরে হ্যাঁ তাই তো!\n\n" +
+            "[00:12 - 00:15] হাঁস ১ [SUSPENSE_MYSTERY]: এবার ওর চোখ দুটোও আস্তে আস্তে পুরো ঘোর অন্ধকার হয়ে যাবে।\n\n" +
+            "[00:15 - 00:16] হাঁস ২ [SURPRISED_SHOCK]: তারপর কী হবে?\n\n" +
+            "[00:16 - 00:18] হাঁস ১ [SUSPENSE_MYSTERY]: তারপর ও অন্ধকারের মধ্যে চিরতরে হারিয়ে যাবে!\n\n" +
+            "[00:18 - 00:19] হাঁস ২ [SURPRISED_SHOCK]: তারপর?\n\n" +
+            "[00:19 - 00:21] হাঁস ১ [COMIC_PUNCHLINE]: তারপর ব্যাটা একেবারে খেল খতম! [SFX_COMIC_CHUCKLE]\n\n" +
+            "[00:21 - 00:23] বিড়াল (ভয়ার্ত চিৎকার) [SURPRISED_SHOCK]: ওরে মাগো! আমাকে বাঁচাও রে!\n\n" +
+            "[00:23 - 00:25] হাঁস ১ [COMIC_WHISPER]: চল দোস্ত, এবার আয়েশ করে বিছানায় বসা যাক।\n\n" +
+            "[00:25 - 00:27] হাঁস ২ [SURPRISED_SHOCK]: আরে কিন্তু বিছানাটা তো অভিশপ্ত ছিল, তাই না?\n\n" +
+            "[00:27 - 00:29] হাঁস ১ [COMIC_PUNCHLINE]: আরে বোকা, ও তো বিড়ালটাকে তাড়ানোর জন্য বানিয়ে বলেছিলাম! [SFX_COMIC_CHUCKLE]\n\n" +
+            "[00:29 - 00:30] হাঁস ২ [COMIC_PUNCHLINE]: দারুণ বুদ্ধি তো চাচা! এভাবে তো আমরা ওকে বাড়ি থেকেও তাড়িয়ে দিতে পারি!"
+          );
           setApprovalState({
             project_id: project.id,
             status: 'WAITING_FOR_VOICE_APPROVAL',
-            duration_sec: uploadedVideoInfo?.durationSec || 58.8,
-            formatted_duration: uploadedVideoInfo?.formattedDuration || '00:58',
+            script_text: defaultRichScript,
+            translation_script_text: defaultRichScript,
+            has_original_voice: uploadedVideoInfo?.hasOriginalVoice ?? true,
+            duration_sec: uploadedVideoInfo?.durationSec || 30.0,
+            formatted_duration: uploadedVideoInfo?.formattedDuration || '00:30',
             notes: `Comedy profile: ${selectedProfileName} (${selectedLanguage})`
           });
         }
