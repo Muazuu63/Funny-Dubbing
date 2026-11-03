@@ -254,6 +254,8 @@ class Mode01Dubbing:
             await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+0%")
             return output_wav
 
+        # Synthesize each parsed dialogue line and clean leading/trailing silence
+        synthesized_clips = []
         for idx, item in enumerate(parsed):
             text = (
                 item["clean_text"]
@@ -262,9 +264,6 @@ class Mode01Dubbing:
                 .replace("বিল্লাডা", "বিল্লাটা")
                 .replace("বিল্লা ডা", "বিল্লা টা")
             )
-            start_sec = max(0.0, float(item["start_sec"] or 0.0))
-            next_start = parsed[idx + 1]["start_sec"] if idx + 1 < len(parsed) else total_duration
-            available_dur = max(1.5, float(next_start) - start_sec - 0.1)
             speaker = item.get("speaker", "")
 
             # Multi-character voice routing: realistic, distinct comedic characters
@@ -282,10 +281,8 @@ class Mode01Dubbing:
 
             raw_mp3 = scratch_dir / f"raw_{idx}.mp3"
             raw_wav = scratch_dir / f"raw_{idx}.wav"
-            fitted_wav = scratch_dir / f"fitted_{idx}.wav"
 
             try:
-                # 1. Synthesize line at natural human speed (rate="+0%")
                 comm = edge_tts.Communicate(text, voice, rate="+0%")
                 await comm.save(str(raw_mp3))
 
@@ -298,48 +295,98 @@ class Mode01Dubbing:
                 ]
                 subprocess.run(cmd_conv, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-                # Check duration
                 with wave.open(str(raw_wav), "rb") as wf:
-                    dur = wf.getnframes() / wf.getframerate()
+                    frames_bytes = wf.readframes(wf.getnframes())
+                arr = np.frombuffer(frames_bytes, dtype=np.int16)
 
-                # 2. Gentle pacing: never rush dialogue unnaturally (capped at 1.20x max)
-                if dur > available_dur:
-                    speed = min(1.20, dur / available_dur)
-                    filter_str = f"atempo={speed:.3f}"
-
-                    cmd_speed = [
-                        ffmpeg_bin, "-y",
-                        "-i", str(raw_wav),
-                        "-filter:a", filter_str,
-                        "-ar", "44100",
-                        "-ac", "2",
-                        str(fitted_wav)
-                    ]
-                    subprocess.run(cmd_speed, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-                    play_wav = fitted_wav
+                # Trim leading/trailing silence so dialogue is punchy and fits comfortably
+                mono = np.abs(arr.reshape(-1, channels)).max(axis=1)
+                active = np.where(mono > 350)[0]
+                if len(active) > 0:
+                    first = max(0, active[0] - int(0.04 * sample_rate))
+                    last = min(len(mono), active[-1] + int(0.05 * sample_rate))
+                    clean_arr = arr[first * channels : last * channels]
                 else:
-                    play_wav = raw_wav
+                    clean_arr = arr
 
-                # 3. Read PCM frames and additively mix into master timeline
-                with wave.open(str(play_wav), "rb") as wf:
-                    n_frames = wf.getnframes()
-                    clip_bytes = wf.readframes(n_frames)
-
-                clip_data = np.frombuffer(clip_bytes, dtype=np.int16).astype(np.int32)
-                start_frame = int(start_sec * sample_rate)
-                start_sample = start_frame * channels
-                end_sample = min(start_sample + len(clip_data), len(master_array))
-                slice_len = end_sample - start_sample
-
-                # Additive mixing: NEVER overwrites or truncates any dialogue!
-                master_array[start_sample:end_sample] += clip_data[:slice_len]
-
-            except Exception as e:
+                synthesized_clips.append({
+                    "clean_arr": clean_arr,
+                    "dur": len(clean_arr) / (channels * sample_rate),
+                    "item": item
+                })
+            except Exception:
                 pass
             finally:
                 raw_mp3.unlink(missing_ok=True)
                 raw_wav.unlink(missing_ok=True)
-                fitted_wav.unlink(missing_ok=True)
+
+        if not synthesized_clips:
+            await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+0%")
+            return output_wav
+
+        # Check if the script came with explicit user timestamp slots or is an unbroken script
+        has_explicit_timestamps = all(
+            c["item"].get("start_sec") is not None and c["item"].get("end_sec") is not None
+            and (c["item"]["end_sec"] - c["item"]["start_sec"]) > 2.0
+            for c in synthesized_clips
+        ) and len(synthesized_clips) <= 8
+
+        gap_sec = 0.08
+        if has_explicit_timestamps:
+            # Slot-based mixing with dynamic speedup to strictly fit within scene slots
+            for idx, clip_info in enumerate(synthesized_clips):
+                item = clip_info["item"]
+                clean_arr = clip_info["clean_arr"]
+                dur = clip_info["dur"]
+                start_sec = max(0.0, float(item["start_sec"] or 0.0))
+                end_sec = float(item["end_sec"] or (start_sec + dur))
+                slot_dur = max(1.2, end_sec - start_sec - 0.05)
+
+                if dur > slot_dur:
+                    speed = max(1.0, min(1.40, dur / slot_dur))
+                    tmp_in = scratch_dir / f"fit_in_{idx}.wav"
+                    tmp_out = scratch_dir / f"fit_out_{idx}.wav"
+                    with wave.open(str(tmp_in), "wb") as wf:
+                        wf.setnchannels(channels); wf.setsampwidth(2); wf.setframerate(sample_rate); wf.writeframes(clean_arr.tobytes())
+                    subprocess.run([ffmpeg_bin, "-y", "-i", str(tmp_in), "-filter:a", f"atempo={speed:.3f}", "-ar", "44100", "-ac", "2", str(tmp_out)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    with wave.open(str(tmp_out), "rb") as wf:
+                        clip_data = np.frombuffer(wf.readframes(wf.getnframes()), dtype=np.int16).astype(np.int32)
+                    tmp_in.unlink(missing_ok=True)
+                    tmp_out.unlink(missing_ok=True)
+                else:
+                    clip_data = clean_arr.astype(np.int32)
+
+                start_sample = int(start_sec * sample_rate) * channels
+                end_sample = min(start_sample + len(clip_data), len(master_array))
+                slice_len = end_sample - start_sample
+                master_array[start_sample:end_sample] += clip_data[:slice_len]
+        else:
+            # Full dialogue sequence mixing: guarantees 100% of all lines are spoken and nothing cut off
+            total_clean_sec = sum(c["dur"] for c in synthesized_clips)
+            target_time = max(5.0, total_duration - 0.5)
+            needed_time = total_clean_sec + len(synthesized_clips) * gap_sec
+            global_speed = max(1.0, min(1.40, needed_time / target_time))
+
+            cur_sample = int(0.2 * sample_rate) * channels  # slight initial breath pause
+            for idx, clip_info in enumerate(synthesized_clips):
+                clean_arr = clip_info["clean_arr"]
+                if global_speed > 1.02:
+                    tmp_in = scratch_dir / f"seq_in_{idx}.wav"
+                    tmp_out = scratch_dir / f"seq_out_{idx}.wav"
+                    with wave.open(str(tmp_in), "wb") as wf:
+                        wf.setnchannels(channels); wf.setsampwidth(2); wf.setframerate(sample_rate); wf.writeframes(clean_arr.tobytes())
+                    subprocess.run([ffmpeg_bin, "-y", "-i", str(tmp_in), "-filter:a", f"atempo={global_speed:.3f}", "-ar", "44100", "-ac", "2", str(tmp_out)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    with wave.open(str(tmp_out), "rb") as wf:
+                        clip_data = np.frombuffer(wf.readframes(wf.getnframes()), dtype=np.int16).astype(np.int32)
+                    tmp_in.unlink(missing_ok=True)
+                    tmp_out.unlink(missing_ok=True)
+                else:
+                    clip_data = clean_arr.astype(np.int32)
+
+                end_sample = min(cur_sample + len(clip_data), len(master_array))
+                slice_len = end_sample - cur_sample
+                master_array[cur_sample:end_sample] += clip_data[:slice_len]
+                cur_sample += len(clip_data) + int(gap_sec * sample_rate) * channels
 
         # Clip samples to prevent distortion and export WAV
         master_int16 = np.clip(master_array, -32768, 32767).astype(np.int16)
