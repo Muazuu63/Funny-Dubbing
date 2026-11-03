@@ -78,9 +78,10 @@ class CartoonizerEngine:
 
             model_path = self._ensure_model()
             opts = ort.SessionOptions()
-            cpu_threads = min(os.cpu_count() or 4, 6)
+            cpu_threads = os.cpu_count() or 4
             opts.intra_op_num_threads = cpu_threads
             opts.inter_op_num_threads = 2
+            opts.execution_mode = ort.ExecutionMode.ORT_SEQUENTIAL
             opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
 
             providers = ["CPUExecutionProvider"]
@@ -99,15 +100,15 @@ class CartoonizerEngine:
         self,
         bgr_frame: np.ndarray,
         prev_frame: Optional[np.ndarray] = None,
-        max_internal_dim: int = 480
+        max_internal_dim: int = 360
     ) -> np.ndarray:
         """
         Transforms a single frame into a studio-grade 2D anime illustration:
-        1. Resizes to internal processing resolution (multiple of 16 for CNN).
+        1. Resizes to optimal internal processing resolution (multiple of 16 for CNN).
         2. Normalizes RGB input to [-1, 1].
         3. Runs AnimeGANv2 deep neural style transfer.
         4. Denormalizes output to [0, 255].
-        5. Post-processes: Edge smoothing (bilateral), saturation pop, and Ghibli warmth.
+        5. Post-processes: Fast edge smoothing, saturation pop, and Ghibli warmth.
         6. Applies EMA blending with previous frame for jitter-free temporal consistency.
         """
         orig_h, orig_w = bgr_frame.shape[:2]
@@ -135,9 +136,9 @@ class CartoonizerEngine:
         if (pw, ph) != (orig_w, orig_h):
             art_bgr = cv2.resize(art_bgr, (orig_w, orig_h), interpolation=cv2.INTER_LANCZOS4)
 
-        # 5. Studio Art Post-Processing:
-        # A. Edge-preserving surface brush smoothing (eliminates high-frequency noise & pixel artifacts)
-        smooth = cv2.bilateralFilter(art_bgr, d=5, sigmaColor=20, sigmaSpace=20)
+        # 5. Fast Studio Art Post-Processing:
+        # A. Edge-preserving surface brush smoothing (d=3 for ultra-fast CPU inference)
+        smooth = cv2.bilateralFilter(art_bgr, d=3, sigmaColor=15, sigmaSpace=15)
 
         # B. Color Vibrancy (boost saturation by 15%)
         hsv = cv2.cvtColor(smooth, cv2.COLOR_BGR2HSV).astype(np.float32)
@@ -213,9 +214,15 @@ class CartoonizerEngine:
                 if not ret:
                     break
 
-                # Process through Studio AnimeGANv2 Neural Pipeline
-                anime_frame = self.cartoonize_frame(frame, prev_frame=prev_frame)
-                prev_frame = anime_frame
+                # Ultra-Fast 15 FPS Anime Sampling ("Animation on Twos"):
+                # Real anime characters are animated on "twos" (12-15 fps).
+                # Stylizing every 2nd frame cuts neural inference time by 50%
+                # while giving that authentic hand-drawn cel anime motion aesthetic!
+                if frame_idx % 2 == 0 or prev_frame is None:
+                    anime_frame = self.cartoonize_frame(frame, prev_frame=prev_frame, max_internal_dim=360)
+                    prev_frame = anime_frame
+                else:
+                    anime_frame = prev_frame
 
                 pipe.stdin.write(anime_frame.tobytes())
                 frame_idx += 1
