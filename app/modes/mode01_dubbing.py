@@ -256,15 +256,21 @@ class Mode01Dubbing:
 
         # Synthesize each parsed dialogue line and clean leading/trailing silence
         synthesized_clips = []
+        from app.providers.tts_provider import SSMLProsodyWrapper
+        sfx_dir = Path("storage/training_profiles/sfx")
+
         for idx, item in enumerate(parsed):
+            tag_data = SSMLProsodyWrapper.parse_text_tags(item["clean_text"])
             text = (
-                item["clean_text"]
+                tag_data["clean_speech"]
                 .replace("শাপলাগ্রস্ত", "অভিশপ্ত")
                 .replace("শাপলা গ্রস্ত", "অভিশপ্ত")
                 .replace("বিল্লাডা", "বিল্লাটা")
                 .replace("বিল্লা ডা", "বিল্লা টা")
             )
             speaker = item.get("speaker", "")
+            emotion = tag_data.get("emotion")
+            sfx_list = tag_data.get("sfx_list", [])
 
             # Multi-character voice routing: realistic, distinct comedic characters
             if "Hindi" in language:
@@ -281,6 +287,7 @@ class Mode01Dubbing:
 
             raw_mp3 = scratch_dir / f"raw_{idx}.mp3"
             raw_wav = scratch_dir / f"raw_{idx}.wav"
+            prosody_wav = scratch_dir / f"prosody_{idx}.wav"
 
             try:
                 comm = edge_tts.Communicate(text, voice, rate="+0%")
@@ -295,7 +302,17 @@ class Mode01Dubbing:
                 ]
                 subprocess.run(cmd_conv, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-                with wave.open(str(raw_wav), "rb") as wf:
+                # Apply dynamic expressive prosody modulation based on character & emotion
+                applied_prosody = SSMLProsodyWrapper.apply_prosody_filter_ffmpeg(
+                    input_wav=raw_wav,
+                    output_wav=prosody_wav,
+                    emotion=emotion,
+                    speaker=speaker,
+                    ffmpeg_bin=ffmpeg_bin
+                )
+                source_wav = prosody_wav if (applied_prosody and prosody_wav.exists()) else raw_wav
+
+                with wave.open(str(source_wav), "rb") as wf:
                     frames_bytes = wf.readframes(wf.getnframes())
                 arr = np.frombuffer(frames_bytes, dtype=np.int16)
 
@@ -309,6 +326,24 @@ class Mode01Dubbing:
                 else:
                     clean_arr = arr
 
+                # Seamlessly append Comic SFX markers (e.g. SFX_COMIC_CHUCKLE, SFX_SURPRISE_REACTION)
+                for sfx_name in sfx_list:
+                    sfx_path = None
+                    if sfx_name == "SFX_COMIC_CHUCKLE":
+                        sfx_path = sfx_dir / "sfx_comic_chuckle.wav"
+                    elif sfx_name == "SFX_SURPRISE_REACTION":
+                        sfx_path = sfx_dir / "sfx_surprise_reaction.wav"
+
+                    if sfx_path and sfx_path.exists():
+                        try:
+                            with wave.open(str(sfx_path), "rb") as swf:
+                                s_bytes = swf.readframes(swf.getnframes())
+                            s_arr = np.frombuffer(s_bytes, dtype=np.int16)
+                            pause_len = int(0.04 * sample_rate) * channels
+                            clean_arr = np.concatenate([clean_arr, np.zeros(pause_len, dtype=np.int16), s_arr])
+                        except Exception:
+                            pass
+
                 synthesized_clips.append({
                     "clean_arr": clean_arr,
                     "dur": len(clean_arr) / (channels * sample_rate),
@@ -319,6 +354,7 @@ class Mode01Dubbing:
             finally:
                 raw_mp3.unlink(missing_ok=True)
                 raw_wav.unlink(missing_ok=True)
+                prosody_wav.unlink(missing_ok=True)
 
         if not synthesized_clips:
             await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+0%")

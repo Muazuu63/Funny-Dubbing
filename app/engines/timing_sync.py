@@ -54,11 +54,87 @@ class TimingSyncEngine:
             return MAX_SPEED_MULTIPLIER, overflow_sec
 
         if raw_multiplier < MIN_SPEED_MULTIPLIER:
-            # Slower than 0.85x; cap at 0.85x and pad remaining with silence
-            return MIN_SPEED_MULTIPLIER, 0.0
+            # Slower than 0.85x; cap at 1.0x and pad remaining with silence
+            return 1.0, 0.0
 
         # Within safe range [0.85x, 1.25x]
         return round(raw_multiplier, 3), 0.0
+
+    async def fit_clip_to_slot(
+        self,
+        input_audio_path: Path,
+        output_audio_path: Path,
+        slot_duration: float,
+        force_allow_overflow: bool = False
+    ) -> float:
+        """
+        High-Quality Expressive Audio Pacing:
+        - If audio_duration <= slot_duration: preserves natural 1.0x speech and pads remaining with silence.
+        - If audio_duration > slot_duration (within 1.25x): accelerates with pitch-preserving atempo.
+        - If audio_duration exceeds 1.25x: raises AudioTimingOverflowWarning or caps safely without dropping words.
+        """
+        output_audio_path.parent.mkdir(parents=True, exist_ok=True)
+        if not input_audio_path.exists():
+            return 1.0
+
+        import wave
+        with wave.open(str(input_audio_path), "rb") as wf:
+            actual_dur = wf.getnframes() / float(wf.getframerate())
+
+        target_dur = max(0.2, slot_duration)
+        speed = actual_dur / target_dur
+
+        if speed <= 1.0:
+            # Speech is shorter or equal to slot: keep natural 1.0x speed, pad silence at the end
+            pad_sec = max(0.0, target_dur - actual_dur)
+            cmd = [
+                str(self.ffmpeg_path), "-y",
+                "-i", str(input_audio_path.resolve()),
+                "-af", f"apad=pad_dur={pad_sec:.3f}",
+                "-ar", "44100", "-ac", "2",
+                str(output_audio_path.resolve())
+            ]
+            final_mult = 1.0
+        elif speed <= MAX_SPEED_MULTIPLIER:
+            # Speech fits comfortably within safe 1.25x speedup
+            cmd = [
+                str(self.ffmpeg_path), "-y",
+                "-i", str(input_audio_path.resolve()),
+                "-filter:a", f"atempo={speed:.3f}",
+                "-ar", "44100", "-ac", "2",
+                str(output_audio_path.resolve())
+            ]
+            final_mult = speed
+        else:
+            # Exceeds 1.25x
+            overflow_sec = (actual_dur / MAX_SPEED_MULTIPLIER) - target_dur
+            if not force_allow_overflow and overflow_sec > 0.15:
+                raise AudioTimingOverflowWarning(actual_dur, target_dur, overflow_sec)
+
+            safe_speed = min(1.35, speed)
+            cmd = [
+                str(self.ffmpeg_path), "-y",
+                "-i", str(input_audio_path.resolve()),
+                "-filter:a", f"atempo={safe_speed:.3f}",
+                "-ar", "44100", "-ac", "2",
+                str(output_audio_path.resolve())
+            ]
+            final_mult = safe_speed
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await proc.communicate()
+        except FileNotFoundError:
+            pass
+
+        if not output_audio_path.exists():
+            output_audio_path.write_bytes(input_audio_path.read_bytes())
+
+        return final_mult
 
     async def apply_atempo_sync(
         self,
