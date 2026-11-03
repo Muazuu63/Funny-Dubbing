@@ -570,18 +570,29 @@ async def render_project_final_video(project_id: str, payload: Optional[RenderPr
             else:
                 input_video = settings.TEMP_DIR / "uploads" / "3e5a053d_thirtd-video.mp4"
 
-        mode01 = Mode01Dubbing()
         proj_dir = settings.PROJECTS_DIR / project_id
         proj_dir.mkdir(parents=True, exist_ok=True)
         
         chosen_lang = (payload.language_matrix if payload and payload.language_matrix else "Bangla")
-        
-        output_files = await mode01.execute_final_render(
-            project_id=project_id,
-            input_video_path=input_video,
-            project_dir=proj_dir,
-            language_matrix_choice=chosen_lang
-        )
+
+        # Dynamic Mode Dispatcher: Mode 01 (Dubbing) vs Mode 02 (Cartoon Re-Creation)
+        if project.mode == "mode02_cartoon" or "cartoon" in str(project.mode).lower():
+            from app.modes.mode02_cartoon import Mode02Cartoon, VoiceType
+            mode02 = Mode02Cartoon()
+            output_files = await mode02.execute_final_render(
+                project_id=project_id,
+                project_dir=proj_dir,
+                voice_type=VoiceType.AI_VOICE,
+                language_matrix_choice=chosen_lang
+            )
+        else:
+            mode01 = Mode01Dubbing()
+            output_files = await mode01.execute_final_render(
+                project_id=project_id,
+                input_video_path=input_video,
+                project_dir=proj_dir,
+                language_matrix_choice=chosen_lang
+            )
         
         final_video = output_files[0] if output_files else (proj_dir / "output_Bangla.mp4")
         
@@ -602,7 +613,7 @@ async def render_project_final_video(project_id: str, payload: Optional[RenderPr
 async def download_project_video(project_id: str):
     """Downloads or streams the final rendered dubbed video or cartoon recreation."""
     proj_dir = settings.PROJECTS_DIR / project_id
-    matches = list(proj_dir.glob("output_*.mp4")) + list(proj_dir.glob("cartoon_output_*.mp4"))
+    matches = list(proj_dir.glob("cartoon_output_*.mp4")) + list(proj_dir.glob("output_*.mp4"))
     if not matches:
         # Fallback to temp uploads if rendered directly
         upload_matches = list((settings.TEMP_DIR / "uploads").glob("*thirtd-video.mp4"))
