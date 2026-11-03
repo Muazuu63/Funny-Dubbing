@@ -121,6 +121,83 @@ class InpainterEngine:
 
         return boxes
 
+    @staticmethod
+    def detect_clean_matte_bounds(video_path: Path) -> Tuple[int, int]:
+        """
+        Detects top banner/sticker and bottom pill/sticker regions in vertical/letterboxed videos.
+        Returns (top_h, bot_y) where:
+        - 0..top_h should be matted to pure black (eliminating top banners/emojis without blur)
+        - bot_y..height should be matted to pure black (eliminating bottom pills/emojis without blur)
+        If no banners/stickers are found, returns (0, height).
+        """
+        v_str = str(video_path.resolve())
+        cap = cv2.VideoCapture(v_str)
+        if not cap.isOpened():
+            return 0, 0
+
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 0)
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 0)
+        total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+        if w == 0 or h == 0 or total == 0:
+            cap.release()
+            return 0, h
+
+        frames = []
+        for r in [0.1, 0.3, 0.5, 0.7]:
+            cap.set(cv2.CAP_PROP_POS_FRAMES, int(total * r))
+            ret, frame = cap.read()
+            if ret:
+                frames.append(frame)
+        cap.release()
+
+        if not frames:
+            return 0, h
+
+        top_limit = int(0.22 * h)
+        bot_start = int(0.74 * h)
+
+        top_h = 0
+        bot_y = h
+
+        for f in frames[:2]:
+            sub_top = f[:top_limit, :]
+            # Check for yellow brush banner or bright text in top letterbox
+            yellow_top = (sub_top[:, :, 2] > 140) & (sub_top[:, :, 1] > 110) & (sub_top[:, :, 0] < 100)
+            if np.count_nonzero(yellow_top) > 40:
+                y_idxs, _ = np.where(yellow_top)
+                top_h = max(top_h, int(y_idxs.max() + 6))
+
+            sub_bot = f[bot_start:, :]
+            # Check for yellow emoji / laughing sticker in bottom area
+            yellow_bot = (sub_bot[:, :, 2] > 140) & (sub_bot[:, :, 1] > 110) & (sub_bot[:, :, 0] < 100)
+            if np.count_nonzero(yellow_bot) > 30:
+                y_idxs, _ = np.where(yellow_bot)
+                bot_y = min(bot_y, int(bot_start + y_idxs.min() - 8))
+            else:
+                # Also detect black pill ("Wait for end") over lighter video
+                black_bot = (sub_bot[:, :, 0] < 35) & (sub_bot[:, :, 1] < 35) & (sub_bot[:, :, 2] < 35)
+                # Check rows from bot_start to bottom
+                for y_row in range(bot_start, h - int(0.08 * h)):
+                    row_center = f[y_row, int(0.3 * w):int(0.7 * w)]
+                    # If dark pill row
+                    if np.mean(row_center) < 40 and np.mean(f[max(0, y_row - 20), int(0.3 * w):int(0.7 * w)]) > 60:
+                        bot_y = min(bot_y, y_row - 4)
+                        break
+
+        # Fallback check: if vertical 9:16 video (e.g. 360x640) with letterbox borders
+        if w > 0 and h / w > 1.6:
+            if top_h == 0 and np.mean(frames[0][:int(0.04 * h), :]) < 25:
+                # Check if top banner exists between 4% and 16% of height
+                sub = frames[0][int(0.04 * h):int(0.18 * h), :]
+                if np.std(sub) > 20:  # has text/sticker content
+                    top_h = int(0.15 * h)
+            if bot_y == h and np.mean(frames[0][int(0.92 * h):, :]) < 25:
+                sub = frames[0][int(0.75 * h):int(0.90 * h), :]
+                if np.std(sub) > 20:  # has text/sticker content
+                    bot_y = int(0.76 * h)
+
+        return top_h, bot_y
+
     async def inpaint_video(
         self,
         input_video_path: Path,
@@ -148,47 +225,60 @@ class InpainterEngine:
                 mask_coverage_percent=0.0,
             )
 
-        # Do not blur videos automatically; preserve 100% crystal-clear native quality unless explicit box is specified
-        boxes = [watermark_box] if watermark_box else []
-
-        if not boxes:
-            import shutil
-            shutil.copy(input_video_path, output_video_path)
-            return InpaintResult(
-                input_video_path=str(input_video_path),
-                output_video_path=str(output_video_path),
-                engine_used="None (Pass-through)",
-                mask_coverage_percent=0.0,
-            )
-
         from app.config import settings
         import subprocess
         ffmpeg_bin = settings.resolve_ffmpeg_binary()
 
-        # High-performance, artifact-free watermark removal with FFmpeg delogo
-        delogo_filters = [f"delogo=x={b[0]}:y={b[1]}:w={b[2]}:h={b[3]}" for b in boxes]
-        vf_str = ",".join(delogo_filters)
+        # Step 1: Check for top/bottom banners, stickers, or text pills
+        top_h, bot_y = self.detect_clean_matte_bounds(input_video_path)
 
-        try:
-            cmd = [
-                str(ffmpeg_bin), "-y",
-                "-i", str(input_video_path),
-                "-vf", vf_str,
-                "-c:v", "libx264",
-                "-crf", "20",
-                "-preset", "fast",
-                "-c:a", "copy",
-                str(output_video_path)
-            ]
-            subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-            return InpaintResult(
-                input_video_path=str(input_video_path),
-                output_video_path=str(output_video_path),
-                engine_used=f"FFmpeg-Delogo ({len(boxes)} regions removed)",
-                mask_coverage_percent=round(sum(b[2]*b[3] for b in boxes) / (360*640) * 100, 2),
-            )
-        except Exception:
-            pass
+        cap = cv2.VideoCapture(str(input_video_path.resolve()))
+        w = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH) or 360)
+        h = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 640)
+        cap.release()
+
+        vf_filters = []
+        if top_h > 0:
+            vf_filters.append(f"drawbox=x=0:y=0:w=iw:h={top_h}:color=black:t=fill")
+        if bot_y < h:
+            vf_filters.append(f"drawbox=x=0:y={bot_y}:w=iw:h=ih-{bot_y}:color=black:t=fill")
+
+        if watermark_box and not vf_filters:
+            b = watermark_box
+            vf_filters.append(f"delogo=x={b[0]}:y={b[1]}:w={b[2]}:h={b[3]}")
+
+        if vf_filters:
+            vf_str = ",".join(vf_filters)
+            try:
+                cmd = [
+                    str(ffmpeg_bin), "-y",
+                    "-i", str(input_video_path),
+                    "-vf", vf_str,
+                    "-c:v", "libx264",
+                    "-crf", "18",
+                    "-preset", "fast",
+                    "-c:a", "copy",
+                    str(output_video_path)
+                ]
+                subprocess.run(cmd, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                return InpaintResult(
+                    input_video_path=str(input_video_path),
+                    output_video_path=str(output_video_path),
+                    engine_used=f"Clean-Matte-Remover ({len(vf_filters)} clean regions)",
+                    mask_coverage_percent=round(((top_h * w) + ((h - bot_y) * w)) / (w * h) * 100, 2),
+                )
+            except Exception:
+                pass
+
+        # If no banners or watermarks detected, keep crisp original
+        import shutil
+        shutil.copy(input_video_path, output_video_path)
+        return InpaintResult(
+            input_video_path=str(input_video_path),
+            output_video_path=str(output_video_path),
+            engine_used="None (Crisp Original Pass-through)",
+            mask_coverage_percent=0.0,
+        )
 
         # OpenCV Fallback
         cap = cv2.VideoCapture(str(input_video_path.resolve()))

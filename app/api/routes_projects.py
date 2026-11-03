@@ -428,7 +428,8 @@ async def serve_project_audio(filename: str):
 
 @router.post("/synthesize-script")
 async def synthesize_script_audio(payload: SynthesizeScriptRequest):
-    """Synthesizes edited script text into real audio with Edge-TTS."""
+    """Synthesizes edited script text into realistic multi-character scene-synchronized audio."""
+    from app.modes.mode01_dubbing import Mode01Dubbing
     from app.providers.tts_provider import TTSProvider
     from app.api.routes_approval import get_project_approval_state
     
@@ -436,18 +437,42 @@ async def synthesize_script_audio(payload: SynthesizeScriptRequest):
     state = get_project_approval_state(payload.project_id)
     state.script_text = payload.script_text
     
-    tts = TTSProvider()
+    duration = max(5.0, float(state.duration_sec or 30.0))
     preview_filename = f"preview_voice_{payload.project_id}.mp3"
     preview_filepath = settings.TEMP_DIR / "uploads" / preview_filename
-    voice = "bn-BD-NabanitaNeural" if payload.voice_gender == "female" else "bn-BD-PradeepNeural"
+    preview_filepath_wav = settings.TEMP_DIR / "uploads" / f"preview_voice_{payload.project_id}.wav"
 
-    await tts.synthesize(
-        text=payload.script_text,
-        output_path=str(preview_filepath),
-        voice_id=voice,
-        language=payload.language,
-        rate="+20%"
-    )
+    try:
+        mode01 = Mode01Dubbing()
+        await mode01.synthesize_synchronized_timeline(
+            script_text=payload.script_text,
+            total_duration=duration,
+            output_wav=preview_filepath_wav,
+            language=payload.language or "Bangla",
+            work_dir=settings.TEMP_DIR / "uploads"
+        )
+        if preview_filepath_wav.exists():
+            cmd_mp3 = [
+                str(settings.resolve_ffmpeg_binary()), "-y",
+                "-i", str(preview_filepath_wav),
+                "-c:a", "libmp3lame",
+                "-b:a", "128k",
+                str(preview_filepath)
+            ]
+            import subprocess
+            subprocess.run(cmd_mp3, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            preview_filepath_wav.unlink(missing_ok=True)
+    except Exception:
+        tts = TTSProvider()
+        voice = "bn-BD-NabanitaNeural" if payload.voice_gender == "female" else "bn-BD-PradeepNeural"
+        await tts.synthesize(
+            text=payload.script_text,
+            output_path=str(preview_filepath),
+            voice_id=voice,
+            language=payload.language,
+            rate="+0%"
+        )
+
     return {
         "status": "success",
         "audio_url": f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"

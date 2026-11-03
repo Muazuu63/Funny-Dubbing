@@ -251,7 +251,7 @@ class Mode01Dubbing:
         scratch_dir.mkdir(parents=True, exist_ok=True)
 
         if not parsed:
-            await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+20%")
+            await self.tts.synthesize(text=script_text, output_path=str(output_wav), language=language, rate="+0%")
             return output_wav
 
         for idx, item in enumerate(parsed):
@@ -264,18 +264,18 @@ class Mode01Dubbing:
             )
             start_sec = max(0.0, float(item["start_sec"] or 0.0))
             next_start = parsed[idx + 1]["start_sec"] if idx + 1 < len(parsed) else total_duration
-            available_dur = max(1.2, float(next_start) - start_sec - 0.1)
+            available_dur = max(1.5, float(next_start) - start_sec - 0.1)
             speaker = item.get("speaker", "")
 
-            # Multi-character voice routing
+            # Multi-character voice routing: realistic, distinct comedic characters
             if "Hindi" in language:
-                voice = "hi-IN-SwaraNeural" if ("2" in speaker or "২" in speaker) else "hi-IN-MadhurNeural"
+                voice = "hi-IN-SwaraNeural" if ("2" in speaker or "২" in speaker or (idx % 2 == 1 and not ("1" in speaker or "১" in speaker))) else "hi-IN-MadhurNeural"
             elif "English" in language:
-                voice = "en-US-JennyNeural" if ("2" in speaker or "২" in speaker) else "en-US-GuyNeural"
+                voice = "en-US-JennyNeural" if ("2" in speaker or "২" in speaker or (idx % 2 == 1 and not ("1" in speaker or "১" in speaker))) else "en-US-GuyNeural"
             else:  # Bangla
-                if "2" in speaker or "২" in speaker or "চিল" in speaker:
+                if "2" in speaker or "২" in speaker or "হাঁস ২" in speaker or "চিল" in speaker or "মহিলা" in speaker or (idx % 2 == 1 and not ("1" in speaker or "১" in speaker)):
                     voice = "bn-BD-NabanitaNeural"
-                elif "3" in speaker or "৩" in speaker or "হুট" in speaker:
+                elif "3" in speaker or "৩" in speaker or "হুট" in speaker or "বিড়াল" in speaker or "বিড়াল" in speaker:
                     voice = "bn-IN-BashkarNeural"
                 else:
                     voice = "bn-BD-PradeepNeural"
@@ -285,8 +285,8 @@ class Mode01Dubbing:
             fitted_wav = scratch_dir / f"fitted_{idx}.wav"
 
             try:
-                # 1. Synthesize line
-                comm = edge_tts.Communicate(text, voice, rate="+20%")
+                # 1. Synthesize line at natural human speed (rate="+0%")
+                comm = edge_tts.Communicate(text, voice, rate="+0%")
                 await comm.save(str(raw_mp3))
 
                 cmd_conv = [
@@ -302,13 +302,10 @@ class Mode01Dubbing:
                 with wave.open(str(raw_wav), "rb") as wf:
                     dur = wf.getnframes() / wf.getframerate()
 
-                # 2. If voice duration exceeds scene slot, speed up using FFmpeg atempo
+                # 2. Gentle pacing: never rush dialogue unnaturally (capped at 1.20x max)
                 if dur > available_dur:
-                    speed = min(2.5, dur / available_dur)
-                    if speed <= 2.0:
-                        filter_str = f"atempo={speed:.3f}"
-                    else:
-                        filter_str = f"atempo=2.0,atempo={speed/2.0:.3f}"
+                    speed = min(1.20, dur / available_dur)
+                    filter_str = f"atempo={speed:.3f}"
 
                     cmd_speed = [
                         ffmpeg_bin, "-y",
@@ -415,30 +412,61 @@ class Mode01Dubbing:
                         text=script_text,
                         output_path=str(lang_voice_audio),
                         language=lang,
-                        rate="+20%"
+                        rate="+0%"
                     )
                 except Exception:
                     lang_voice_audio.write_bytes(b"RIFF\x24\x00\x00\x00WAVEfmt \x10\x00\x00\x00\x01\x00\x01\x00D\xac\x00\x00\x88X\x01\x00\x02\x00\x10\x00data\x00\x00\x00\x00")
 
-            # Final mux to output video using FFmpeg: crystal-clear native video (zero blur) + synchronized Bengali dubbed audio
+            # Final mux to output video: clean removal of watermarks/text/emojis (zero blur) + natural Bengali dubbed audio
             final_video_name = f"output_{lang}.mp4"
             final_video_path = project_dir / final_video_name
             ffmpeg_bin = settings.resolve_ffmpeg_binary()
 
             if input_video_path and input_video_path.exists() and lang_voice_audio.exists():
                 try:
-                    cmd = [
-                        str(ffmpeg_bin), "-y",
-                        "-i", str(input_video_path),
-                        "-i", str(lang_voice_audio),
-                        "-map", "0:v:0",
-                        "-map", "1:a:0",
-                        "-c:v", "copy",
-                        "-c:a", "aac",
-                        "-b:a", "192k",
-                        "-shortest",
-                        str(final_video_path)
-                    ]
+                    # Detect if video has banner/text/emoji overlays in letterbox regions
+                    top_h, bot_y = self.inpainter.detect_clean_matte_bounds(input_video_path)
+
+                    cap = cv2.VideoCapture(str(input_video_path.resolve()))
+                    h_vid = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT) or 640)
+                    cap.release()
+
+                    vf_filters = []
+                    if top_h > 0:
+                        vf_filters.append(f"drawbox=x=0:y=0:w=iw:h={top_h}:color=black:t=fill")
+                    if bot_y < h_vid:
+                        vf_filters.append(f"drawbox=x=0:y={bot_y}:w=iw:h=ih-{bot_y}:color=black:t=fill")
+
+                    if vf_filters:
+                        vf_str = ",".join(vf_filters)
+                        cmd = [
+                            str(ffmpeg_bin), "-y",
+                            "-i", str(input_video_path),
+                            "-i", str(lang_voice_audio),
+                            "-vf", vf_str,
+                            "-map", "0:v:0",
+                            "-map", "1:a:0",
+                            "-c:v", "libx264",
+                            "-crf", "18",
+                            "-preset", "fast",
+                            "-c:a", "aac",
+                            "-b:a", "192k",
+                            "-shortest",
+                            str(final_video_path)
+                        ]
+                    else:
+                        cmd = [
+                            str(ffmpeg_bin), "-y",
+                            "-i", str(input_video_path),
+                            "-i", str(lang_voice_audio),
+                            "-map", "0:v:0",
+                            "-map", "1:a:0",
+                            "-c:v", "copy",
+                            "-c:a", "aac",
+                            "-b:a", "192k",
+                            "-shortest",
+                            str(final_video_path)
+                        ]
                     res = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 except Exception:
                     if input_video_path.exists():

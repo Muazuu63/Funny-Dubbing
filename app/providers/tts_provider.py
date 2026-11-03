@@ -49,7 +49,7 @@ class EdgeTTSEngine(BaseTTSProvider):
         elif "English" in str(lang) or "en" in str(voice_id).lower():
             voice = "en-US-GuyNeural"
         
-        rate = kwargs.get("rate", "+20%")
+        rate = kwargs.get("rate", "+0%")
         
         import re
         # Comprehensive dialogue cleaner: strips timestamps, character names, and stage directions
