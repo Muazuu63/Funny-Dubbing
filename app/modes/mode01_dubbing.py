@@ -362,13 +362,13 @@ class Mode01Dubbing:
                 master_array[start_sample:end_sample] += clip_data[:slice_len]
         else:
             # Full dialogue sequence mixing: guarantees 100% of all lines are spoken and nothing cut off
-            gap_sec = 0.06
+            gap_sec = 0.05
             total_clean_sec = sum(c["dur"] for c in synthesized_clips)
-            target_time = max(5.0, total_duration - 1.6)
+            target_time = max(5.0, total_duration - 3.2)
             needed_time = total_clean_sec + len(synthesized_clips) * gap_sec
-            global_speed = max(1.0, min(1.45, needed_time / target_time))
+            global_speed = max(1.0, min(1.50, needed_time / target_time))
 
-            cur_sample = int(0.12 * sample_rate) * channels  # slight initial breath pause
+            cur_sample = int(0.10 * sample_rate) * channels  # slight initial breath pause
             for idx, clip_info in enumerate(synthesized_clips):
                 clean_arr = clip_info["clean_arr"]
                 if global_speed > 1.02:
