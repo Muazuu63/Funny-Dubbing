@@ -102,6 +102,10 @@ def test_settings_and_key_management():
     # Plaintext key must NOT be returned in response!
     assert "api_key" not in save_data
 
+    # Clean up test key so it does not interfere with runtime
+    del_res = client.delete("/api/v1/settings/gemini-key", headers={"Host": "127.0.0.1:8000"})
+    assert del_res.status_code == 200
+
     # Toggle offline mode
     toggle_res = client.post("/api/v1/settings/offline-mode", json={"enabled": True}, headers={"Host": "127.0.0.1:8000"})
     assert toggle_res.status_code == 200
