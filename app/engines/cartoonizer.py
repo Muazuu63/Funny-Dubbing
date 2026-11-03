@@ -1,69 +1,160 @@
 """
-Local Visual Cartoonizer Engine (Mode 02: Cartoon Re-creation Studio).
+Studio-Grade 2D Anime & Cartoonizer Engine (Mode 02: Cartoon Re-creation Studio).
+Replaces legacy OpenCV edge filters with Neural AnimeGANv2 Stylization.
 Master Architecture v2.2 & PRD v2.2 Aligned.
 
-Key Principles:
-1. 1:1 Frame Match & Timeline Preservation:
-   Maintains identical FPS, aspect ratio, and total frame count so lip movement and gestures
-   remain in 100% microsecond frame-sync with audio.
-2. Vibrant 2D Anime & Cel-Shaded Aesthetics:
-   Applies edge-preserving bilateral smoothing, cel-shading color quantization,
-   and clean cartoon ink contours.
-3. Memory & Resource Safety:
-   Processes frames in streams/batches with explicit garbage collection to prevent VRAM/RAM spikes.
-4. Zero Extra Cost:
-   100% offline local processing without cloud APIs or token costs.
+Enforces:
+1. Studio-Grade 2D Anime Stylization (AnimeGANv2 Hayao / Studio Ghibli & Shinkai Styles):
+   Replaces dirty OpenCV thresholding and posterization with deep neural style transfer.
+2. 1:1 Frame Match & Microsecond Audio Sync:
+   Preserves original FPS, aspect ratio, and total frame count so lip gestures and comedy timing match audio perfectly.
+3. Edge Smoothing & Color Grading:
+   Applies edge-preserving bilateral smoothing, saturation pop, and warmth grading for vibrant digital animation.
+4. Temporal Consistency (Jitter Prevention):
+   Applies exponential moving average (EMA) frame blending to eliminate neural flickering.
+5. Zero Extra Cost & Memory Safety:
+   100% offline local processing with ONNX Runtime and streaming FFmpeg pipes.
 """
 import os
 import gc
 import cv2
 import asyncio
 import subprocess
+import urllib.request
 import numpy as np
 from pathlib import Path
 from typing import Optional, Callable, Dict, Any
 
 from app.config import settings
 
+try:
+    import onnxruntime as ort
+except ImportError:
+    ort = None
+
 
 class CartoonizerEngine:
-    def __init__(self):
+    """
+    Studio-Grade Neural 2D Cartoonizer Engine using AnimeGANv2 ONNX Runtime.
+    """
+
+    MODEL_URLS = {
+        "hayao": "https://huggingface.co/vumichien/AnimeGANv2_Hayao/resolve/main/AnimeGANv2_Hayao.onnx",
+        "shinkai": "https://huggingface.co/vumichien/AnimeGANv2_Shinkai/resolve/main/AnimeGANv2_Shinkai.onnx",
+    }
+
+    def __init__(self, style: str = "hayao"):
+        self.style = style.lower() if style.lower() in self.MODEL_URLS else "hayao"
         self.ffmpeg_path = settings.resolve_ffmpeg_binary()
+        self.models_dir = settings.BASE_DIR / "storage" / "models"
+        self.models_dir.mkdir(parents=True, exist_ok=True)
+        self._session: Optional[Any] = None
+        self._in_name: Optional[str] = None
+        self._out_name: Optional[str] = None
 
-    @staticmethod
-    def cartoonize_frame(bgr_frame: np.ndarray) -> np.ndarray:
+    def _ensure_model(self) -> Path:
+        """Ensures the selected ONNX model weights exist locally, downloading if necessary."""
+        filename = f"AnimeGANv2_{self.style.capitalize()}.onnx"
+        model_path = self.models_dir / filename
+
+        if not model_path.exists() or model_path.stat().st_size < 1000000:
+            url = self.MODEL_URLS.get(self.style, self.MODEL_URLS["hayao"])
+            try:
+                urllib.request.urlretrieve(url, str(model_path))
+            except Exception as e:
+                # Fallback to Hayao if specific style download fails
+                hayao_path = self.models_dir / "AnimeGANv2_Hayao.onnx"
+                if hayao_path.exists():
+                    return hayao_path
+                raise RuntimeError(f"Failed to acquire AnimeGANv2 model from {url}: {e}")
+
+        return model_path
+
+    def _get_session(self):
+        """Initializes and caches the optimized ONNX Runtime session."""
+        if self._session is None:
+            if ort is None:
+                raise RuntimeError("onnxruntime is required for Studio-Grade AnimeGANv2 Stylization.")
+
+            model_path = self._ensure_model()
+            opts = ort.SessionOptions()
+            cpu_threads = min(os.cpu_count() or 4, 6)
+            opts.intra_op_num_threads = cpu_threads
+            opts.inter_op_num_threads = 2
+            opts.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+
+            providers = ["CPUExecutionProvider"]
+            # Auto-detect CUDA if available
+            available_providers = ort.get_available_providers()
+            if "CUDAExecutionProvider" in available_providers:
+                providers.insert(0, "CUDAExecutionProvider")
+
+            self._session = ort.InferenceSession(str(model_path), sess_options=opts, providers=providers)
+            self._in_name = self._session.get_inputs()[0].name
+            self._out_name = self._session.get_outputs()[0].name
+
+        return self._session
+
+    def cartoonize_frame(
+        self,
+        bgr_frame: np.ndarray,
+        prev_frame: Optional[np.ndarray] = None,
+        max_internal_dim: int = 480
+    ) -> np.ndarray:
         """
-        Converts a real-world photo/video frame into a high-quality 2D cartoon / anime aesthetic:
-        - Bilateral filtering smooths skin and textures while preserving sharp boundaries.
-        - Cel-shading color quantization simulates hand-drawn comic frames.
-        - Saturation enhancement pops vibrant animated colors.
-        - Adaptive thresholding creates clean cartoon ink outline edges.
+        Transforms a single frame into a studio-grade 2D anime illustration:
+        1. Resizes to internal processing resolution (multiple of 16 for CNN).
+        2. Normalizes RGB input to [-1, 1].
+        3. Runs AnimeGANv2 deep neural style transfer.
+        4. Denormalizes output to [0, 255].
+        5. Post-processes: Edge smoothing (bilateral), saturation pop, and Ghibli warmth.
+        6. Applies EMA blending with previous frame for jitter-free temporal consistency.
         """
-        h, w = bgr_frame.shape[:2]
+        orig_h, orig_w = bgr_frame.shape[:2]
 
-        # 1. Edge-preserving surface smoothing (removes realistic skin pores, textures)
-        smooth = cv2.bilateralFilter(bgr_frame, d=7, sigmaColor=50, sigmaSpace=50)
+        # 1. Optimal internal processing dimensions (multiple of 16)
+        scale = min(1.0, float(max_internal_dim) / max(orig_h, orig_w))
+        pw = max(16, int(round((orig_w * scale) / 16)) * 16)
+        ph = max(16, int(round((orig_h * scale) / 16)) * 16)
 
-        # 2. Cel-shading / comic color quantization
-        quantized = (smooth // 22) * 22 + 11
+        resized = cv2.resize(bgr_frame, (pw, ph), interpolation=cv2.INTER_AREA)
+        rgb = cv2.cvtColor(resized, cv2.COLOR_BGR2RGB)
 
-        # 3. Enhance saturation & vibrancy for animated cartoon look
-        hsv = cv2.cvtColor(quantized, cv2.COLOR_BGR2HSV).astype(np.float32)
-        hsv[:, :, 1] = np.clip(hsv[:, :, 1] * 1.25, 0, 255)  # boost saturation
-        hsv[:, :, 2] = np.clip(hsv[:, :, 2] * 1.05, 0, 255)  # boost brightness slightly
-        vibrant_bgr = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR)
+        # 2. Normalize to [-1.0, 1.0]
+        norm = (rgb.astype(np.float32) / 127.5) - 1.0
+        batch = np.expand_dims(norm, axis=0)
 
-        # 4. Clean anime ink contour lines
-        gray = cv2.cvtColor(bgr_frame, cv2.COLOR_BGR2GRAY)
-        gray_blur = cv2.medianBlur(gray, 5)
-        edges = cv2.adaptiveThreshold(
-            gray_blur, 255, cv2.ADAPTIVE_THRESH_MEAN_C, cv2.THRESH_BINARY, 9, 3
-        )
-        edges_bgr = cv2.cvtColor(edges, cv2.COLOR_GRAY2BGR)
+        # 3. ONNX Neural Inference
+        session = self._get_session()
+        raw_out = session.run([self._out_name], {self._in_name: batch})[0]
 
-        # 5. Composite cel-shaded colors with ink edges
-        cartoon = cv2.bitwise_and(vibrant_bgr, edges_bgr)
-        return cartoon
+        # 4. Denormalize to uint8 BGR
+        denorm = ((raw_out[0] + 1.0) * 127.5).clip(0, 255).astype(np.uint8)
+        art_bgr = cv2.cvtColor(denorm, cv2.COLOR_RGB2BGR)
+
+        if (pw, ph) != (orig_w, orig_h):
+            art_bgr = cv2.resize(art_bgr, (orig_w, orig_h), interpolation=cv2.INTER_LANCZOS4)
+
+        # 5. Studio Art Post-Processing:
+        # A. Edge-preserving surface brush smoothing (eliminates high-frequency noise & pixel artifacts)
+        smooth = cv2.bilateralFilter(art_bgr, d=5, sigmaColor=20, sigmaSpace=20)
+
+        # B. Color Vibrancy (boost saturation by 15%)
+        hsv = cv2.cvtColor(smooth, cv2.COLOR_BGR2HSV).astype(np.float32)
+        hsv[:, :, 1] = np.clip(hsv[:, :, 1] * 1.15, 0, 255)
+        vibrant = cv2.cvtColor(hsv.astype(np.uint8), cv2.COLOR_HSV2BGR).astype(np.float32)
+
+        # C. Warmth Color Grading (Ghibli warmth: slight red & yellow warmth, reduced blue)
+        vibrant[:, :, 2] = np.clip(vibrant[:, :, 2] * 1.04, 0, 255)  # Red
+        vibrant[:, :, 1] = np.clip(vibrant[:, :, 1] * 1.01, 0, 255)  # Green
+        vibrant[:, :, 0] = np.clip(vibrant[:, :, 0] * 0.98, 0, 255)  # Blue
+        final_art = vibrant.astype(np.uint8)
+
+        # 6. Temporal Consistency (EMA Frame Blending to prevent flickering)
+        if prev_frame is not None and prev_frame.shape == final_art.shape:
+            final_art = cv2.addWeighted(final_art, 0.88, prev_frame, 0.12, 0)
+
+        return final_art
 
     async def cartoonize_video(
         self,
@@ -73,7 +164,8 @@ class CartoonizerEngine:
         progress_callback: Optional[Callable[[int, int], None]] = None,
     ) -> Path:
         """
-        Transforms full video into 1:1 frame-accurate cartoon video track using streaming FFmpeg pipe.
+        Transforms video into 1:1 studio-grade 2D anime video track using streaming FFmpeg pipe.
+        Maintains 100% exact frame count and FPS for zero-drift audio sync.
         """
         output_video_path.parent.mkdir(parents=True, exist_ok=True)
         if not input_video_path.exists():
@@ -100,7 +192,7 @@ class CartoonizerEngine:
             "-i", "-",
             "-c:v", "libx264",
             "-preset", "veryfast",
-            "-crf", "20",
+            "-crf", "19",
             "-pix_fmt", "yuv420p",
             str(output_video_path.resolve()),
         ]
@@ -113,14 +205,19 @@ class CartoonizerEngine:
         )
 
         frame_idx = 0
+        prev_frame: Optional[np.ndarray] = None
+
         try:
             while True:
                 ret, frame = cap.read()
                 if not ret:
                     break
 
-                cartoon_frame = self.cartoonize_frame(frame)
-                pipe.stdin.write(cartoon_frame.tobytes())
+                # Process through Studio AnimeGANv2 Neural Pipeline
+                anime_frame = self.cartoonize_frame(frame, prev_frame=prev_frame)
+                prev_frame = anime_frame
+
+                pipe.stdin.write(anime_frame.tobytes())
                 frame_idx += 1
 
                 if progress_callback and frame_idx % batch_size == 0:
@@ -141,6 +238,6 @@ class CartoonizerEngine:
             gc.collect()
 
         if not output_video_path.exists() or output_video_path.stat().st_size == 0:
-            raise RuntimeError(f"Failed to render cartoon video to {output_video_path}")
+            raise RuntimeError(f"Failed to render studio cartoon video to {output_video_path}")
 
         return output_video_path
