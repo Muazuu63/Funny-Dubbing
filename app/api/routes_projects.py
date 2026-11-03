@@ -126,6 +126,18 @@ def generate_ai_voice_translation_script(video_path: Path, target_language: str 
                     lines = [l for l in raw_text.splitlines() if re.search(r'\d{2}:\d{2}', l) and ":" in l]
                     if lines:
                         return "\n\n".join(lines)
+                    # If lines are formatted in a paragraph without newlines
+                    chunks = re.split(r'\s{2,}|\n+|(?<=[!?.।])\s*(?=[^\s:()]+(?:\([^)]*\))?:\s*)', raw_text)
+                    chunks = [c.strip() for c in chunks if c.strip() and ":" in c]
+                    if chunks:
+                        step = 30.0 / len(chunks)
+                        formatted = []
+                        for i, l in enumerate(chunks):
+                            s_sec = i * step
+                            e_sec = min(30.0, (i + 1) * step)
+                            formatted.append(f"[{int(s_sec)//60:02d}:{int(s_sec)%60:02d} - {int(e_sec)//60:02d}:{int(e_sec)%60:02d}] {l}")
+                        return "\n\n".join(formatted)
+                    return raw_text
         except Exception:
             pass
 
@@ -313,23 +325,66 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
             .replace("বিল্লা ডা", "বিল্লা টা")
         )
 
-    # Synthesize real Edge-TTS preview voice
+    # Ensure default_script is cleanly formatted with timestamps and line breaks
+    if default_script:
+        import re
+        if "\n" not in default_script or len(default_script.splitlines()) <= 2:
+            chunks = re.split(r'\s{2,}|\n+|(?<=[!?.।])\s*(?=[^\s:()]+(?:\([^)]*\))?:\s*)', default_script)
+            chunks = [c.strip() for c in chunks if c.strip()]
+            if len(chunks) > 1:
+                default_script = "\n\n".join(chunks)
+
+        lines = [l.strip() for l in default_script.splitlines() if l.strip()]
+        if lines and not any(re.search(r'\d{1,2}:\d{2}', l) for l in lines):
+            step = duration_sec / len(lines)
+            formatted = []
+            for i, l in enumerate(lines):
+                s_sec = i * step
+                e_sec = min(duration_sec, (i + 1) * step)
+                formatted.append(f"[{int(s_sec)//60:02d}:{int(s_sec)%60:02d} - {int(e_sec)//60:02d}:{int(e_sec)%60:02d}] {l}")
+            default_script = "\n\n".join(formatted)
+
+    # Synthesize synchronized Edge-TTS preview voice matching exact duration
     preview_filename = f"preview_voice_{payload.project_id}.mp3"
     preview_filepath = settings.TEMP_DIR / "uploads" / preview_filename
+    preview_filepath_wav = settings.TEMP_DIR / "uploads" / f"preview_voice_{payload.project_id}.wav"
     audio_preview_url = None
 
     try:
-        import re
-        clean_voice_text = re.sub(r'\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}\s*\|?', '', voice_speech_text).strip()
-        tts = TTSProvider()
-        await tts.synthesize(
-            text=clean_voice_text,
-            output_path=str(preview_filepath),
-            language=payload.target_language
+        from app.modes.mode01_dubbing import Mode01Dubbing
+        mode01 = Mode01Dubbing()
+        await mode01.synthesize_synchronized_timeline(
+            script_text=default_script,
+            total_duration=duration_sec,
+            output_wav=preview_filepath_wav,
+            language=payload.target_language,
+            work_dir=settings.TEMP_DIR / "uploads"
         )
-        audio_preview_url = f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"
+        if preview_filepath_wav.exists():
+            cmd_mp3 = [
+                str(settings.resolve_ffmpeg_binary()), "-y",
+                "-i", str(preview_filepath_wav),
+                "-c:a", "libmp3lame",
+                "-b:a", "128k",
+                str(preview_filepath)
+            ]
+            import subprocess
+            subprocess.run(cmd_mp3, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            preview_filepath_wav.unlink(missing_ok=True)
+            audio_preview_url = f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"
     except Exception as e:
-        audio_preview_url = None
+        try:
+            import re
+            clean_voice_text = re.sub(r'\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]|\d{2}:\d{2}\s*[-–]\s*\d{2}:\d{2}\s*\|?', '', default_script).strip()
+            tts = TTSProvider()
+            await tts.synthesize(
+                text=clean_voice_text,
+                output_path=str(preview_filepath),
+                language=payload.target_language
+            )
+            audio_preview_url = f"/api/v1/projects/audio/{preview_filename}?t={int(datetime.now().timestamp())}"
+        except Exception:
+            audio_preview_url = None
 
     approval_state = get_project_approval_state(payload.project_id)
     approval_state.status = "WAITING_FOR_VOICE_APPROVAL"

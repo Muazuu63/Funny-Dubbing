@@ -152,13 +152,24 @@ class Mode01Dubbing:
     def parse_script_lines_with_timing(script_text: str, total_duration: float = 58.8) -> List[Dict[str, Any]]:
         """Parses script lines into start_sec, end_sec, speaker, and clean spoken dialogue."""
         import re
-        lines = [l.strip() for l in script_text.splitlines() if l.strip()]
+
+        # Split into distinct dialogue turns even if formatted on one line or separated by multi-spaces
+        raw_lines = []
+        for line in script_text.splitlines():
+            line = line.strip()
+            if not line:
+                continue
+            chunks = re.split(r'\s{2,}|\n+|(?<=[!?.।])\s*(?=[^\s:()]+(?:\([^)]*\))?:\s*)', line)
+            for c in chunks:
+                if c.strip():
+                    raw_lines.append(c.strip())
+
         parsed = []
         time_pattern = re.compile(
             r'^(?:\[|\s*)(\d{1,2}):(\d{2})\s*[-–—]\s*(\d{1,2}):(\d{2})(?:\]|\s*)\s*\|?\s*(.*)$'
         )
 
-        for line in lines:
+        for line in raw_lines:
             m = time_pattern.match(line)
             if m:
                 m1, s1, m2, s2, rest = m.groups()
@@ -199,11 +210,14 @@ class Mode01Dubbing:
                         "clean_text": dialogue
                     })
 
-        if parsed and all(p["start_sec"] is None for p in parsed):
-            step = total_duration / len(parsed)
-            for i, p in enumerate(parsed):
-                p["start_sec"] = round(i * step, 2)
-                p["end_sec"] = round((i + 1) * step, 2)
+        # Distribute timing across the exact total_duration if timestamps are missing or unassigned
+        if parsed:
+            has_missing = any(p["start_sec"] is None for p in parsed)
+            if has_missing:
+                step = total_duration / len(parsed)
+                for i, p in enumerate(parsed):
+                    p["start_sec"] = round(i * step, 2)
+                    p["end_sec"] = round(min(total_duration, (i + 1) * step), 2)
 
         return parsed
 
