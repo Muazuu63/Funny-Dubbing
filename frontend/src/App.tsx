@@ -244,6 +244,8 @@ export const App: React.FC = () => {
       formattedDuration: formatted,
       hasOriginalVoice: isVoice,
     });
+    setApprovalState(null);
+    setCompletedVideo(null);
     setVideoTitle(filename.replace(/\.[^/.]+$/, ''));
     setActiveTab('production');
     setShowTrainingVideoPicker(false);
@@ -274,6 +276,8 @@ export const App: React.FC = () => {
           formattedDuration: data.formatted_duration,
           hasOriginalVoice: data.has_original_voice,
         });
+        setApprovalState(null);
+        setCompletedVideo(null);
         if (!videoTitle || videoTitle === 'Bengali Dubbing Comedy Test') {
           setVideoTitle(data.filename.replace(/\.[^/.]+$/, ''));
         }
@@ -292,6 +296,8 @@ export const App: React.FC = () => {
   const handleCancelVideo = () => {
     setVideoPath('');
     setUploadedVideoInfo(null);
+    setApprovalState(null);
+    setCompletedVideo(null);
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
