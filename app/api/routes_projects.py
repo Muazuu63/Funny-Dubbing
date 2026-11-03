@@ -237,6 +237,8 @@ class GeneratePreviewRequest(BaseModel):
     input_video_path: str
     target_language: str = "Bangla"
     comedy_profile: Optional[str] = None
+    mode: Optional[str] = None
+    cartoon_audio_mode: Optional[str] = None
 
 
 class SynthesizeScriptRequest(BaseModel):
@@ -315,6 +317,21 @@ async def generate_project_preview(payload: GeneratePreviewRequest):
     from app.providers.gemini_provider import LocalScriptEngine
     from app.providers.tts_provider import TTSProvider
     from app.api.routes_approval import get_project_approval_state, set_project_approval_state
+
+    # Mode 02: Cartoon Re-Creation Studio Dispatcher
+    if (payload.mode and "cartoon" in payload.mode.lower()) or payload.cartoon_audio_mode:
+        from app.modes.mode02_cartoon import Mode02Cartoon, VoiceType
+        mode02 = Mode02Cartoon()
+        v_type = VoiceType.REAL_VOICE if payload.cartoon_audio_mode == "real" else VoiceType.AI_VOICE
+        proj_dir = settings.PROJECTS_DIR / payload.project_id
+        proj_dir.mkdir(parents=True, exist_ok=True)
+        return await mode02.execute_preview(
+            project_id=payload.project_id,
+            input_video_path=video_path,
+            project_dir=proj_dir,
+            voice_type=v_type,
+            target_language=payload.target_language
+        )
 
     # Check whether the video has voice dialogue (using FFmpeg probe)
     has_original_voice = check_video_has_audio_track(video_path)
@@ -583,9 +600,9 @@ async def render_project_final_video(project_id: str, payload: Optional[RenderPr
 
 @router.get("/{project_id}/download")
 async def download_project_video(project_id: str):
-    """Downloads or streams the final rendered dubbed video."""
+    """Downloads or streams the final rendered dubbed video or cartoon recreation."""
     proj_dir = settings.PROJECTS_DIR / project_id
-    matches = list(proj_dir.glob("output_*.mp4"))
+    matches = list(proj_dir.glob("output_*.mp4")) + list(proj_dir.glob("cartoon_output_*.mp4"))
     if not matches:
         # Fallback to temp uploads if rendered directly
         upload_matches = list((settings.TEMP_DIR / "uploads").glob("*thirtd-video.mp4"))

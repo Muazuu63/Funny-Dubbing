@@ -407,12 +407,29 @@ export const App: React.FC = () => {
               project_id: project.id,
               input_video_path: videoPath,
               target_language: selectedLanguage,
-              comedy_profile: selectedProfileName
+              comedy_profile: selectedProfileName,
+              mode: selectedMode,
+              cartoon_audio_mode: cartoonAudioMode
             })
           });
 
           if (previewRes.ok) {
             const previewData = await previewRes.json();
+
+            // Mode 02 Real Voice Passthrough: Instant completion without approval gate
+            if (previewData.status === 'APPROVED' && previewData.rendered_video) {
+              setCompletedVideo({
+                projectId: project.id,
+                videoUrl: `/api/v1/projects/${project.id}/download?t=${Date.now()}`,
+                downloadUrl: `/api/v1/projects/${project.id}/download`,
+                language: 'Original Sound (Real Voice)',
+                title: videoTitle || 'Cartoon Re-Creation',
+                filename: `cartoon_${project.id.slice(0, 8)}.mp4`
+              });
+              setCurrentStep('2D Cartoon Re-Creation with Original Real Voice Completed!');
+              setProgressPercent(100);
+              return;
+            }
             setCurrentStep(`Synthesizing Comedic Pacing Voice (Full Timeline 00:00 - ${previewData.formatted_duration})...`);
             setProgressPercent(80);
 

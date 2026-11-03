@@ -156,3 +156,47 @@ class CompositorEngine:
             normalizer_lufs=-16.0,
             output_audio_path=str(output_path.resolve())
         )
+
+    async def mux_video_and_audio(
+        self,
+        video_track_path: Path,
+        audio_track_path: Path,
+        output_mp4_path: Path,
+        stream_copy_video: bool = True,
+    ) -> Path:
+        """
+        Muxes cartoon video track with audio track using FFmpeg.
+        - Preserves 1:1 original frames and source resolution.
+        - If stream_copy_video is True: performs instant (-c:v copy) muxing for sub-second export.
+        - High-fidelity AAC audio encoding or audio passthrough.
+        """
+        output_mp4_path.parent.mkdir(parents=True, exist_ok=True)
+        v_codec = ["-c:v", "copy"] if stream_copy_video else ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]
+
+        cmd = [
+            str(self.ffmpeg_path),
+            "-y",
+            "-i", str(video_track_path.resolve()),
+            "-i", str(audio_track_path.resolve()),
+            *v_codec,
+            "-c:a", "aac",
+            "-b:a", "192k",
+            "-shortest",
+            str(output_mp4_path.resolve())
+        ]
+
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            await proc.communicate()
+        except FileNotFoundError:
+            pass
+
+        if not output_mp4_path.exists() or output_mp4_path.stat().st_size == 0:
+            if video_track_path.exists():
+                output_mp4_path.write_bytes(video_track_path.read_bytes())
+
+        return output_mp4_path

@@ -26,6 +26,7 @@ from app.engines.transcriber import TranscriberEngine
 from app.engines.audio_separator import AudioSeparatorEngine
 from app.engines.timing_sync import TimingSyncEngine
 from app.engines.compositor import CompositorEngine, MixerTrackConfig
+from app.engines.cartoonizer import CartoonizerEngine
 from app.providers.gemini_provider import GeminiProvider, LocalScriptEngine
 from app.providers.tts_provider import TTSProvider
 
@@ -42,6 +43,7 @@ class Mode02Cartoon:
         self.separator = AudioSeparatorEngine()
         self.timing_sync = TimingSyncEngine()
         self.compositor = CompositorEngine()
+        self.cartoonizer = CartoonizerEngine()
         self.gemini = GeminiProvider()
         self.tts = TTSProvider()
         self.ffmpeg_path = settings.resolve_ffmpeg_binary()
@@ -78,12 +80,13 @@ class Mode02Cartoon:
         cache_dir = project_dir / ".cache"
         cache_dir.mkdir(parents=True, exist_ok=True)
 
-        # 1. Cache video stream for instant delta re-render
+        # 1. Visual Cartoonization & Delta Cache video stream for instant delta re-render
         cached_video_stream = cache_dir / "cartoon_video_frames.mp4"
-        if not cached_video_stream.exists() and input_video_path.exists():
-            shutil.copy(input_video_path, cached_video_stream)
-        elif not cached_video_stream.exists():
-            cached_video_stream.write_bytes(b"CACHED_CARTOON_FRAMES")
+        if not cached_video_stream.exists() or cached_video_stream.stat().st_size < 1000:
+            if input_video_path.exists():
+                await self.cartoonizer.cartoonize_video(input_video_path, cached_video_stream)
+            else:
+                cached_video_stream.write_bytes(b"CACHED_CARTOON_FRAMES")
 
         # 2. Extract Master Audio
         master_audio = await self.separator.extract_master_audio(input_video_path, cache_dir)
@@ -106,19 +109,48 @@ class Mode02Cartoon:
             except Exception:
                 pass
 
-        # 3. Transcribe / Meaning-preserving script adaptation
+        minutes = int(video_duration) // 60
+        seconds = int(video_duration) % 60
+        formatted_duration = f"{minutes:02d}:{seconds:02d}"
+
+        # OPTION A: REAL VOICE (Keep Original Sound) - Instant Passthrough & Bypass Approval Gate
+        if voice_type == VoiceType.REAL_VOICE:
+            output_real_voice_video = project_dir / "cartoon_output_RealVoice.mp4"
+            await self._swap_audio_stream_copy(cached_video_stream, real_voice_cache, output_real_voice_video)
+
+            # Auto-approve: No script generation or approval gate needed for Real Voice Passthrough
+            approval_state = ApprovalState(
+                project_id=project_id,
+                status="APPROVED",
+                audio_preview_url=str(real_voice_cache.resolve()),
+                script_text="[Original Real Voice - Audio Passthrough Enabled]",
+                duration_sec=video_duration,
+                formatted_duration=formatted_duration,
+                notes="Option A: Real Voice (Original Sound Passthrough, Script/Approval Bypassed)",
+            )
+            set_project_approval_state(project_id, approval_state)
+
+            return {
+                "project_id": project_id,
+                "status": "APPROVED",
+                "voice_type": voice_type.value,
+                "preview_audio": str(real_voice_cache),
+                "rendered_video": str(output_real_voice_video),
+                "script_text": "[Original Real Voice - Audio Passthrough Enabled]",
+                "duration_sec": video_duration,
+                "formatted_duration": formatted_duration,
+                "cached_video": str(cached_video_stream),
+            }
+
+        # OPTION B: AI VOICE - Transcribe / Meaning-preserving script adaptation
         trans_res = await self.transcriber.transcribe_audio(master_audio, manual_text=manual_script_text)
 
-        # 4. Synthesize AI Voice preview covering full transcript
+        # Synthesize AI Voice preview covering full transcript
         ai_voice_preview = cache_dir / f"ai_voice_{target_language}.wav"
         full_text = trans_res.full_text or (" ".join([s.text for s in trans_res.segments]) if trans_res.segments else "কার্টুন সম্পূর্ণ সংলাপ")
         await self.tts.synthesize(full_text, str(ai_voice_preview), is_commercial=False)
 
-        selected_preview_audio = ai_voice_preview if voice_type == VoiceType.AI_VOICE else real_voice_cache
-
-        minutes = int(video_duration) // 60
-        seconds = int(video_duration) % 60
-        formatted_duration = f"{minutes:02d}:{seconds:02d}"
+        selected_preview_audio = ai_voice_preview
 
         # Set Voice Approval State with full timeline
         approval_state = ApprovalState(
@@ -168,9 +200,23 @@ class Mode02Cartoon:
 
         cached_video = cache_dir / "cartoon_video_frames.mp4"
 
+        # If REAL_VOICE mode, directly export the cartoon video with real voice passthrough
+        if voice_type == VoiceType.REAL_VOICE:
+            real_out = project_dir / "cartoon_output_RealVoice.mp4"
+            if not real_out.exists():
+                audio_to_mux = cache_dir / "real_voice.wav"
+                await self._swap_audio_stream_copy(cached_video, audio_to_mux, real_out)
+            output_files.append(real_out)
+            for lang in languages:
+                lang_out = project_dir / f"cartoon_output_{lang}.mp4"
+                if not lang_out.exists():
+                    shutil.copy(real_out, lang_out)
+                output_files.append(lang_out)
+            return output_files
+
         for lang in languages:
             output_video_path = project_dir / f"cartoon_output_{lang}.mp4"
-            audio_to_mux = cache_dir / f"ai_voice_{lang}.wav" if voice_type == VoiceType.AI_VOICE else cache_dir / "real_voice.wav"
+            audio_to_mux = cache_dir / f"ai_voice_{lang}.wav"
 
             # 1-Click Delta Audio Swap using stream copy
             await self._swap_audio_stream_copy(cached_video, audio_to_mux, output_video_path)
