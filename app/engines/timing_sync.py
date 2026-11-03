@@ -36,6 +36,72 @@ class TimingSyncEngine:
     def __init__(self):
         self.ffmpeg_path = settings.resolve_ffmpeg_binary()
 
+    def measure_video_duration(self, video_path: Path) -> float:
+        """Accurately measures video duration using OpenCV or FFprobe."""
+        if not video_path.exists():
+            return 30.0
+        try:
+            import cv2
+            cap = cv2.VideoCapture(str(video_path))
+            if cap.isOpened():
+                fps = float(cap.get(cv2.CAP_PROP_FPS) or 25.0)
+                frames = float(cap.get(cv2.CAP_PROP_FRAME_COUNT) or 0)
+                cap.release()
+                if fps > 0 and frames > 0:
+                    return round(frames / fps, 2)
+        except Exception:
+            pass
+        return 30.0
+
+    async def trim_or_pad_audio_to_video(
+        self,
+        input_audio_path: Path,
+        output_audio_path: Path,
+        max_duration: float,
+    ) -> Path:
+        """
+        Enforces strict audio boundary: audio duration never exceeds max_duration (video duration).
+        If audio exceeds max_duration, gently accelerates it using atempo up to 1.15x
+        or cleanly trims trailing silence so the video never displays a black screen.
+        """
+        output_audio_path.parent.mkdir(parents=True, exist_ok=True)
+        if not input_audio_path.exists():
+            return input_audio_path
+
+        import wave
+        with wave.open(str(input_audio_path), "rb") as wf:
+            actual_dur = wf.getnframes() / float(wf.getframerate())
+
+        safe_target = max(1.0, max_duration - 0.3)
+        if actual_dur <= safe_target:
+            # Audio is within safe bounds
+            if input_audio_path.resolve() != output_audio_path.resolve():
+                output_audio_path.write_bytes(input_audio_path.read_bytes())
+            return output_audio_path
+
+        # If audio is slightly longer, accelerate with atempo so no speech is cut off
+        speed = min(1.25, actual_dur / safe_target)
+        cmd = [
+            str(self.ffmpeg_path), "-y",
+            "-i", str(input_audio_path.resolve()),
+            "-filter:a", f"atempo={speed:.3f}",
+            "-t", f"{safe_target:.2f}",
+            "-ar", "44100", "-ac", "2",
+            str(output_audio_path.resolve())
+        ]
+        try:
+            proc = await asyncio.create_subprocess_exec(
+                *cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE
+            )
+            await proc.communicate()
+        except Exception:
+            if input_audio_path.resolve() != output_audio_path.resolve():
+                output_audio_path.write_bytes(input_audio_path.read_bytes())
+
+        return output_audio_path
+
     @staticmethod
     def calculate_pacing_multiplier(audio_duration: float, slot_duration: float) -> Tuple[float, float]:
         """

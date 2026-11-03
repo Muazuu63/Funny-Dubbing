@@ -162,23 +162,35 @@ class CompositorEngine:
         video_track_path: Path,
         audio_track_path: Path,
         output_mp4_path: Path,
-        stream_copy_video: bool = True,
+        stream_copy_video: bool = False,
     ) -> Path:
         """
         Muxes cartoon video track with audio track using FFmpeg.
         - Preserves 1:1 original frames and source resolution.
-        - If stream_copy_video is True: performs instant (-c:v copy) muxing for sub-second export.
-        - High-fidelity AAC audio encoding or audio passthrough.
+        - Frame-Freeze Protection: Applies 'tpad=stop_mode=clone:stop_duration=3' so the last video frame
+          is smoothly held rather than collapsing into a black screen if audio runs slightly longer.
+        - High-fidelity AAC audio encoding with -shortest cut.
         """
         output_mp4_path.parent.mkdir(parents=True, exist_ok=True)
-        v_codec = ["-c:v", "copy"] if stream_copy_video else ["-c:v", "libx264", "-preset", "veryfast", "-crf", "19"]
+
+        if stream_copy_video:
+            v_args = ["-c:v", "copy"]
+        else:
+            # Frame-Freeze Protection (Directive 3)
+            v_args = [
+                "-vf", "tpad=stop_mode=clone:stop_duration=3",
+                "-c:v", "libx264",
+                "-preset", "veryfast",
+                "-crf", "19",
+                "-pix_fmt", "yuv420p"
+            ]
 
         cmd = [
             str(self.ffmpeg_path),
             "-y",
             "-i", str(video_track_path.resolve()),
             "-i", str(audio_track_path.resolve()),
-            *v_codec,
+            *v_args,
             "-c:a", "aac",
             "-b:a", "192k",
             "-shortest",

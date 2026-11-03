@@ -210,14 +210,25 @@ class Mode01Dubbing:
                         "clean_text": dialogue
                     })
 
-        # Distribute timing across the exact total_duration if timestamps are missing or unassigned
+        # Directive 3: Lock audio duration within video boundaries (Black Screen Prevention)
+        # Ensure all dialogue finishes strictly before (total_duration - 0.6s)
+        safe_end_target = max(3.0, total_duration - 0.6)
         if parsed:
             has_missing = any(p["start_sec"] is None for p in parsed)
             if has_missing:
-                step = total_duration / len(parsed)
+                step = safe_end_target / len(parsed)
                 for i, p in enumerate(parsed):
                     p["start_sec"] = round(i * step, 2)
-                    p["end_sec"] = round(min(total_duration, (i + 1) * step), 2)
+                    p["end_sec"] = round((i + 1) * step, 2)
+            else:
+                max_end = max((p["end_sec"] for p in parsed if p["end_sec"] is not None), default=safe_end_target)
+                if max_end > safe_end_target:
+                    scale = safe_end_target / max_end
+                    for p in parsed:
+                        if p["start_sec"] is not None:
+                            p["start_sec"] = round(p["start_sec"] * scale, 2)
+                        if p["end_sec"] is not None:
+                            p["end_sec"] = round(p["end_sec"] * scale, 2)
 
         return parsed
 
@@ -302,12 +313,13 @@ class Mode01Dubbing:
                 ]
                 subprocess.run(cmd_conv, check=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
-                # Apply dynamic expressive prosody modulation based on character & emotion
+                # Apply dynamic expressive prosody modulation based on character, scream/panic, and emotion
                 applied_prosody = SSMLProsodyWrapper.apply_prosody_filter_ffmpeg(
                     input_wav=raw_wav,
                     output_wav=prosody_wav,
                     emotion=emotion,
                     speaker=speaker,
+                    text=text,
                     ffmpeg_bin=ffmpeg_bin
                 )
                 source_wav = prosody_wav if (applied_prosody and prosody_wav.exists()) else raw_wav
@@ -326,11 +338,13 @@ class Mode01Dubbing:
                 else:
                     clean_arr = arr
 
-                # Seamlessly append Comic SFX markers (e.g. SFX_COMIC_CHUCKLE, SFX_SURPRISE_REACTION)
+                # Seamlessly append Comic SFX markers (e.g. SFX_COMIC_LAUGH, SFX_COMIC_CHUCKLE, SFX_SURPRISE_REACTION)
                 for sfx_name in sfx_list:
                     sfx_path = None
-                    if sfx_name == "SFX_COMIC_CHUCKLE":
-                        sfx_path = sfx_dir / "sfx_comic_chuckle.wav"
+                    if sfx_name in ("SFX_COMIC_CHUCKLE", "SFX_COMIC_LAUGH"):
+                        sfx_path = sfx_dir / "sfx_comic_laugh.wav"
+                        if not sfx_path.exists():
+                            sfx_path = sfx_dir / "sfx_comic_chuckle.wav"
                     elif sfx_name == "SFX_SURPRISE_REACTION":
                         sfx_path = sfx_dir / "sfx_surprise_reaction.wav"
 
@@ -521,36 +535,28 @@ class Mode01Dubbing:
                     if bot_y < h_vid:
                         vf_filters.append(f"drawbox=x=0:y={bot_y}:w=iw:h=ih-{bot_y}:color=black:t=fill")
 
+                    # Directive 3: Frame-Freeze Protection (tpad=stop_mode=clone:stop_duration=3) so video NEVER turns black
+                    freeze_filter = "tpad=stop_mode=clone:stop_duration=3"
                     if vf_filters:
-                        vf_str = ",".join(vf_filters)
-                        cmd = [
-                            str(ffmpeg_bin), "-y",
-                            "-i", str(input_video_path),
-                            "-i", str(lang_voice_audio),
-                            "-vf", vf_str,
-                            "-map", "0:v:0",
-                            "-map", "1:a:0",
-                            "-c:v", "libx264",
-                            "-crf", "18",
-                            "-preset", "fast",
-                            "-c:a", "aac",
-                            "-b:a", "192k",
-                            "-shortest",
-                            str(final_video_path)
-                        ]
+                        vf_str = f"{','.join(vf_filters)},{freeze_filter}"
                     else:
-                        cmd = [
-                            str(ffmpeg_bin), "-y",
-                            "-i", str(input_video_path),
-                            "-i", str(lang_voice_audio),
-                            "-map", "0:v:0",
-                            "-map", "1:a:0",
-                            "-c:v", "copy",
-                            "-c:a", "aac",
-                            "-b:a", "192k",
-                            "-shortest",
-                            str(final_video_path)
-                        ]
+                        vf_str = freeze_filter
+
+                    cmd = [
+                        str(ffmpeg_bin), "-y",
+                        "-i", str(input_video_path),
+                        "-i", str(lang_voice_audio),
+                        "-vf", vf_str,
+                        "-map", "0:v:0",
+                        "-map", "1:a:0",
+                        "-c:v", "libx264",
+                        "-crf", "18",
+                        "-preset", "fast",
+                        "-c:a", "aac",
+                        "-b:a", "192k",
+                        "-shortest",
+                        str(final_video_path)
+                    ]
                     res = subprocess.run(cmd, check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 except Exception:
                     if input_video_path.exists():

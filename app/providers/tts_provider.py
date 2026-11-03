@@ -7,6 +7,8 @@ Engines Supported:
 2. Local Offline Optional Engine: Meta MMS / Bark (Zero external calls, CPU/CUDA local execution).
 3. Paid Engines: Permanently forbidden by Zero Cost Hard-Lock.
 """
+import os
+import re
 from pathlib import Path
 from typing import Optional, Dict, Any
 
@@ -41,14 +43,21 @@ class SSMLProsodyWrapper:
 
     SFX_PATTERNS = {
         "SFX_COMIC_CHUCKLE": r"\[SFX_COMIC_CHUCKLE\]",
+        "SFX_COMIC_LAUGH": r"\[SFX_COMIC_LAUGH\]",
         "SFX_SURPRISE_REACTION": r"\[SFX_SURPRISE_REACTION\]",
         "SFX_DRAMATIC_STING": r"\[SFX_DRAMATIC_STING\]",
     }
 
+    # Strict Unicode regex for Bengali and English laugh words without fragile ASCII \b word boundaries
+    LAUGH_CLEANER_PATTERN = re.compile(
+        r'(?:\bha+\b|\bhe+\b|হা[\s,-]*হা(?:[\s,-]*হা)*|হি[\s,-]*হি(?:[\s,-]*হি)*|হাহাহা+|হিহিহি+|\(হাসি[^)]*\)|\[হাসি[^\]]*\]|\[SFX_COMIC_LAUGH\]|\[SFX_COMIC_CHUCKLE\])',
+        re.IGNORECASE
+    )
+
     @classmethod
     def parse_text_tags(cls, text: str) -> Dict[str, Any]:
         """
-        Parses emotion and SFX markers, strips unwanted raw laugh syllables ('হাহাহা'),
+        Parses emotion and SFX markers, strips unwanted raw laugh syllables ('হাহাহা', 'হা হা হা'),
         and returns clean TTS text with detected tags.
         """
         import re
@@ -63,12 +72,18 @@ class SSMLProsodyWrapper:
             if re.search(pattern, text, re.IGNORECASE):
                 sfx_list.append(sfx_name)
 
-        # Convert robotic laugh text into SFX chuckles
-        cleaned = re.sub(r'(\bহাহাহা+\b|\bহা\s*হা\s*হা+\b|\(হাসি\)|\(হাসির শব্দ\))', '', text, flags=re.IGNORECASE)
-        if ("হা হা" in text or "হাহাহা" in text) and "SFX_COMIC_CHUCKLE" not in sfx_list:
-            sfx_list.append("SFX_COMIC_CHUCKLE")
+        # Detect any laughter syllables in text and assign real audio SFX
+        has_laughter = bool(
+            re.search(r'হা[\s,-]*হা|হি[\s,-]*হি|হাহাহা|হিহিহি|\[SFX_COMIC_LAUGH\]|\[SFX_COMIC_CHUCKLE\]', text)
+        )
+        if has_laughter:
+            if "SFX_COMIC_LAUGH" not in sfx_list and "SFX_COMIC_CHUCKLE" not in sfx_list:
+                sfx_list.append("SFX_COMIC_LAUGH")
 
-        # Strip tags from speech text so Edge-TTS does not speak bracketed markers
+        # Completely purge robotic laugh text so TTS NEVER speaks them
+        cleaned = cls.LAUGH_CLEANER_PATTERN.sub('', text)
+
+        # Strip bracketed markers from speech text
         for pattern in list(cls.EMOTION_PATTERNS.values()) + list(cls.SFX_PATTERNS.values()):
             cleaned = re.sub(pattern, '', cleaned, flags=re.IGNORECASE)
 
@@ -81,46 +96,54 @@ class SSMLProsodyWrapper:
         }
 
     @classmethod
-    def get_prosody_params(cls, emotion: Optional[str], speaker: str = "") -> Dict[str, float]:
+    def get_prosody_params(cls, emotion: Optional[str], speaker: str = "", text: str = "") -> Dict[str, float]:
         """
-        Calculates pitch factor, tempo rate, and volume dB based on character profile and emotion.
-        - Duck 1 (Main / Mysterious / Playful): Pradeep Neural with rich modulation.
-        - Duck 2 (Sidekick / Nervous / Inquisitive): Nabanita Neural with heightened pitch.
-        - Cat / Screaming / Frightened: Bashkar Neural with dramatic shock pitch.
+        Calculates pitch factor, tempo rate, and volume dB based on character profile, emotion, and text cues.
+        Directive Requirements:
+        - High-Emotion Scream & Panic (বাঁচাও, ভাগো, ওরে বাবারে, চিৎকার, !):
+          Pitch +35%, Rate +18%, Volume +25% (+2.5dB) for dramatic cartoon panic.
+        - Suspense / Mystery: -12% pitch, deliberate pacing.
+        - Conspiratorial Comic Whisper: softer, slightly lower pitch, quick delivery.
+        - Comic Punchline: lively cadence, +4% pitch.
         """
-        # Default baseline
         pitch_factor = 1.0
         tempo_rate = 1.0
         volume_db = 0.0
 
         emo = (emotion or "").upper()
+        txt = (text or "").lower()
+        spk = speaker.lower()
 
-        if "SUSPENSE_MYSTERY" in emo:
-            # Mystery: deep ominous pitch, deliberate pacing
+        # Check for scream / panic cues
+        is_panic_scream = (
+            "SURPRISED_SHOCK" in emo or
+            "PANIC" in emo or
+            "বাঁচাও" in txt or
+            "ভাগো" in txt or
+            "ওরে বাবারে" in txt or
+            "মাগো" in txt or
+            "চিৎকার" in spk or
+            "বিড়াল" in spk or
+            "বিড়াল" in spk
+        )
+
+        if is_panic_scream:
+            # High-Emotion Scream & Panic Prosody (+35% pitch, +18% rate, +25% volume)
+            pitch_factor = 1.35  # +35% pitch
+            tempo_rate = 1.18    # +18% fast panic delivery
+            volume_db = 2.5      # +25% amplitude / ~2.5 dB
+        elif "SUSPENSE_MYSTERY" in emo:
             pitch_factor = 0.88  # -12% pitch
             tempo_rate = 0.94    # -6% slow pace
             volume_db = -0.5
-        elif "SURPRISED_SHOCK" in emo:
-            # Shock / Panic: high pitch spike, fast delivery
-            pitch_factor = 1.20  # +20% pitch
-            tempo_rate = 1.06    # +6% fast
-            volume_db = 1.5
         elif "COMIC_WHISPER" in emo:
-            # Conspiratorial whisper: softer volume, slightly lower pitch, quick delivery
             pitch_factor = 0.94  # -6% pitch
             tempo_rate = 1.08    # +8% quick whisper
             volume_db = -4.5     # quiet whisper
         elif "COMIC_PUNCHLINE" in emo:
-            # Punchline: punchy, energized, lively cadence
             pitch_factor = 1.04  # +4% pitch
             tempo_rate = 1.06    # +6% pace
             volume_db = 1.0
-
-        # Character voice layer overrides
-        spk = speaker.lower()
-        if "বিড়াল" in spk or "বিড়াল" in spk or "cat" in spk or "চিৎকার" in spk:
-            pitch_factor = max(pitch_factor, 1.25)
-            volume_db = max(volume_db, 2.0)
 
         return {
             "pitch_factor": round(pitch_factor, 3),
@@ -135,13 +158,14 @@ class SSMLProsodyWrapper:
         output_wav: Path,
         emotion: Optional[str],
         speaker: str = "",
+        text: str = "",
         ffmpeg_bin: Optional[str] = None
     ) -> bool:
         """
         Applies pitch-preserving/shifting prosody filters and volume adjustments via FFmpeg.
         """
         import subprocess
-        params = cls.get_prosody_params(emotion, speaker)
+        params = cls.get_prosody_params(emotion, speaker, text)
         pitch = params["pitch_factor"]
         rate = params["tempo_rate"]
         vol_db = params["volume_db"]
@@ -228,6 +252,10 @@ class EdgeTTSEngine(BaseTTSProvider):
             clean_speech = re.sub(r'\[\d{2}:\d{2}\s*-\s*\d{2}:\d{2}\]', '', text).strip()
         if not clean_speech:
             clean_speech = text.strip()
+
+        # Directive 1: Completely purge all laugh words so TTS never reads them
+        clean_speech = SSMLProsodyWrapper.LAUGH_CLEANER_PATTERN.sub('', clean_speech)
+        clean_speech = re.sub(r'\s{2,}', ' ', clean_speech).strip()
 
         try:
             import edge_tts
